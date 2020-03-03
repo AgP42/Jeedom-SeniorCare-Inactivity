@@ -50,13 +50,13 @@ $eqLogics = eqLogic::byType($plugin->getId());
     <li role="presentation" class="active"><a href="#eqlogictab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-tachometer-alt"></i> {{Général}}</a></li>
 
     <li role="presentation"><a href="#capteursSdVtab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-heartbeat"></i> {{Capteurs Signes de vie}}</a></li>
-    <li role="presentation"><a href="#alertesSdVtab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-heartbeat"></i> {{Alertes Signes de vie}}</a></li>
+    <!-- <li role="presentation"><a href="#alertesSdVtab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-heartbeat"></i> {{Alertes Signes de vie}}</a></li> -->
 
     <li role="presentation"><a href="#capteursConforttab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-spa"></i> {{Capteurs Confort}}</a></li>
-    <li role="presentation"><a href="#alertesConforttab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-spa"></i> {{Alertes Confort}}</a></li>
+    <!-- <li role="presentation"><a href="#alertesConforttab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-spa"></i> {{Alertes Confort}}</a></li> -->
 
     <li role="presentation"><a href="#capteursSecuritetab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-exclamation-triangle"></i> {{Capteurs Sécurité}}</a></li>
-    <li role="presentation"><a href="#alertesSecuritetab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-exclamation-triangle"></i> {{Alertes Sécurité}}</a></li>
+    <!-- <li role="presentation"><a href="#alertesSecuritetab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-exclamation-triangle"></i> {{Alertes Sécurité}}</a></li> -->
 
     <!--li role="presentation"><a href="#alertesPerteAutonomietab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-list-alt"></i> {{Alertes Perte d'autonomie}}</a></li-->
 
@@ -126,7 +126,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
       <form class="form-horizontal">
         <fieldset>
           <legend><i class="fas fa-heartbeat"></i> {{Capteurs de signe de vie}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces capteurs déclancheront une alerte si aucun d'entre eux n'est activé pendant une certaine durée}}"></i></sup>
-            <a class="btn btn-primary btn-xs pull-right addSensorLifeSign" data-type="life_sign" style="position: relative; top : 5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un capteur}}</a>
+            <a class="btn btn-success btn-sm addSensorLifeSign" style="margin-bottom:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un capteur}}</a>
           </legend>
           <div id="div_life_sign">
           </div>
@@ -136,13 +136,28 @@ $eqLogics = eqLogic::byType($plugin->getId());
       <form class="form-horizontal">
         <fieldset>
           <legend><i class="fas fa-exclamation-circle"></i> {{Boutons d'alerte}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces capteurs déclancheront une alerte dès qu'ils seront activés}}"></i></sup>
-            <a class="btn btn-danger btn-xs pull-right addSensorBtAlert" data-type="alert_bt" style="position: relative; top : 5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un bouton}}</a>
+            <a class="btn btn-success btn-sm addSensorBtAlert" style="margin-bottom:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un bouton}}</a>
           </legend>
           <div id="div_alert_bt">
 
           </div>
         </fieldset>
       </form>
+    </div>
+
+    <!-- TAB Capteurs Confort -->
+    <div class="tab-pane" id="capteursConforttab">
+      <br/>
+      <form class="form-horizontal">
+        <fieldset>
+          <legend><i class="fas fa-spa"></i> {{Capteurs confort}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces capteurs déclancheront une alerte si leur valeur sort des seuils paramétrés}}"></i></sup>
+            <a class="btn btn-success btn-sm addSensorConfort" style="margin-bottom:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un capteur}}</a>
+          </legend>
+          <div id="div_confort">
+          </div>
+        </fieldset>
+      </form>
+
     </div>
 
     <!-- TAB COMMANDES -->

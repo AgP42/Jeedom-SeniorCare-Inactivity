@@ -18,6 +18,7 @@
 // permet de reorganiser les elements de la div en les cliquant/deplacant
 $("#div_life_sign").sortable({axis: "y", cursor: "move", items: ".life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_alert_bt").sortable({axis: "y", cursor: "move", items: ".alert_bt", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
+$("#div_confort").sortable({axis: "y", cursor: "move", items: ".confort", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 
 // le bouton "ajouter un capteur" de l'onglet signe de vie
 $('.addSensorLifeSign').off('click').on('click', function () {
@@ -27,6 +28,11 @@ $('.addSensorLifeSign').off('click').on('click', function () {
 // le bouton "ajouter un bt d'alerte" de l'onglet signe de vie
 $('.addSensorBtAlert').off('click').on('click', function () {
   addSensorBtAlert({});
+});
+
+// le bouton "ajouter un capteur" de l'onglet confort
+$('.addSensorConfort').off('click').on('click', function () {
+  addSensorConfort({});
 });
 
 // tous les - qui permettent de supprimer la ligne
@@ -99,6 +105,48 @@ function addSensorBtAlert(_info) {
   $('#div_alert_bt .alert_bt').last().setValues(_info, '.expressionAttr');
 }
 
+// ajoute chaque ligne de bt alerte à la demande
+function addSensorConfort(_info) {
+  var div = '<div class="confort">';
+  div += '<div class="form-group ">';
+  div += '<label class="col-sm-1 control-label">Capteur</label>';
+  div += '<div class="col-sm-4">';
+  div += '<div class="input-group">';
+  div += '<span class="input-group-btn">';
+  div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="confort"><i class="fas fa-minus-circle"></i></a>';
+  div += '</span>';
+  div += '<input class="expressionAttr form-control cmdInfo" data-l1key="cmd" />';
+  div += '<span class="input-group-btn">';
+  div += '<a class="btn btn-default listCmdInfoWindow roundedRight"><i class="fas fa-list-alt"></i></a>';
+  div += '</span>';
+  div += '</div>';
+  div += '</div>';
+  div += '<label class="col-sm-1 control-label">{{Type de capteur }}</label>';
+  div += '<div class="col-sm-2">';
+  div += '<select class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="type_confort">';
+  div += '<option value="temperature">Température</option>';
+  div += '<option value="humidite">Humidité</option>';
+  div += '<option value="co2">CO2</option>';
+  div += '<option value="pollution">Pollution</option>';
+  div += '<option value="other">Divers</option>';
+  div += '</select>';
+  div += '</div>';
+
+  div += '<label class="col-sm-1 control-label">{{Seuil bas}}</label>';
+  div += '<div class="col-sm-1">';
+  div += '<input class="expressionAttr form-control cmdInfo" data-l1key="stopTime" />';
+  div += '</div>';
+  div += '<label class="col-sm-1 control-label">{{Seuil haut}}</label>';
+  div += '<div class="col-sm-1">';
+  div += '<input class="expressionAttr form-control cmdInfo" data-l1key="restartTime"/>';
+  div += '</div>';
+
+  div += '</div>';
+  div += '</div>';
+  $('#div_confort').append(div);
+  $('#div_confort .confort').last().setValues(_info, '.expressionAttr');
+}
+
 // Fct core permettant de sauvegarder
 function saveEqLogic(_eqLogic) {
   if (!isset(_eqLogic.configuration)) {
@@ -106,6 +154,7 @@ function saveEqLogic(_eqLogic) {
   }
   _eqLogic.configuration.life_sign = $('#div_life_sign .life_sign').getValues('.expressionAttr');
   _eqLogic.configuration.alert_bt = $('#div_alert_bt .alert_bt').getValues('.expressionAttr');
+  _eqLogic.configuration.confort = $('#div_confort .confort').getValues('.expressionAttr');
 
   return _eqLogic;
 }
@@ -115,6 +164,7 @@ function printEqLogic(_eqLogic) {
 
   $('#div_life_sign').empty();
   $('#div_alert_bt').empty();
+  $('#div_confort').empty();
 
   if (isset(_eqLogic.configuration)) {
     if (isset(_eqLogic.configuration.life_sign)) {
@@ -125,6 +175,11 @@ function printEqLogic(_eqLogic) {
     if (isset(_eqLogic.configuration.alert_bt)) {
       for (var i in _eqLogic.configuration.alert_bt) {
         addSensorBtAlert(_eqLogic.configuration.alert_bt[i]);
+      }
+    }
+    if (isset(_eqLogic.configuration.confort)) {
+      for (var i in _eqLogic.configuration.confort) {
+        addSensorConfort(_eqLogic.configuration.confort[i]);
       }
     }
   }
