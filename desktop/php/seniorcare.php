@@ -49,14 +49,12 @@ $eqLogics = eqLogic::byType($plugin->getId());
     <li role="presentation"><a href="#" class="eqLogicAction" aria-controls="home" role="tab" data-toggle="tab" data-action="returnToThumbnailDisplay"><i class="fa fa-arrow-circle-left"></i></a></li>
     <li role="presentation" class="active"><a href="#eqlogictab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-tachometer-alt"></i> {{Général}}</a></li>
 
-    <li role="presentation"><a href="#capteursSdVtab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-heartbeat"></i> {{Capteurs Signes de vie}}</a></li>
-    <!-- <li role="presentation"><a href="#alertesSdVtab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-heartbeat"></i> {{Alertes Signes de vie}}</a></li> -->
+    <li role="presentation"><a href="#lifesigntab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-heartbeat"></i> {{Signes de vie}}</a></li>
 
-    <li role="presentation"><a href="#capteursConforttab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-spa"></i> {{Capteurs Confort}}</a></li>
-    <!-- <li role="presentation"><a href="#alertesConforttab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-spa"></i> {{Alertes Confort}}</a></li> -->
+    <li role="presentation"><a href="#conforttab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-spa"></i> {{Confort}}</a></li>
 
-    <li role="presentation"><a href="#capteursSecuritetab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-exclamation-triangle"></i> {{Capteurs Sécurité}}</a></li>
-    <!-- <li role="presentation"><a href="#alertesSecuritetab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-exclamation-triangle"></i> {{Alertes Sécurité}}</a></li> -->
+    <li role="presentation"><a href="#securitytab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-exclamation-triangle"></i> {{Sécurité}}</a></li>
+
 
     <!--li role="presentation"><a href="#alertesPerteAutonomietab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-list-alt"></i> {{Alertes Perte d'autonomie}}</a></li-->
 
@@ -121,54 +119,75 @@ $eqLogics = eqLogic::byType($plugin->getId());
     </div>
 
     <!-- TAB Capteurs Signes de vie -->
-    <div class="tab-pane" id="capteursSdVtab">
+    <div class="tab-pane" id="lifesigntab">
       <br/>
       <form class="form-horizontal">
         <fieldset>
           <legend><i class="fas fa-heartbeat"></i> {{Capteurs de signe de vie}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces capteurs déclancheront une alerte si aucun d'entre eux n'est activé pendant une certaine durée}}"></i></sup>
-            <a class="btn btn-success btn-sm addSensorLifeSign" style="margin-bottom:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un capteur}}</a>
+            <a class="btn btn-success btn-sm addSensorLifeSign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un capteur}}</a>
           </legend>
-          <div id="div_life_sign">
+          <div id="div_life_sign"></div>
+
+          <label class="col-sm-3 control-label">{{Durée avant alerte}} <sup><i class="fas fa-question-circle tooltips" title="{{Durée au bout de laquelle aucun des signes de vie ci-dessus déclanchera une alerte}}"></i></sup></label>
+          <div class="col-sm-2">
+            <input type="text" class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="order_max" title="{{}}"/>
           </div>
+
         </fieldset>
       </form>
+
+      <br>
 
       <form class="form-horizontal">
         <fieldset>
           <legend><i class="fas fa-exclamation-circle"></i> {{Boutons d'alerte}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces capteurs déclancheront une alerte dès qu'ils seront activés}}"></i></sup>
-            <a class="btn btn-success btn-sm addSensorBtAlert" style="margin-bottom:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un bouton}}</a>
+            <a class="btn btn-success btn-sm addSensorBtAlert" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un bouton}}</a>
           </legend>
-          <div id="div_alert_bt">
-
-          </div>
+          <div id="div_alert_bt"></div>
         </fieldset>
       </form>
+
+      <br>
+
+      <form class="form-horizontal">
+        <fieldset>
+          <legend><i class="fas fa-bomb"></i> {{Action avertissement alerte - personne dépendante}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées dés que le système détectera qu'aucun signe de vie n'est présent depuis la durée considerée. La personne dépendante disposera d'un certain temps pour désactiver l'alerte avant qu'elle ne soit transmise aux aidants}}"></i></sup>
+            <a class="btn btn-success btn-sm addActionWarningLifeSign" data-type="action_warning_life_sign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
+          </legend>
+          <div id="div_action_warning_life_sign"></div>
+
+          <label class="col-sm-3 control-label">{{Durée de ces actions avant de prévenir les aidants}} <sup><i class="fas fa-question-circle tooltips" title="{{Durée pendant laquelle la personne dépendante peut désactiver l'alerte (en activant n'importe quel signe de vie) avant qu'elle ne soit transmise aux aidants}}"></i></sup></label>
+          <div class="col-sm-2">
+            <input type="text" class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="order_max" title="{{}}"/>
+          </div>
+
+        </fieldset>
+      </form>
+
     </div>
 
     <!-- TAB Capteurs Confort -->
-    <div class="tab-pane" id="capteursConforttab">
+    <div class="tab-pane" id="conforttab">
       <br/>
       <form class="form-horizontal">
         <fieldset>
           <legend><i class="fas fa-spa"></i> {{Capteurs confort}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces capteurs déclancheront une alerte si leur valeur sort des seuils paramétrés}}"></i></sup>
-            <a class="btn btn-success btn-sm addSensorConfort" style="margin-bottom:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un capteur}}</a>
+            <a class="btn btn-success btn-sm addSensorConfort" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un capteur}}</a>
           </legend>
-          <div id="div_confort">
-          </div>
+          <div id="div_confort"></div>
         </fieldset>
       </form>
     </div>
 
     <!-- TAB Capteurs Sécurité -->
-    <div class="tab-pane" id="capteursSecuritetab">
+    <div class="tab-pane" id="securitytab">
       <br/>
       <form class="form-horizontal">
         <fieldset>
           <legend><i class="fas fa-exclamation-triangle"></i> {{Capteurs Sécurité}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces capteurs déclancheront une alerte de sécurité immédiate à chaque déclanchement}}"></i></sup>
-            <a class="btn btn-success btn-sm addSensorSecurity" style="margin-bottom:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un capteur}}</a>
+            <a class="btn btn-success btn-sm addSensorSecurity" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un capteur}}</a>
           </legend>
-          <div id="div_security">
-          </div>
+          <div id="div_security"></div>
         </fieldset>
       </form>
 

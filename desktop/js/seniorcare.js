@@ -20,6 +20,8 @@ $("#div_life_sign").sortable({axis: "y", cursor: "move", items: ".life_sign", pl
 $("#div_alert_bt").sortable({axis: "y", cursor: "move", items: ".alert_bt", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_confort").sortable({axis: "y", cursor: "move", items: ".confort", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_security").sortable({axis: "y", cursor: "move", items: ".security", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
+$("#div_action_warning_life_sign").sortable({axis: "y", cursor: "move", items: ".action_warning_life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
+
 
 
 // le bouton "ajouter un capteur" de l'onglet signe de vie
@@ -42,6 +44,11 @@ $('.addSensorSecurity').off('click').on('click', function () {
   addSensorSecurity({});
 });
 
+// le bouton "ajouter un capteur" de l'onglet security
+$('.addActionWarningLifeSign').off('click').on('click', function () {
+  addActionWarningLifeSign({});
+});
+
 
 // tous les - qui permettent de supprimer la ligne
 $("body").off('click','.bt_removeAction').on('click','.bt_removeAction',function () {
@@ -55,6 +62,29 @@ $("body").off('click', '.listCmdInfoWindow').on('click', '.listCmdInfoWindow',fu
   jeedom.cmd.getSelectModal({cmd: {type: 'info', subtype: 'binary'}}, function (result) {
     el.value(result.human);
   });
+});
+
+// affiche les cmd jeedom de type action
+$("body").off('click','.listCmdAction').on('click','.listCmdAction', function () {
+  var type = $(this).attr('data-type');
+  var el = $(this).closest('.' + type).find('.expressionAttr[data-l1key=cmd]');
+  jeedom.cmd.getSelectModal({cmd: {type: 'action'}}, function (result) {
+    el.value(result.human);
+    jeedom.cmd.displayActionOption(el.value(), '', function (html) {
+      el.closest('.' + type).find('.actionOptions').html(html);
+    });
+
+  });
+});
+
+$('body').off('focusout','.cmdAction.expressionAttr[data-l1key=cmd]').on('focusout','.cmdAction.expressionAttr[data-l1key=cmd]',function (event) {
+  var type = $(this).attr('data-type');
+  var expression = $(this).closest('.' + type).getValues('.expressionAttr');
+  var el = $(this);
+  jeedom.cmd.displayActionOption($(this).value(), init(expression[0].options), function (html) {
+    el.closest('.' + type).find('.actionOptions').html(html);
+  });
+
 });
 
 // ajoute chaque ligne de capteur signe de vie à la demande
@@ -187,6 +217,35 @@ function addSensorSecurity(_info) {
   $('#div_security .security').last().setValues(_info, '.expressionAttr');
 }
 
+// ajoute chaque ligne de capteur sécurite à la demande
+function addActionWarningLifeSign(_info) {
+  var div = '<div class="action_warning_life_sign">';
+  div += '<div class="form-group ">';
+  div += '<label class="col-sm-1 control-label">Action</label>';
+  div += '<div class="col-sm-4">';
+  div += '<div class="input-group">';
+  div += '<span class="input-group-btn">';
+  div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="action_warning_life_sign"><i class="fas fa-minus-circle"></i></a>';
+  div += '</span>';
+
+  div += '<input class="expressionAttr form-control cmdAction" data-l1key="cmd" data-type="action_warning_life_sign" />';
+
+  div += '<span class="input-group-btn">';
+  div += '<a class="btn btn-default listCmdAction roundedRight" data-type="action_warning_life_sign" ><i class="fas fa-list-alt"></i></a>';
+
+  div += '</span>';
+  div += '</div>';
+  div += '</div>';
+
+  div += '<div class="col-sm-7 actionOptions">';
+  div += jeedom.cmd.displayActionOption(init(_info.cmd, ''), _info.options);
+
+  div += '</div>';
+  div += '</div>';
+  $('#div_action_warning_life_sign').append(div);
+  $('#div_action_warning_life_sign .action_warning_life_sign').last().setValues(_info, '.expressionAttr');
+}
+
 // Fct core permettant de sauvegarder
 function saveEqLogic(_eqLogic) {
   if (!isset(_eqLogic.configuration)) {
@@ -196,6 +255,7 @@ function saveEqLogic(_eqLogic) {
   _eqLogic.configuration.alert_bt = $('#div_alert_bt .alert_bt').getValues('.expressionAttr');
   _eqLogic.configuration.confort = $('#div_confort .confort').getValues('.expressionAttr');
   _eqLogic.configuration.security = $('#div_security .security').getValues('.expressionAttr');
+  _eqLogic.configuration.action_warning_life_sign = $('#div_action_warning_life_sign .action_warning_life_sign').getValues('.expressionAttr');
 
   return _eqLogic;
 }
@@ -207,6 +267,7 @@ function printEqLogic(_eqLogic) {
   $('#div_alert_bt').empty();
   $('#div_confort').empty();
   $('#div_security').empty();
+  $('#div_action_warning_life_sign').empty();
 
   if (isset(_eqLogic.configuration)) {
     if (isset(_eqLogic.configuration.life_sign)) {
@@ -227,6 +288,11 @@ function printEqLogic(_eqLogic) {
     if (isset(_eqLogic.configuration.security)) {
       for (var i in _eqLogic.configuration.security) {
         addSensorSecurity(_eqLogic.configuration.security[i]);
+      }
+    }
+    if (isset(_eqLogic.configuration.action_warning_life_sign)) {
+      for (var i in _eqLogic.configuration.action_warning_life_sign) {
+        addActionWarningLifeSign(_eqLogic.configuration.action_warning_life_sign[i]);
       }
     }
   }
