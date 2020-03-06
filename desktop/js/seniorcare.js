@@ -153,7 +153,7 @@ function addSensorConfort(_info) {
   div += '<span class="input-group-btn">';
   div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="confort"><i class="fas fa-minus-circle"></i></a>';
   div += '</span>';
-  div += '<input class="expressionAttr form-control cmdInfo" data-l1key="cmd" />';
+  div += '<input class="expressionAttr form-control cmdInfo" data-l1key="cmd" />'; // dans la class on retrouvera le resultat avec un ['cmd'] sous forme #10# qui represente l'id de la cmd referencé
   div += '<span class="input-group-btn">';
   div += '<a class="btn btn-default listCmdInfoWindow roundedRight"><i class="fas fa-list-alt"></i></a>';
   div += '</span>';
@@ -161,7 +161,7 @@ function addSensorConfort(_info) {
   div += '</div>';
   div += '<label class="col-sm-1 control-label">{{Type de capteur }}</label>';
   div += '<div class="col-sm-2">';
-  div += '<select class="expressionAttr eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="type_confort">';
+  div += '<select class="expressionAttr eqLogicAttr form-control tooltips" data-l1key="sensor_confort_type">'; // dans la class : ['sensor_confort_type']
   div += '<option value="temperature">Température</option>';
   div += '<option value="humidite">Humidité</option>';
   div += '<option value="co2">CO2</option>';
@@ -172,11 +172,11 @@ function addSensorConfort(_info) {
 
   div += '<label class="col-sm-1 control-label">{{Seuil bas}}</label>';
   div += '<div class="col-sm-1">';
-  div += '<input class="expressionAttr form-control cmdInfo" data-l1key="stopTime" />';
+  div += '<input class="expressionAttr form-control cmdInfo" data-l1key="seuilBas" />'; // dans la class ['seuilBas']
   div += '</div>';
   div += '<label class="col-sm-1 control-label">{{Seuil haut}}</label>';
   div += '<div class="col-sm-1">';
-  div += '<input class="expressionAttr form-control cmdInfo" data-l1key="restartTime"/>';
+  div += '<input class="expressionAttr form-control cmdInfo" data-l1key="seuilHaut"/>'; // dans la class ['seuilHaut']
   div += '</div>';
 
   div += '</div>';

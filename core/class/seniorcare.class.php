@@ -66,6 +66,14 @@ class seniorcare extends eqLogic {
 
     public function postSave() {
 
+      $jsSensorConfort = array();
+      if (is_array($this->getConfiguration('confort'))) { // pour les capteurs de type confort
+        foreach ($this->getConfiguration('confort') as $key => $confort) {
+          $jsSensorConfort[$key] = $confort;
+          log::add('seniorcare', 'error', 'Capteurs confort config : ' . $key . ' - ' . $confort['cmd'] . ' - ' . $confort['sensor_confort_type'] . ' - ' . $confort['seuilBas'] . ' - ' . $confort['seuilHaut']);
+        }
+      }
+
     }
 
     public function preUpdate() {
