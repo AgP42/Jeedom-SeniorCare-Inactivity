@@ -66,13 +66,59 @@ class seniorcare extends eqLogic {
 
     public function postSave() {
 
-      $jsSensorConfort = array();
-      if (is_array($this->getConfiguration('confort'))) { // pour les capteurs de type confort
-        foreach ($this->getConfiguration('confort') as $key => $confort) {
-          $jsSensorConfort[$key] = $confort;
-          log::add('seniorcare', 'error', 'Capteurs confort config : ' . $key . ' - ' . $confort['cmd'] . ' - ' . $confort['sensor_confort_type'] . ' - ' . $confort['seuilBas'] . ' - ' . $confort['seuilHaut']);
+      //** Pour les capteurs confort **//
+
+      $jsSensorConfort = array(); // on va stocker les sensor confort du JS ici, s'ils contiennent une valeur dans le champs cmd
+      if (is_array($this->getConfiguration('confort'))) {
+        foreach ($this->getConfiguration('confort') as $confort) {
+          if ($confort['cmd'] != '') {
+            $jsSensorConfort[$confort['cmd']] = $confort;
+        //    log::add('seniorcare', 'error', 'Capteurs confort config : ' . $confort['cmd'] . ' - ' . $confort['sensor_confort_type'] . ' - ' . $confort['seuilBas'] . ' - ' . $confort['seuilHaut']);
+
+          }
         }
       }
+
+/*      foreach ($this->getCmd() as $cmdSensorConfort) { // on boucle dans les cmd existantes, pour les modifier si besoin
+        if ($cmdSensorConfort->getLogicalId() == 'SensorConfort') { // si c'est une cmd "SensorConfort"
+          if (isset($jsSensorConfort[$cmdSensorConfort->getValues()])) { // on regarde qu'elle est dans le tableau qu'on vient de recuperer du JS, si oui, on actualise les infos qui pourraient avoir bougé
+            // on bidouille pour avoir un nom unique et presque lisible
+            $humanName = $confort['sensor_confort_type'] . ' - ' . cmd::byId(str_replace('#', '', $confort['cmd']))->getHumanName();
+            $cmdSensorConfort->setName($humanName);
+            $cmdSensorConfort->save();
+
+            unset($jsSensorConfort[$cmdSensorConfort->getValues()])); // on a traité notre ligne, on la vire pour pas repasser dessus dans la boucle suivante
+          } else { // on a un SensorConfort qui était dans la DB mais n'est plus dans notre JS : on la supprime !
+            $cmdSensorConfort->remove();
+          }
+        }
+      } //*/
+
+      foreach ($jsSensorConfort as $confort) { // pour tous ceux restant (ils sont dans le tableau JS, mais n'étaient pas deja en DB), il faut les créer
+
+        log::add('seniorcare', 'error', 'Capteurs confort config : ' . $confort['cmd'] . ' - ' . $confort['sensor_confort_type'] . ' - ' . $confort['seuilBas'] . ' - ' . $confort['seuilHaut']);
+
+
+    /*    $cmdSensorConfort = new seniorcareCmd();
+        $cmdSensorConfort->setEqLogic_id($this->getId());
+
+        // on bidouille pour avoir un nom unique et presque lisible
+        $humanName = $confort['sensor_confort_type'] . ' - ' . cmd::byId(str_replace('#', '', $confort['cmd']))->getHumanName();
+       // log::add('seniorcare', 'error', '$humanName : ' . $humanName);
+
+        $cmdSensorConfort->setName($humanName);
+        $cmdSensorConfort->setType('info');
+        $cmdSensorConfort->setSubType('numeric');
+        $cmdSensorConfort->setLogicalId('SensorConfort');
+        $cmdSensorConfort->setIsVisible(0);
+        $cmdSensorConfort->setIsHistorized(1);
+        $cmdSensorConfort->setConfiguration('historizeMode', 'avg');
+        $cmdSensorConfort->setConfiguration('historizeRound', 2);
+        $cmdSensorConfort->setValues($confort['cmd']); // on lui assigne en valeur le #xx# representant la cmd source. Vu que c'est cette meme cmd qui est utilisé comme index du tableau $jsSensorConfort, ca permet de comparer si on a deja la cmd ou pas (dans le foreach précédent), un peu tordu mais ca devrai tomber en marche...
+        $cmdSensorConfort->save();
+        //*/
+      } //*/
+
 
     }
 
