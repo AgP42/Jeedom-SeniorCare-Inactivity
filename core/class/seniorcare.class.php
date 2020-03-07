@@ -72,7 +72,9 @@ class seniorcare extends eqLogic {
       if (is_array($this->getConfiguration('confort'))) {
         foreach ($this->getConfiguration('confort') as $confort) {
           if ($confort['cmd'] != '') {
-            $jsSensorConfort[$confort['cmd']] = $confort;
+            $humanName = $confort['sensor_confort_type'] . ' - ' . cmd::byId(str_replace('#', '', $confort['cmd']))->getHumanName();
+
+            $jsSensorConfort[$humanName] = $confort;
         //    log::add('seniorcare', 'error', 'Capteurs confort config : ' . $confort['cmd'] . ' - ' . $confort['sensor_confort_type'] . ' - ' . $confort['seuilBas'] . ' - ' . $confort['seuilHaut']);
 
           }
@@ -81,7 +83,7 @@ class seniorcare extends eqLogic {
 
 /*      foreach ($this->getCmd() as $cmdSensorConfort) { // on boucle dans les cmd existantes, pour les modifier si besoin
         if ($cmdSensorConfort->getLogicalId() == 'SensorConfort') { // si c'est une cmd "SensorConfort"
-          if (isset($jsSensorConfort[$cmdSensorConfort->getValues()])) { // on regarde qu'elle est dans le tableau qu'on vient de recuperer du JS, si oui, on actualise les infos qui pourraient avoir bougé
+          if (isset($jsSensorConfort[$cmdSensorConfort->getValues()])) { // on regarde si elle est dans le tableau qu'on vient de recuperer du JS, si oui, on actualise les infos qui pourraient avoir bougé
             // on bidouille pour avoir un nom unique et presque lisible
             $humanName = $confort['sensor_confort_type'] . ' - ' . cmd::byId(str_replace('#', '', $confort['cmd']))->getHumanName();
             $cmdSensorConfort->setName($humanName);
@@ -99,7 +101,7 @@ class seniorcare extends eqLogic {
         log::add('seniorcare', 'error', 'Capteurs confort config : ' . $confort['cmd'] . ' - ' . $confort['sensor_confort_type'] . ' - ' . $confort['seuilBas'] . ' - ' . $confort['seuilHaut']);
 
 
-    /*    $cmdSensorConfort = new seniorcareCmd();
+        $cmdSensorConfort = new seniorcareCmd();
         $cmdSensorConfort->setEqLogic_id($this->getId());
 
         // on bidouille pour avoir un nom unique et presque lisible
@@ -114,7 +116,7 @@ class seniorcare extends eqLogic {
         $cmdSensorConfort->setIsHistorized(1);
         $cmdSensorConfort->setConfiguration('historizeMode', 'avg');
         $cmdSensorConfort->setConfiguration('historizeRound', 2);
-        $cmdSensorConfort->setValues($confort['cmd']); // on lui assigne en valeur le #xx# representant la cmd source. Vu que c'est cette meme cmd qui est utilisé comme index du tableau $jsSensorConfort, ca permet de comparer si on a deja la cmd ou pas (dans le foreach précédent), un peu tordu mais ca devrai tomber en marche...
+    //    $cmdSensorConfort->setValues(str_replace('#', '', $confort['cmd'])); // on lui assigne en valeur le #xx# representant la cmd source. Vu que c'est cette meme cmd qui est utilisé comme index du tableau $jsSensorConfort, ca permet de comparer si on a deja la cmd ou pas (dans le foreach précédent), un peu tordu mais ca devrai tomber en marche... non erreur 500 ici
         $cmdSensorConfort->save();
         //*/
       } //*/
