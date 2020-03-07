@@ -144,42 +144,52 @@ function addSensorBtAlert(_info) {
 }
 
 // ajoute chaque ligne de capteur confort à la demande
+// tout ce qui a la class expressionAttr sera enregistré et retrouvable dans la class.php
 function addSensorConfort(_info) {
   var div = '<div class="confort">';
-  div += '<div class="form-group ">';
-  div += '<label class="col-sm-1 control-label">Capteur</label>';
-  div += '<div class="col-sm-4">';
-  div += '<div class="input-group">';
-  div += '<span class="input-group-btn">';
-  div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="confort"><i class="fas fa-minus-circle"></i></a>';
-  div += '</span>';
-  div += '<input class="expressionAttr form-control cmdInfo" data-l1key="cmd" />'; // dans la class on retrouvera le resultat avec un ['cmd'] sous forme #10# qui represente l'id de la cmd referencé
-  div += '<span class="input-group-btn">';
-  div += '<a class="btn btn-default listCmdInfoWindow roundedRight"><i class="fas fa-list-alt"></i></a>';
-  div += '</span>';
-  div += '</div>';
-  div += '</div>';
-  div += '<label class="col-sm-1 control-label">{{Type de capteur }}</label>';
-  div += '<div class="col-sm-2">';
-  div += '<select class="expressionAttr eqLogicAttr form-control tooltips" data-l1key="sensor_confort_type">'; // dans la class : ['sensor_confort_type']
-  div += '<option value="temperature">Température</option>';
-  div += '<option value="humidite">Humidité</option>';
-  div += '<option value="co2">CO2</option>';
-  div += '<option value="pollution">Pollution</option>';
-  div += '<option value="other">Divers</option>';
-  div += '</select>';
-  div += '</div>';
+    div += '<div class="form-group ">';
 
-  div += '<label class="col-sm-1 control-label">{{Seuil bas}}</label>';
-  div += '<div class="col-sm-1">';
-  div += '<input class="expressionAttr form-control cmdInfo" data-l1key="seuilBas" />'; // dans la class ['seuilBas']
-  div += '</div>';
-  div += '<label class="col-sm-1 control-label">{{Seuil haut}}</label>';
-  div += '<div class="col-sm-1">';
-  div += '<input class="expressionAttr form-control cmdInfo" data-l1key="seuilHaut"/>'; // dans la class ['seuilHaut']
-  div += '</div>';
+      div += '<label class="col-sm-1 control-label">{{Nom (unique)}}</label>';
+      div += '<div class="col-sm-2">';
+      div += '<div class="input-group">';
+        div += '<span class="input-group-btn">';
+        div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="confort"><i class="fas fa-minus-circle"></i></a>';
+        div += '</span>';
+        div += '<input class="expressionAttr form-control cmdInfo" data-l1key="name" />'; // dans la class ['name']
+      div += '</div>';
+      div += '</div>';
 
-  div += '</div>';
+      div += '<label class="col-sm-1 control-label">Capteur</label>';
+      div += '<div class="col-sm-2">';
+        div += '<div class="input-group">';
+          div += '<input class="expressionAttr roundedLeft form-control cmdInfo" data-l1key="cmd" />'; // dans la class on retrouvera le resultat avec un ['cmd'] sous forme #10# qui represente l'id de la cmd referencé
+          div += '<span class="input-group-btn">';
+          div += '<a class="btn btn-default listCmdInfoWindow roundedRight"><i class="fas fa-list-alt"></i></a>';
+          div += '</span>';
+        div += '</div>';
+      div += '</div>';
+
+      div += '<label class="col-sm-1 control-label">{{Type de capteur }}</label>';
+      div += '<div class="col-sm-1">';
+        div += '<select class="expressionAttr eqLogicAttr form-control tooltips" data-l1key="sensor_confort_type">'; // dans la class : ['sensor_confort_type']
+        div += '<option value="temperature">Température</option>';
+        div += '<option value="humidite">Humidité</option>';
+        div += '<option value="co2">CO2</option>';
+        div += '<option value="pollution">Pollution</option>';
+        div += '<option value="other">Divers</option>';
+        div += '</select>';
+      div += '</div>';
+
+      div += '<label class="col-sm-1 control-label">{{Seuil bas}}</label>';
+      div += '<div class="col-sm-1">';
+        div += '<input class="expressionAttr form-control cmdInfo" data-l1key="seuilBas" />'; // dans la class ['seuilBas']
+      div += '</div>';
+      div += '<label class="col-sm-1 control-label">{{Seuil haut}}</label>';
+      div += '<div class="col-sm-1">';
+        div += '<input class="expressionAttr form-control cmdInfo" data-l1key="seuilHaut"/>'; // dans la class ['seuilHaut']
+      div += '</div>';
+
+    div += '</div>';
   div += '</div>';
   $('#div_confort').append(div);
   $('#div_confort .confort').last().setValues(_info, '.expressionAttr');
