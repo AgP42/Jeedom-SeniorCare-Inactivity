@@ -177,6 +177,15 @@ class seniorcare extends eqLogic {
           if ($confort['cmd'] == '') {
             throw new Exception(__('Le champs Capteur pour les capteurs de confort ne peut être vide',__FILE__));
           }
+
+          if (!is_numeric($confort['seuilHaut']) || !is_numeric($confort['seuilBas'])) {
+            throw new Exception(__('Capteur confort - ' . $confort['name'] . ', les valeurs des seuils doivent être numérique', __FILE__));
+          }
+
+          if ($confort['seuilBas'] > $confort['seuilHaut']) {
+            throw new Exception(__('Capteur confort - ' . $confort['name'] . ', le seuil bas ne peut pas être supérieur au seuil haut', __FILE__));
+          }
+
         }
       }
 
