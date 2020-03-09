@@ -28,16 +28,62 @@ class seniorcare extends eqLogic {
 
     public static function sensorConfort($_option) {
       log::add('seniorcare', 'debug', 'Detection d\'un changement d\'un capteur confort');
-//      $thermostat = thermostat::byId($_option['thermostat_id']);
+
+    //  $seniorcare = seniorcare::byId($_option['seniorcare_id']);
+
+      log::add('seniorcare', 'debug', 'Fct sensorConfort appelé par le listener : $_option[seniorcare_id] : ' . $_option['seniorcare_id'] . ' - value : ' . $_option['value'] . ' - event_id : ' . $_option['event_id']);
+
+   /*   if (is_object($seniorcare) && $seniorcare->getIsEnable() == 1) {
+
+        foreach ($seniorcare->getConfiguration('confort') as $confort) {
+
+        }
+      } //*/
 
     }
 
-    /*
-     * Fonction exécutée automatiquement toutes les minutes par Jeedom
-      public static function cron() {
+    //*
+    // * Fonction exécutée automatiquement toutes les minutes par Jeedom
+      public static function cron15() {
+
+        log::add('seniorcare', 'debug', '#################### CRON 15 ###################');
+
+        //pour chaque equipement (personne) declaré par l'utilisateur
+        foreach (self::byType('seniorcare',true) as $seniorcare) {
+
+          if ($seniorcare->getIsEnable() == 1) { // si notre eq est actif
+
+            // on boucle dans toutes les cmd existantes
+            foreach ($seniorcare->getCmd() as $cmd) {
+              if ($cmd->getLogicalId() == 'SensorConfort') { // si c'est une cmd "SensorConfort"
+
+                // il nous faut les seuils bas et haut et la valeur actuelle du capteur associé, et eventuellement la date de la valeur
+                $valeur = jeedom::evaluateExpression($cmd->getValue());
+
+                $seuilbas = $cmd->getConfiguration('seuilBas');
+                $seuilhaut = $cmd->getConfiguration('seuilHaut');
+               // $cmd->getGeneric_type();
+
+                log::add('seniorcare', 'debug', 'Capteurs confort cron - HumanNamecmd :' . $cmd->getHumanName() . ' du type : ' . $cmd->getGeneric_type() . ' - value : ' . $cmd->getValue() . '$cmd->getCollectDate() : ' . $cmd->getCollectDate() . ' qui vaut : ' . jeedom::evaluateExpression($cmd->getValue()) . ' seuil bas : ' . $cmd->getConfiguration('seuilBas') . ' seuil haut : ' . $cmd->getConfiguration('seuilHaut'));
+
+                if ($valeur > $seuilhaut || $valeur < $seuilbas){
+                  log::add('seniorcare', 'debug', 'Capteurs confort cron - HumanNamecmd :' . $cmd->getHumanName() . ' sort des seuils !');
+
+                } else {
+                  log::add('seniorcare', 'debug', 'Capteurs confort cron - HumanNamecmd :' . $cmd->getHumanName() . ' OK, dans les seuils !');
+                }
+
+              }
+            }
+
+          } // fin if eq actif
+
+
+
+        } // fin foreach equipement
 
       }
-     */
+     //*/
 
 
     /*
@@ -122,6 +168,7 @@ class seniorcare extends eqLogic {
             $cmdSensorConfort->save();
 
             // va chopper la valeur de la commande pour l'initialiser lors de l'enregistrement
+            // c'est aussi ca qui permet de l'updater a chaque changement de valeur de la cmd 'origine ? TODO : a mieux comprendre...
             if (is_nan($cmdSensorConfort->execCmd()) || $cmdSensorConfort->execCmd() == '') {
               $cmdSensorConfort->event($cmdSensorConfort->execute());
             }
@@ -179,6 +226,7 @@ class seniorcare extends eqLogic {
 
       } // fin foreach restant. A partir de maintenant on a des cmd qui refletent notre config lue en JS
 
+      //********** Mise en place des listeners de capteurs ***********//
       if ($this->getIsEnable() == 1) { // si notre eq est actif, on va lui definir nos listeners de capteurs
 
         // on boucle dans toutes les cmd existantes
@@ -186,19 +234,22 @@ class seniorcare extends eqLogic {
           if ($cmd->getLogicalId() == 'SensorConfort') { // si c'est une cmd "SensorConfort"
           // TODO a-t-on vraiment besoin d'un listener par sensor confort ? un cron ou cron5 ne serait-il pas largement suffisant ?
 
-            $listener = listener::byClassAndFunction('seniorcare', 'sensorConfort', array('seniorcare_id' => intval($this->getId())));
-            if (!is_object($listener)) {
+            $listener = listener::byClassAndFunction('seniorcare', 'sensorConfort', array('seniorcare_id' => intval($cmd->getId())));
+            if (!is_object($listener)) { // s'il existe pas, on le cree, sinon on le reprend
               $listener = new listener();
+              $listener->setClass('seniorcare');
+              $listener->setFunction('sensorConfort');
+              $listener->setOption(array('seniorcare_id' => intval($cmd->getId())));
             }
-            $listener->setClass('seniorcare');
-            $listener->setFunction('sensorConfort');
-            $listener->setOption(array('seniorcare_id' => intval($this->getId())));
-            $listener->emptyEvent();
+          //  $listener->emptyEvent();
             $listener->addEvent($cmd->getValue());
-            $listener->save();
+
+            log::add('seniorcare', 'debug', 'Capteurs confort set listener - cmd :' . $cmd->getHumanName() . ' - event : ' . $cmd->getValue());
 
           }
         }
+
+        $listener->save();
 
       } // fin if eq actif
 
@@ -287,6 +338,7 @@ class seniorcareCmd extends cmd {
     //  $eqLogic = $this->getEqLogic();
 
       if ($this->getLogicalId() == 'SensorConfort') {
+        log::add('seniorcare', 'debug', 'Fct execute - Capteurs confort, valeur renvoyée :' . round(jeedom::evaluateExpression($this->getValue()), 1));
         return round(jeedom::evaluateExpression($this->getValue()), 1);
       }
 
