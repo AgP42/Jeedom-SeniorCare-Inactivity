@@ -84,6 +84,19 @@ $("body").off('click','.listCmdAction').on('click','.listCmdAction', function ()
   });
 });
 
+// copier/coller du core (cmd.configure.php), permet de choisir la liste des actions (scenario, attendre, ...)
+$("body").undelegate(".listAction", 'click').delegate(".listAction", 'click', function () {
+  var type = $(this).attr('data-type');
+  var el = $(this).closest('.' + type).find('.expressionAttr[data-l1key=cmd]');
+  jeedom.getSelectActionModal({}, function (result) {
+    el.value(result.human);
+    jeedom.cmd.displayActionOption(el.value(), '', function (html) {
+      el.closest('.' + type).find('.actionOptions').html(html);
+      taAutosize();
+    });
+  });
+});
+
 // TODO ce morceau de code est un copier/coller du plugin thermostat, a voir s'il n'y a pas des trucs inutils la dedans
 $('body').off('focusout','.cmdAction.expressionAttr[data-l1key=cmd]').on('focusout','.cmdAction.expressionAttr[data-l1key=cmd]',function (event) {
   var type = $(this).attr('data-type');
@@ -225,6 +238,7 @@ function addActionWarningConfort(_info) {
           div += '</span>';
           div += '<input class="expressionAttr form-control cmdAction" data-l1key="cmd" data-type="action_warning_confort" />';
           div += '<span class="input-group-btn">';
+            div += '<a class="btn btn-default listAction" data-type="action_warning_confort" title="{{Sélectionner un mot-clé}}"><i class="fa fa-tasks"></i></a>';
             div += '<a class="btn btn-default listCmdAction roundedRight" data-type="action_warning_confort" ><i class="fas fa-list-alt"></i></a>';
           div += '</span>';
         div += '</div>';

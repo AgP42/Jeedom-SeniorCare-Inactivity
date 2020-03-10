@@ -34,13 +34,15 @@ class seniorcare extends eqLogic {
         foreach ($seniorcare->getConfiguration('action_warning_confort') as $action) {
         log::add('seniorcare', 'debug', 'Capteurs confort :' . $_name . ' sort des seuils !, on va executer l action : ' . $action['cmd']);
           try {
-            $options = array();
-         /*   if (isset($action['options'])) {
-              $options = $action['options'];
+            $options = array(); // va permettre d'appeller les options de configuration des actions, par exemple quel scenario ou le message si action messagerie
+            if (isset($action['options'])) {
               foreach ($options as $key => $value) {
-                $options[$key] = str_replace('#slider#', $consigne, $value);
+                $options[$key] = str_replace('#pers#', $_name, $value);
+                // str_replace ( $search , $replace , $subject )
+                // str_replace() retourne une chaîne ou un tableau, dont toutes les occurrences de search dans subject ont été remplacées par replace.
               }
-            }*/
+              $options = $action['options'];
+            }
             scenarioExpression::createAndExec('action', $action['cmd'], $options);
           } catch (Exception $e) {
             log::add('thermostat', 'error', $this->getHumanName() . __(' : Erreur lors de l\'éxecution de ', __FILE__) . $action['cmd'] . __('. Détails : ', __FILE__) . $e->getMessage());
