@@ -28,6 +28,10 @@ class seniorcare extends eqLogic {
 
     public static function checkAndActionSeuilsSensorConfort($seniorcare, $_name, $_value, $_seuilBas, $_seuilHaut, $_type) { // appelée soit par le cron, soit par un listener (via la fct sensorConfort), va regarder si on est dans les seuils définis et si non appliquer les actions voulues
 
+    // TODO on pourrait ajouter une durée min pendant laquelle le capteur est hors seuils avant de declancher l'alerte
+    // TODO on pourrait limiter l'alerte à 1 fois par heure (a parametrer ?)
+    // TODO on pourrait ajouter la date de collecte de la valeur pour ne pas faire des alertes sur une vieille info, ou au contraire ajouter une alerte si pas de valeur fraiche pendant un certain temps. Mais ca peut etre aussi géré par le core dans les configuration de la cmd...
+
       log::add('seniorcare', 'debug', 'Fct checkAndActionSeuilsSensorConfort, name : ' . $_name . ' - ' . $_type . ' - ' . $_value . ' - ' . $_seuilBas . ' - ' . $_seuilHaut);
 
       if ($_value > $_seuilHaut || $_value < $_seuilBas){
@@ -68,7 +72,7 @@ class seniorcare extends eqLogic {
         foreach ($seniorcare->getConfiguration('confort') as $confort) { // on boucle direct dans la conf, on pourrait aussi boucler dans les cmd saved en DB et chercher nos infos vu qu'on les a enregistrés. TODO Si on en a jamais besoin, voir pour virer l'enregistrement des datas dans la DB (seuil haut et bas, ...)
           if ('#' . $_option['event_id'] . '#' == $confort['cmd']) { // on cherche quel est l'event qui nous a declanché (vu qu'on a fait le choix d'un listener par groupe)
 
-        //    log::add('seniorcare', 'debug', 'Fct sensorConfort appelé par le listener, name : ' . $confort['name'] . ' - cmd : ' . $confort['cmd']  . ' - ' . $confort['sensor_confort_type'] . ' - ' . $confort['seuilBas'] . ' - ' . $confort['seuilHaut']);
+            //  log::add('seniorcare', 'debug', 'Fct sensorConfort appelé par le listener, name : ' . $confort['name'] . ' - cmd : ' . $confort['cmd']  . ' - ' . $confort['sensor_confort_type'] . ' - ' . $confort['seuilBas'] . ' - ' . $confort['seuilHaut']);
 
             $seniorcare->checkAndActionSeuilsSensorConfort($seniorcare, $confort['name'], $_option['value'], $confort['seuilBas'], $confort['seuilHaut'], $confort['sensor_confort_type']);
 
@@ -177,13 +181,10 @@ class seniorcare extends eqLogic {
                     $unit = '%';
                     break;
                 case 'co2':
-                    $unit = 'ppm'; //TODO
-                    break;
-                case 'pollution':
-                    $unit = '?'; //TODO
+                    $unit = 'ppm'; //Les sondes de CO2 présentent généralement une plage de mesure de 0-5000 ppm. Il faudra recommander dans la doc une alerte a partir de 1000ppm max
                     break;
                 default:
-                    $unit = '?'; //TODO
+                    $unit = '-'; //TODO
                     break;
             }
             $cmdSensorConfort->setUnite($unit);
@@ -192,6 +193,7 @@ class seniorcare extends eqLogic {
 
             // va chopper la valeur de la commande puis la suivre a chaque changement
             if (is_nan($cmdSensorConfort->execCmd()) || $cmdSensorConfort->execCmd() == '') {
+              $cmdSensorConfort->setCollectDate('');
               $cmdSensorConfort->event($cmdSensorConfort->execute());
             }
 
@@ -225,13 +227,10 @@ class seniorcare extends eqLogic {
                 $unit = '%';
                 break;
             case 'co2':
-                $unit = 'ppm'; //TODO
-                break;
-            case 'pollution':
-                $unit = '?'; //TODO
+                $unit = 'ppm';
                 break;
             default:
-                $unit = '?'; //TODO
+                $unit = '-';  //TODO
                 break;
         }
         $cmdSensorConfort->setUnite($unit);
@@ -243,6 +242,7 @@ class seniorcare extends eqLogic {
 
         // va chopper la valeur de la commande puis la suivre a chaque changement
         if (is_nan($cmdSensorConfort->execCmd()) || $cmdSensorConfort->execCmd() == '') {
+          $cmdSensorConfort->setCollectDate('');
           $cmdSensorConfort->event($cmdSensorConfort->execute());
         }
 

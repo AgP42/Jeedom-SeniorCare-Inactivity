@@ -178,13 +178,13 @@ function addSensorConfort(_info) {
   var div = '<div class="confort">';
     div += '<div class="form-group ">';
 
-      div += '<label class="col-sm-1 control-label">{{Nom (unique)}}</label>';
+      div += '<label class="col-sm-1 control-label">{{Nom}}</label>';
       div += '<div class="col-sm-2">';
       div += '<div class="input-group">';
         div += '<span class="input-group-btn">';
-        div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="confort"><i class="fas fa-minus-circle"></i></a>';
+        div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="confort" title="{{Supprimer le capteur}}""><i class="fas fa-minus-circle"></i></a>';
         div += '</span>';
-        div += '<input class="expressionAttr form-control cmdInfo" data-l1key="name" />'; // dans la class ['name']
+        div += '<input class="expressionAttr form-control cmdInfo" data-l1key="name" title="{{Le nom doit être unique}}"/>'; // dans la class ['name']
       div += '</div>';
       div += '</div>';
 
@@ -193,7 +193,7 @@ function addSensorConfort(_info) {
         div += '<div class="input-group">';
           div += '<input class="expressionAttr roundedLeft form-control cmdInfo" data-l1key="cmd" />'; // dans la class on retrouvera le resultat avec un ['cmd'] sous forme #10# qui represente l'id de la cmd referencé
           div += '<span class="input-group-btn">';
-          div += '<a class="btn btn-default listCmdInfoWindow roundedRight"><i class="fas fa-list-alt"></i></a>';
+          div += '<a class="btn btn-default listCmdInfoWindow roundedRight" title="{{Selectionner la commande}}"><i class="fas fa-list-alt"></i></a>';
           div += '</span>';
         div += '</div>';
       div += '</div>';
@@ -204,8 +204,7 @@ function addSensorConfort(_info) {
         div += '<option value="temperature">Température</option>';
         div += '<option value="humidite">Humidité</option>';
         div += '<option value="co2">CO2</option>';
-        div += '<option value="pollution">Pollution</option>';
-        div += '<option value="other">Divers</option>';
+        div += '<option value="other">Autre</option>';
         div += '</select>';
       div += '</div>';
 
@@ -234,12 +233,12 @@ function addActionWarningConfort(_info) {
 
         div += '<div class="input-group">';
           div += '<span class="input-group-btn">';
-            div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="action_warning_confort"><i class="fas fa-minus-circle"></i></a>';
+            div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="action_warning_confort" title="{{Supprimer l\'action}}"><i class="fas fa-minus-circle"></i></a>';
           div += '</span>';
           div += '<input class="expressionAttr form-control cmdAction" data-l1key="cmd" data-type="action_warning_confort" />';
           div += '<span class="input-group-btn">';
             div += '<a class="btn btn-default listAction" data-type="action_warning_confort" title="{{Sélectionner un mot-clé}}"><i class="fa fa-tasks"></i></a>';
-            div += '<a class="btn btn-default listCmdAction roundedRight" data-type="action_warning_confort" ><i class="fas fa-list-alt"></i></a>';
+            div += '<a class="btn btn-default listCmdAction roundedRight" data-type="action_warning_confort" title="{{Sélectionner une commande}}"><i class="fas fa-list-alt"></i></a>';
           div += '</span>';
         div += '</div>';
 
