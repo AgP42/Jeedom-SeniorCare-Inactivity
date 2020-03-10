@@ -36,12 +36,16 @@ class seniorcare extends eqLogic {
           try {
             $options = array(); // va permettre d'appeller les options de configuration des actions, par exemple quel scenario ou le message si action messagerie
             if (isset($action['options'])) {
-              foreach ($options as $key => $value) {
-                $options[$key] = str_replace('#pers#', $_name, $value);
-                // str_replace ( $search , $replace , $subject )
-                // str_replace() retourne une chaîne ou un tableau, dont toutes les occurrences de search dans subject ont été remplacées par replace.
-              }
               $options = $action['options'];
+              foreach ($options as $key => $value) { // ici on peut definir les "tag" de configuration qui seront a remplacer par des variables
+                // str_replace ($search, $replace, $subject) retourne une chaîne ou un tableau, dont toutes les occurrences de search dans subject ont été remplacées par replace.
+                $value = str_replace('#nom_personne#', $seniorcare->getName(), $value);
+                $value = str_replace('#nom_capteur#', $_name, $value);
+                $value = str_replace('#type_capteur#', $_type, $value);
+                $value = str_replace('#valeur#', $_value, $value);
+                $value = str_replace('#seuil_bas#', $_seuilBas, $value);
+                $options[$key] = str_replace('#seuil_haut#', $_seuilHaut, $value);
+              }
             }
             scenarioExpression::createAndExec('action', $action['cmd'], $options);
           } catch (Exception $e) {
