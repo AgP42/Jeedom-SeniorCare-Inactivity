@@ -48,6 +48,21 @@ class seniorcare extends eqLogic {
                 $value = str_replace('#type_capteur#', $_type, $value);
                 $value = str_replace('#valeur#', $_value, $value);
                 $value = str_replace('#seuil_bas#', $_seuilBas, $value);
+                switch ($_type) {
+                    case 'temperature':
+                        $unit = '°C';
+                        break;
+                    case 'humidite':
+                        $unit = '%';
+                        break;
+                    case 'co2':
+                        $unit = 'ppm';
+                        break;
+                    default:
+                        $unit = '-';
+                        break;
+                }
+                $value = str_replace('#unite#', $unit, $value);
                 $options[$key] = str_replace('#seuil_haut#', $_seuilHaut, $value);
               }
             }
@@ -85,7 +100,7 @@ class seniorcare extends eqLogic {
 
     //*
     // * Fonction exécutée automatiquement toutes les 15 minutes par Jeedom - sert de backup si on rate un listener. A voir a l'usage si on veut garder ca et la fréquence... TODO
-      public static function cron15() {
+  /*    public static function cron15() {
 
         log::add('seniorcare', 'debug', '#################### CRON 15 ###################');
 
@@ -111,7 +126,7 @@ class seniorcare extends eqLogic {
 
         } // fin foreach equipement
 
-      }
+      } //*/
 
     /*
      * Fonction exécutée automatiquement toutes les heures par Jeedom
@@ -262,7 +277,7 @@ class seniorcare extends eqLogic {
               if (!is_object($listener)) { // s'il existe pas, on le cree, sinon on le reprend
                 $listener = new listener();
                 $listener->setClass('seniorcare');
-                $listener->setFunction('sensorConfort');
+                $listener->setFunction('sensorConfort'); // la fct qui sera appellée a chaque evenement sur une des sources écoutée
                 $listener->setOption(array('seniorcare_id' => intval($this->getId())));
               }
             //  $listener->emptyEvent();
@@ -314,7 +329,7 @@ class seniorcare extends eqLogic {
 
     public function preRemove() {
 
-      // quand on supprime notre eqLogic, on vire nos listeners associés...
+      // quand on supprime notre eqLogic, on vire nos listeners associés
       $listener = listener::byClassAndFunction('seniorcare', 'sensorConfort', array('seniorcare_id' => intval($this->getId())));
       if (is_object($listener)) {
         $listener->remove();

@@ -107,51 +107,34 @@ $('body').off('focusout','.cmdAction.expressionAttr[data-l1key=cmd]').on('focuso
   });
 
 });
-// ajoute chaque ligne de bt alerte signes de vie à la demande
-function addSensorBtAlert(_info) {
-  var div = '<div class="alert_bt">';
-  div += '<div class="form-group ">';
-  div += '<label class="col-sm-1 control-label">Bouton</label>';
-  div += '<div class="col-sm-4">';
-  div += '<div class="input-group">';
-  div += '<span class="input-group-btn">';
-  div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="alert_bt"><i class="fas fa-minus-circle"></i></a>';
-  div += '</span>';
-  div += '<input class="expressionAttr form-control cmdInfo" data-l1key="cmd" />'; //comment on va recuperer les infos si elles s'appellent toutes cmd ?? todo later...
-  div += '<span class="input-group-btn">';
-  div += '<a class="btn btn-default listCmdInfoWindow roundedRight"><i class="fas fa-list-alt"></i></a>';
-  div += '</span>';
-  div += '</div>';
-  div += '</div>';
-  div += '</div>';
-  div += '</div>';
-  $('#div_alert_bt').append(div);
-  $('#div_alert_bt .alert_bt').last().setValues(_info, '.expressionAttr');
-}
 
 // ajoute chaque ligne de capteur signes de vie à la demande
 function addSensorLifeSign(_info) {
   var div = '<div class="life_sign">';
     div += '<div class="form-group ">';
 
-      div += '<label class="col-sm-1 control-label">{{Nom (unique)}}</label>';
+      div += '<label class="col-sm-1 control-label">{{Nom}}</label>';
       div += '<div class="col-sm-2">';
-      div += '<div class="input-group">';
-        div += '<span class="input-group-btn">';
-        div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="confort"><i class="fas fa-minus-circle"></i></a>';
-        div += '</span>';
-        div += '<input class="expressionAttr form-control cmdInfo" data-l1key="name" />'; // dans la class ['name']
-      div += '</div>';
+        div += '<div class="input-group">';
+          div += '<span class="input-group-btn">';
+          div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="life_sign" title="{{Supprimer le capteur}}""><i class="fas fa-minus-circle"></i></a>';
+          div += '</span>';
+          div += '<input class="expressionAttr form-control cmdInfo" data-l1key="name" title="{{Le nom doit être unique}}"/>'; // dans la class ['name']
+        div += '</div>';
       div += '</div>';
 
       div += '<label class="col-sm-1 control-label">Capteur</label>';
       div += '<div class="col-sm-2">';
         div += '<div class="input-group">';
-          div += '<input class="expressionAttr form-control cmdInfo" data-l1key="cmd" />';
+          div += '<input class="expressionAttr roundedLeft form-control cmdInfo" data-l1key="cmd" />'; // dans la class on retrouvera le resultat avec un ['cmd'] sous forme #10# qui represente l'id de la cmd referencé
           div += '<span class="input-group-btn">';
-          div += '<a class="btn btn-default listCmdInfoWindow roundedRight"><i class="fas fa-list-alt"></i></a>';
+          div += '<a class="btn btn-default listCmdInfoWindow roundedRight" title="{{Selectionner le capteur}}"><i class="fas fa-list-alt"></i></a>';
           div += '</span>';
         div += '</div>';
+      div += '</div>';
+
+      div += '<div class="col-sm-1">';
+        div += '<label class="checkbox-inline"><input type="checkbox" class="expressionAttr cmdInfo" data-l1key="invert" title="{{Cocher si ce capteur renvoie un 0 lors d\'une activation}}"/>{{Inverser}}</label>';
       div += '</div>';
 
       div += '<label class="col-sm-1 control-label">{{Type de capteur }}</label>';
@@ -160,19 +143,49 @@ function addSensorLifeSign(_info) {
         div += '<option value="other">Divers</option>';
         div += '<option value="frigo">Frigidaire</option>';
         div += '<option value="toilettes">Chasse d\'eau</option>';
-        div += '<option value="lit">Mouvement lit</option>';
-        div += '<option value="interupteur">Interupteur</option>';
+        div += '<option value="lit">Présence lit</option>';
+        div += '<option value="interrupteur">Interrupteur</option>';
         div += '<option value="detecteur_mvt">Détecteur de mouvement</option>';
         div += '</select>';
       div += '</div>';
+
     div += '</div>';
   div += '</div>';
   $('#div_life_sign').append(div);
   $('#div_life_sign .life_sign').last().setValues(_info, '.expressionAttr');
 }
 
+// ajoute chaque ligne de bt alerte immédiate signes de vie
+function addSensorBtAlert(_info) {
+  var div = '<div class="alert_bt">';
+    div += '<div class="form-group ">';
 
-// ajoute chaque ligne de capteur confort à la demande
+      div += '<label class="col-sm-1 control-label">{{Nom}}</label>';
+      div += '<div class="col-sm-2">';
+        div += '<div class="input-group">';
+          div += '<span class="input-group-btn">';
+          div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="alert_bt" title="{{Supprimer le bouton}}""><i class="fas fa-minus-circle"></i></a>';
+          div += '</span>';
+          div += '<input class="expressionAttr form-control cmdInfo" data-l1key="name" title="{{Le nom doit être unique}}"/>'; // dans la class ['name']
+        div += '</div>';
+      div += '</div>';
+
+      div += '<label class="col-sm-1 control-label">Bouton</label>';
+      div += '<div class="col-sm-2">';
+        div += '<div class="input-group">';
+          div += '<input class="expressionAttr form-control cmdInfo" data-l1key="cmd" />';
+          div += '<span class="input-group-btn">';
+            div += '<a class="btn btn-default listCmdInfoWindow roundedRight"><i class="fas fa-list-alt"></i></a>';
+          div += '</span>';
+        div += '</div>';
+      div += '</div>';
+    div += '</div>';
+  div += '</div>';
+  $('#div_alert_bt').append(div);
+  $('#div_alert_bt .alert_bt').last().setValues(_info, '.expressionAttr');
+}
+
+// ajoute chaque ligne de capteur confort
 // tout ce qui a la class expressionAttr sera enregistré et retrouvable dans la class.php
 function addSensorConfort(_info) {
   var div = '<div class="confort">';
@@ -180,12 +193,12 @@ function addSensorConfort(_info) {
 
       div += '<label class="col-sm-1 control-label">{{Nom}}</label>';
       div += '<div class="col-sm-2">';
-      div += '<div class="input-group">';
-        div += '<span class="input-group-btn">';
-        div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="confort" title="{{Supprimer le capteur}}""><i class="fas fa-minus-circle"></i></a>';
-        div += '</span>';
-        div += '<input class="expressionAttr form-control cmdInfo" data-l1key="name" title="{{Le nom doit être unique}}"/>'; // dans la class ['name']
-      div += '</div>';
+        div += '<div class="input-group">';
+          div += '<span class="input-group-btn">';
+          div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="confort" title="{{Supprimer le capteur}}""><i class="fas fa-minus-circle"></i></a>';
+          div += '</span>';
+          div += '<input class="expressionAttr form-control cmdInfo" data-l1key="name" title="{{Le nom doit être unique}}"/>'; // dans la class ['name']
+        div += '</div>';
       div += '</div>';
 
       div += '<label class="col-sm-1 control-label">Capteur</label>';
@@ -193,7 +206,7 @@ function addSensorConfort(_info) {
         div += '<div class="input-group">';
           div += '<input class="expressionAttr roundedLeft form-control cmdInfo" data-l1key="cmd" />'; // dans la class on retrouvera le resultat avec un ['cmd'] sous forme #10# qui represente l'id de la cmd referencé
           div += '<span class="input-group-btn">';
-          div += '<a class="btn btn-default listCmdInfoWindow roundedRight" title="{{Selectionner la commande}}"><i class="fas fa-list-alt"></i></a>';
+          div += '<a class="btn btn-default listCmdInfoWindow roundedRight" title="{{Selectionner le capteur}}"><i class="fas fa-list-alt"></i></a>';
           div += '</span>';
         div += '</div>';
       div += '</div>';
@@ -210,11 +223,11 @@ function addSensorConfort(_info) {
 
       div += '<label class="col-sm-1 control-label">{{Seuil bas}}</label>';
       div += '<div class="col-sm-1">';
-        div += '<input class="expressionAttr form-control cmdInfo" data-l1key="seuilBas" />'; // dans la class ['seuilBas']
+        div += '<input type="number" class="expressionAttr form-control cmdInfo" data-l1key="seuilBas" />'; // dans la class ['seuilBas']
       div += '</div>';
       div += '<label class="col-sm-1 control-label">{{Seuil haut}}</label>';
       div += '<div class="col-sm-1">';
-        div += '<input class="expressionAttr form-control cmdInfo" data-l1key="seuilHaut"/>'; // dans la class ['seuilHaut']
+        div += '<input type="number" class="expressionAttr form-control cmdInfo" data-l1key="seuilHaut"/>'; // dans la class ['seuilHaut']
       div += '</div>';
 
     div += '</div>';

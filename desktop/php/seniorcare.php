@@ -49,19 +49,17 @@ $eqLogics = eqLogic::byType($plugin->getId());
     <li role="presentation"><a href="#" class="eqLogicAction" aria-controls="home" role="tab" data-toggle="tab" data-action="returnToThumbnailDisplay"><i class="fa fa-arrow-circle-left"></i></a></li>
     <li role="presentation" class="active"><a href="#eqlogictab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-tachometer-alt"></i> {{Général}}</a></li>
 
+    <li role="presentation"><a href="#absencestab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-calendar-alt"></i> {{Gestion absences}}</a></li>
+
     <li role="presentation"><a href="#lifesigntab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-heartbeat"></i> {{Signes de vie}}</a></li>
 
     <li role="presentation"><a href="#conforttab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-spa"></i> {{Confort}}</a></li>
 
     <li role="presentation"><a href="#securitytab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-exclamation-triangle"></i> {{Sécurité}}</a></li>
 
+    <li role="presentation"><a href="#alertesPerteAutonomietab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-list-alt"></i> {{Alertes Perte d'autonomie}}</a></li>
 
-    <!--li role="presentation"><a href="#alertesPerteAutonomietab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-list-alt"></i> {{Alertes Perte d'autonomie}}</a></li-->
-
-    <!--li role="presentation"><a href="#absences" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-list-alt"></i> {{Gestion absences}}</a></li-->
-    <!-- Ici il faudra ajouter une liaison avec le plugin agenda et ajouter des inputs de bouton "depart", "retour" -->
-
-    <li role="presentation"><a href="#commandtab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-list-alt"></i> {{Commandes}}</a></li>
+    <li role="presentation"><a href="#commandtab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-list-alt"></i> {{Avancé - Commandes Jeedom}}</a></li>
 
   </ul>
 
@@ -121,20 +119,37 @@ $eqLogics = eqLogic::byType($plugin->getId());
       </form>
     </div>
 
+    <!-- TAB Capteurs absences -->
+    <div class="tab-pane" id="absencestab">
+      <br/>
+      <div class="alert alert-info">
+        {{TODO : gerer la liaison avec le plugin Agenda pour saisir les absences prévues, et ajouter les boutons ou capteurs du logement à utiliser pour détecter la présence/absence de la personne de son logement}}
+      </div>
+
+    </div>
+
     <!-- TAB Capteurs Signes de vie -->
     <div class="tab-pane" id="lifesigntab">
       <br/>
+      <div class="alert alert-info">
+        {{Cet onglet permet de configurer les capteurs indiquant au système une activité de la personne dépendante. Si aucun de ces capteurs n'est activé pendant un certain temps, une alerte de "suspicion de chute" pourra être envoyé aux aidants.}}
+      </div>
+
       <form class="form-horizontal">
         <fieldset>
           <legend><i class="fas fa-heartbeat"></i> {{Capteurs de signe de vie}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces capteurs déclancheront une alerte si aucun d'entre eux n'est activé pendant une certaine durée}}"></i></sup>
             <a class="btn btn-success btn-sm addSensorLifeSign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un capteur}}</a>
           </legend>
+
           <div id="div_life_sign"></div>
 
+          <legend><i class="fas fa-stopwatch"></i> {{Délai avant alerte}} <sup><i class="fas fa-question-circle tooltips" title="{{Durée au bout de laquelle aucun des signes de vie ci-dessus déclanchera une alerte. TODO - A paufiner selon jour/nuit, etc.}}"></i></sup>
+          </legend>
+
           <div class="form-group">
-            <label class="col-sm-2 control-label">{{Durée avant alerte}} <sup><i class="fas fa-question-circle tooltips" title="{{Durée au bout de laquelle aucun des signes de vie ci-dessus déclanchera une alerte}}"></i></sup></label>
+            <label class="col-sm-2 control-label">{{Durée en minutes}}</label>
             <div class="col-sm-1">
-              <input type="text" class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="order_max" title="{{}}"/>
+              <input type="number" min="0" class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="order_max" />
             </div>
           </div>
 
@@ -145,7 +160,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-exclamation-circle"></i> {{Boutons d'alerte}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces capteurs déclancheront une alerte dès qu'ils seront activés}}"></i></sup>
+          <legend><i class="fas fa-exclamation-circle"></i> {{Boutons d'alerte immédiate}} <sup><i class="fas fa-question-circle tooltips" title="{{Bouton à porter par la personne pour déclencher une alerte immédiate par un simple appui}}"></i></sup>
             <a class="btn btn-success btn-sm addSensorBtAlert" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un bouton}}</a>
           </legend>
           <div id="div_alert_bt"></div>
@@ -174,6 +189,9 @@ $eqLogics = eqLogic::byType($plugin->getId());
     <!-- TAB Capteurs Confort -->
     <div class="tab-pane" id="conforttab">
       <br/>
+      <div class="alert alert-info">
+        {{Cet onglet permet de configurer les capteurs du confort du logement de la personne dépendante. Vous pouvez définir les actions à réaliser lors des dépassement de seuils définis.}}
+      </div>
 
       <form class="form-horizontal">
         <fieldset>
@@ -199,6 +217,9 @@ $eqLogics = eqLogic::byType($plugin->getId());
     <!-- TAB Capteurs Sécurité -->
     <div class="tab-pane" id="securitytab">
       <br/>
+      <div class="alert alert-info">
+        {{Cet onglet permet de configurer les capteurs de sécurité du logement de la personne dépendante ainsi que les actions à réaliser en cas de déchenchement}}
+      </div>
 
       <form class="form-horizontal">
         <fieldset>
@@ -208,6 +229,15 @@ $eqLogics = eqLogic::byType($plugin->getId());
           <div id="div_security"></div>
         </fieldset>
       </form>
+
+    </div>
+
+    <!-- TAB Perte Autonomie -->
+    <div class="tab-pane" id="alertesPerteAutonomietab">
+      <br/>
+      <div class="alert alert-info">
+        {{TODO : en attente de la liste des critéres à prendre en compte pour gerer la perte d'autonomie}}
+      </div>
 
     </div>
 
