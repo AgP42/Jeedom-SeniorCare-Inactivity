@@ -51,13 +51,15 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
     <li role="presentation"><a href="#absencestab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-calendar-alt"></i> {{Gestion absences}}</a></li>
 
-    <li role="presentation"><a href="#lifesigntab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-heartbeat"></i> {{Signes de vie}}</a></li>
+    <li role="presentation"><a href="#lifesigntab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-heartbeat"></i> {{Détection chute}}</a></li>
+
+    <li role="presentation"><a href="#alertbttab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-toggle-on"></i> {{Bouton d'alerte}}</a></li>
 
     <li role="presentation"><a href="#conforttab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-spa"></i> {{Confort}}</a></li>
 
     <li role="presentation"><a href="#securitytab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-exclamation-triangle"></i> {{Sécurité}}</a></li>
 
-    <li role="presentation"><a href="#alertesPerteAutonomietab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-list-alt"></i> {{Alertes Perte d'autonomie}}</a></li>
+    <li role="presentation"><a href="#alertesPerteAutonomietab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-brain"></i> {{Alertes Perte d'autonomie}}</a></li>
 
     <li role="presentation"><a href="#commandtab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-list-alt"></i> {{Avancé - Commandes Jeedom}}</a></li>
 
@@ -132,7 +134,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
     <div class="tab-pane" id="lifesigntab">
       <br/>
       <div class="alert alert-info">
-        {{Cet onglet permet de configurer les capteurs indiquant au système une activité de la personne dépendante. Si aucun de ces capteurs n'est activé pendant un certain temps, une alerte de "suspicion de chute" pourra être envoyé aux aidants.}}
+        {{Cet onglet permet de configurer les capteurs indiquant au système une activité de la personne dépendante. Si aucun de ces capteurs n'est activé pendant un certain temps, une alerte de "suspicion de chute" sera envoyé aux aidants.}}
       </div>
 
       <form class="form-horizontal">
@@ -160,7 +162,43 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-exclamation-circle"></i> {{Boutons d'alerte immédiate}} <sup><i class="fas fa-question-circle tooltips" title="{{Bouton à porter par la personne pour déclencher une alerte immédiate par un simple appui}}"></i></sup>
+          <legend><i class="fas fa-bomb"></i> {{Actions avertissement alerte - personne dépendante}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées dés que le système détectera qu'aucun signe de vie n'est présent depuis la durée considerée. La personne dépendante disposera d'un certain temps pour désactiver l'alerte avant qu'elle ne soit transmise aux aidants}}"></i></sup>
+            <a class="btn btn-success btn-sm addActionWarningLifeSign" data-type="action_warning_life_sign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
+          </legend>
+          <div id="div_action_warning_life_sign"></div>
+
+          <label class="col-sm-3 control-label">{{Durée de ces actions avant de prévenir les aidants}} <sup><i class="fas fa-question-circle tooltips" title="{{Durée pendant laquelle la personne dépendante peut désactiver l'alerte (en activant n'importe quel signe de vie) avant qu'elle ne soit transmise aux aidants}}"></i></sup></label>
+          <div class="col-sm-2">
+            <input type="text" class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="order_max" title="{{}}"/>
+          </div>
+
+        </fieldset>
+      </form>
+
+      <br>
+
+      <form class="form-horizontal">
+        <fieldset>
+          <legend><i class="fas fa-bomb"></i> {{Actions alerte "suspicion de chute" vers les aidants}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées à l'échéance du délai de désactivation de l'alerte par la personne dépendante.}}"></i></sup>
+            <a class="btn btn-success btn-sm addActionWarningLifeSign" data-type="action_alert_life_sign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
+          </legend>
+          <div id="div_action_alert_life_sign"></div>
+
+        </fieldset>
+      </form>
+
+    </div>
+
+    <!-- TAB Capteurs Bouton alerte immédiate -->
+    <div class="tab-pane" id="alertbttab">
+      <br/>
+      <div class="alert alert-info">
+        {{Cet onglet permet de configurer un ou plusieurs boutons d'alerte immédiate pour envoyer une alerte aux aidants.}}
+      </div>
+
+      <form class="form-horizontal">
+        <fieldset>
+          <legend><i class="fas fa-toggle-on"></i> {{Boutons d'alerte immédiate}} <sup><i class="fas fa-question-circle tooltips" title="{{Bouton à porter par la personne pour déclencher une alerte immédiate par un simple appui}}"></i></sup>
             <a class="btn btn-success btn-sm addSensorBtAlert" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un bouton}}</a>
           </legend>
           <div id="div_alert_bt"></div>
@@ -171,15 +209,10 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-bomb"></i> {{Action avertissement alerte - personne dépendante}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées dés que le système détectera qu'aucun signe de vie n'est présent depuis la durée considerée. La personne dépendante disposera d'un certain temps pour désactiver l'alerte avant qu'elle ne soit transmise aux aidants}}"></i></sup>
-            <a class="btn btn-success btn-sm addActionWarningLifeSign" data-type="action_warning_life_sign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
+          <legend><i class="fas fa-bomb"></i> {{Actions alerte immédiate vers les aidants}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées à l'activation d'un des boutons d'alerte par la personne dépendante.}}"></i></sup>
+            <a class="btn btn-success btn-sm addActionBtAlert" data-type="action_alert_bt" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
           </legend>
-          <div id="div_action_warning_life_sign"></div>
-
-          <label class="col-sm-3 control-label">{{Délai de ces actions avant de prévenir les aidants}} <sup><i class="fas fa-question-circle tooltips" title="{{Délai pendant lequel la personne dépendante peut désactiver l'alerte (en activant n'importe quel signe de vie) avant qu'elle ne soit transmise aux aidants}}"></i></sup></label>
-          <div class="col-sm-2">
-            <input type="text" class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="order_max" title="{{}}"/>
-          </div>
+          <div id="div_action_alert_bt"></div>
 
         </fieldset>
       </form>
@@ -204,7 +237,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-bomb"></i> {{Action avertissement}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées (simultanément) dés que le système détectera qu'un capteur de confort sort des seuils définis. Vous pouvez définir des actions pour la personne dépendante et/ou pour les aidants. Vous pouvez appeler un scenario pour des actions plus complexes. Pour les messages, vous pouvez utiliser les tag suivants : #nom_personne#, #nom_capteur#, #type_capteur#, #valeur#, #seuil_bas#, #seuil_haut#. Voir la doc pour plus de détails.}}"></i></sup>
+          <legend><i class="fas fa-bomb"></i> {{Action avertissement}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées (simultanément) dés que le système détectera qu'un capteur de confort sort des seuils définis. Vous pouvez définir des actions pour la personne dépendante et/ou pour les aidants. Vous pouvez appeler un scenario pour des actions plus complexes. Pour les messages, vous pouvez utiliser les tag suivants : #nom_personne#, #nom_capteur#, #type_capteur#, #valeur#, #seuil_bas#, #seuil_haut# et #unite#. Voir la doc pour plus de détails.}}"></i></sup>
             <a class="btn btn-success btn-sm addActionWarningConfort" data-type="action_warning_confort" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
           </legend>
           <div id="div_action_warning_confort"></div>
