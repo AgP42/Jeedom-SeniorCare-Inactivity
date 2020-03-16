@@ -62,7 +62,7 @@ $("body").off('click','.bt_removeAction').on('click','.bt_removeAction',function
 });
 
 // permet d'afficher la liste des cmd Jeedom pour choisir sa commande de type "info" (pas les actions donc)
-// TODO ce morceau de code est un copier/coller du plugin thermostat, a voir s'il n'y a pas des trucs inutils la dedans
+// TODO ce morceau de code est un copier/coller du plugin thermostat, a voir s'il n'y a pas des trucs inutiles là-dedans
 $("body").off('click', '.listCmdInfoWindow').on('click', '.listCmdInfoWindow',function () {
   var el = $(this).closest('.form-group').find('.expressionAttr[data-l1key=cmd]');
   jeedom.cmd.getSelectModal({cmd: {type: 'info', subtype: 'binary'}}, function (result) {
@@ -71,7 +71,7 @@ $("body").off('click', '.listCmdInfoWindow').on('click', '.listCmdInfoWindow',fu
 });
 
 // affiche les cmd jeedom de type action
-// TODO ce morceau de code est un copier/coller du plugin thermostat, a voir s'il n'y a pas des trucs inutils la dedans
+// TODO ce morceau de code est un copier/coller du plugin thermostat, a voir s'il n'y a pas des trucs inutiles là-dedans
 $("body").off('click','.listCmdAction').on('click','.listCmdAction', function () {
   var type = $(this).attr('data-type');
   var el = $(this).closest('.' + type).find('.expressionAttr[data-l1key=cmd]');
@@ -97,7 +97,7 @@ $("body").undelegate(".listAction", 'click').delegate(".listAction", 'click', fu
   });
 });
 
-// TODO ce morceau de code est un copier/coller du plugin thermostat, a voir s'il n'y a pas des trucs inutils la dedans
+// TODO ce morceau de code est un copier/coller du plugin thermostat, a voir s'il n'y a pas des trucs inutiles là-edans
 $('body').off('focusout','.cmdAction.expressionAttr[data-l1key=cmd]').on('focusout','.cmdAction.expressionAttr[data-l1key=cmd]',function (event) {
   var type = $(this).attr('data-type');
   var expression = $(this).closest('.' + type).getValues('.expressionAttr');

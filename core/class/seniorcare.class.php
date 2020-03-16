@@ -26,11 +26,11 @@ class seniorcare extends eqLogic {
 
     /*     * ***********************Methode static*************************** */
 
-    public static function checkAndActionSeuilsSensorConfort($seniorcare, $_name, $_value, $_seuilBas, $_seuilHaut, $_type) { // appelée soit par le cron, soit par un listener (via la fct sensorConfort), va regarder si on est dans les seuils définis et si non appliquer les actions voulues
+    public static function checkAndActionSeuilsSensorConfort($seniorcare, $_name, $_value, $_seuilBas, $_seuilHaut, $_type) { // appelée soit par le cron, soit par un listener (via la fct sensorConfort), va regarder si on est dans les seuils définis et, si non, appliquer les actions voulues
 
-    // TODO on pourrait ajouter une durée min pendant laquelle le capteur est hors seuils avant de declancher l'alerte
-    // TODO on pourrait limiter l'alerte à 1 fois par heure (a parametrer ?)
-    // TODO on pourrait ajouter la date de collecte de la valeur pour ne pas faire des alertes sur une vieille info, ou au contraire ajouter une alerte si pas de valeur fraiche pendant un certain temps. Mais ca peut etre aussi géré par le core dans les configuration de la cmd...
+    // TODO on pourrait ajouter une durée min pendant laquelle le capteur est hors seuils avant de déclencher l'alerte
+    // TODO on pourrait limiter l'alerte à 1 fois par heure (à parametrer ?)
+    // TODO on pourrait ajouter la date de collecte de la valeur pour ne pas faire des alertes sur une vieille info, ou au contraire ajouter une alerte si pas de valeur fraiche pendant un certain temps. Mais ça peut etre aussi géré par le core dans les configuration de la cmd...
 
       log::add('seniorcare', 'debug', 'Fct checkAndActionSeuilsSensorConfort, name : ' . $_name . ' - ' . $_type . ' - ' . $_value . ' - ' . $_seuilBas . ' - ' . $_seuilHaut);
 
@@ -38,10 +38,10 @@ class seniorcare extends eqLogic {
         foreach ($seniorcare->getConfiguration('action_warning_confort') as $action) {
         log::add('seniorcare', 'debug', 'Capteurs confort :' . $_name . ' sort des seuils !, on va executer l action : ' . $action['cmd']);
           try {
-            $options = array(); // va permettre d'appeller les options de configuration des actions, par exemple quel scenario ou le message si action messagerie
+            $options = array(); // va permettre d'appeler les options de configuration des actions, par exemple quel scenario ou le message si action messagerie
             if (isset($action['options'])) {
               $options = $action['options'];
-              foreach ($options as $key => $value) { // ici on peut definir les "tag" de configuration qui seront a remplacer par des variables
+              foreach ($options as $key => $value) { // ici on peut définir les "tag" de configuration qui seront à remplacer par des variables
                 // str_replace ($search, $replace, $subject) retourne une chaîne ou un tableau, dont toutes les occurrences de search dans subject ont été remplacées par replace.
                 $value = str_replace('#nom_personne#', $seniorcare->getName(), $value);
                 $value = str_replace('#nom_capteur#', $_name, $value);
@@ -77,7 +77,8 @@ class seniorcare extends eqLogic {
 
     }
 
-    public static function sensorConfort($_option) { // fct appelée par le listener des capteurs conforts (on sait pas lequel, ca serait trop simple, mais on connait l'event_id). Le listener n'est setté que si les seuils sont définis dans la conf, donc on reverifie pas ici que nos seuils sont non vides
+    public static function sensorConfort($_option) { // fct appelée par le listener des capteurs conforts (on sait pas lequel, ça serait trop simple, mais on connait l'event_id). Le listener n'est setté que si les seuils sont définis dans la conf, donc on revérifie pas ici que nos seuils sont non vides
+// Question probablement bête,  Le Id du capteur ne pourrait-il pas être passé en paramètre de la fonction?
       log::add('seniorcare', 'debug', '################ Detection d\'un changement d\'un capteur confort ############');
 
     //  log::add('seniorcare', 'debug', 'Fct sensorConfort appelé par le listener : $_option[seniorcare_id] : ' . $_option['seniorcare_id'] . ' - value : ' . $_option['value'] . ' - event_id : ' . $_option['event_id']);
@@ -85,7 +86,7 @@ class seniorcare extends eqLogic {
       $seniorcare = seniorcare::byId($_option['seniorcare_id']);
       if (is_object($seniorcare) && $seniorcare->getIsEnable() == 1 ) {
         foreach ($seniorcare->getConfiguration('confort') as $confort) { // on boucle direct dans la conf, on pourrait aussi boucler dans les cmd saved en DB et chercher nos infos vu qu'on les a enregistrés. TODO Si on en a jamais besoin, voir pour virer l'enregistrement des datas dans la DB (seuil haut et bas, ...)
-          if ('#' . $_option['event_id'] . '#' == $confort['cmd']) { // on cherche quel est l'event qui nous a declanché (vu qu'on a fait le choix d'un listener par groupe)
+          if ('#' . $_option['event_id'] . '#' == $confort['cmd']) { // on cherche quel est l'event qui nous a déclenché (vu qu'on a fait le choix d'un listener par groupe)
 
             //  log::add('seniorcare', 'debug', 'Fct sensorConfort appelé par le listener, name : ' . $confort['name'] . ' - cmd : ' . $confort['cmd']  . ' - ' . $confort['sensor_confort_type'] . ' - ' . $confort['seuilBas'] . ' - ' . $confort['seuilHaut']);
 
@@ -162,7 +163,7 @@ class seniorcare extends eqLogic {
 
       //********** Pour les capteurs confort ***********//
 
-      // on va stocker les sensor confort du JS, s'ils contiennent une valeur dans le champs cmd et un nom
+      // on va stocker les sensor confort du JS, s'ils contiennent une valeur dans le champ cmd et un nom
       $jsSensorConfort = array();
       if (is_array($this->getConfiguration('confort'))) {
         foreach ($this->getConfiguration('confort') as $confort) {
@@ -170,7 +171,7 @@ class seniorcare extends eqLogic {
 
             $jsSensorConfort[$confort['name']] = $confort;
             log::add('seniorcare', 'debug', 'Capteurs confort config : ' . $confort['cmd'] . ' - ' . $confort['sensor_confort_type'] . ' - ' . $confort['seuilBas'] . ' - ' . $confort['seuilHaut']);
-
+// Comment sais-tu que tu es en mode DEBUG ?
           }
         }
       }
@@ -196,7 +197,7 @@ class seniorcare extends eqLogic {
                     $unit = '%';
                     break;
                 case 'co2':
-                    $unit = 'ppm'; //Les sondes de CO2 présentent généralement une plage de mesure de 0-5000 ppm. Il faudra recommander dans la doc une alerte a partir de 1000ppm max
+                    $unit = 'ppm'; //Les sondes de CO2 présentent généralement une plage de mesure de 0-5000 ppm. Il faudra recommander dans la doc une alerte à partir de 1000ppm max
                     break;
                 default:
                     $unit = '-'; //TODO
@@ -206,7 +207,7 @@ class seniorcare extends eqLogic {
 
             $cmdSensorConfort->save();
 
-            // va chopper la valeur de la commande puis la suivre a chaque changement
+            // va choper la valeur de la commande puis la suivre a chaque changement
             if (is_nan($cmdSensorConfort->execCmd()) || $cmdSensorConfort->execCmd() == '') {
               $cmdSensorConfort->setCollectDate('');
               $cmdSensorConfort->event($cmdSensorConfort->execute());
@@ -214,7 +215,7 @@ class seniorcare extends eqLogic {
 
             unset($jsSensorConfort[$cmdSensorConfort->getName()]); // on a traité notre ligne, on la vire pour pas repasser dessus dans le foreach suivant
 
-          } else { // on a un SensorConfort qui était dans la DB mais dont le nom n'est plus dans notre JS : on la supprime ! Attention, si on a juste changé le nom, on va le supprimer et le recreer, donc perdre l'historique éventuel. //TODO : voir si ca pose probleme
+          } else { // on a un SensorConfort qui était dans la DB mais dont le nom n'est plus dans notre JS : on la supprime ! Attention, si on a juste changé le nom, on va le supprimer et le recréer, donc perdre l'historique éventuel. //TODO : voir si ça pose problème (est-il possible d'effectuer un transfert d'id préalable?)
             $cmdSensorConfort->remove();
           }
         }
@@ -255,23 +256,23 @@ class seniorcare extends eqLogic {
         $cmdSensorConfort->setConfiguration('historizeRound', 2);
         $cmdSensorConfort->save();
 
-        // va chopper la valeur de la commande puis la suivre a chaque changement
+        // va choper la valeur de la commande puis la suivre à chaque changement
         if (is_nan($cmdSensorConfort->execCmd()) || $cmdSensorConfort->execCmd() == '') {
           $cmdSensorConfort->setCollectDate('');
           $cmdSensorConfort->event($cmdSensorConfort->execute());
         }
 
-      } // fin foreach restant. A partir de maintenant on a des cmd qui refletent notre config lue en JS
+      } // fin foreach restant. A partir de maintenant on a des cmd qui reflètent notre config lue en JS
 
       //********** Mise en place des listeners de capteurs ***********//
-      if ($this->getIsEnable() == 1) { // si notre eq est actif, on va lui definir nos listeners de capteurs
+      if ($this->getIsEnable() == 1) { // si notre eq est actif, on va lui définir nos listeners de capteurs
 
         // on boucle dans toutes les cmd existantes
         foreach ($this->getCmd() as $cmd) {
           if ($cmd->getLogicalId() == 'SensorConfort') { // si c'est une cmd "SensorConfort"
-          // TODO a-t-on vraiment besoin d'un listener par sensor confort ? un cron5 ou cron15 ne serait-il pas suffisant ? => actuellement j'ai codé cron15 et listener, a voir a l'usage... TODO
+          // TODO a-t-on vraiment besoin d'un listener par sensor confort ? un cron5 ou cron15 ne serait-il pas suffisant ? => actuellement j'ai codé cron15 et listener, à voir a l'usage -> d'acord avec toi, un cron15 au maximum devrait suffire ... TODO
 
-            if($cmd->getConfiguration('seuilBas') != '' || $cmd->getConfiguration('seuilHaut') != '') { // si on a au moins 1 seuil defini, sinon sert a rien de traquer
+            if($cmd->getConfiguration('seuilBas') != '' || $cmd->getConfiguration('seuilHaut') != '') { // si on a au moins 1 seuil défini, sinon sert a rien de traquer
 
               $listener = listener::byClassAndFunction('seniorcare', 'sensorConfort', array('seniorcare_id' => intval($this->getId())));
               if (!is_object($listener)) { // s'il existe pas, on le cree, sinon on le reprend
@@ -281,8 +282,9 @@ class seniorcare extends eqLogic {
                 $listener->setOption(array('seniorcare_id' => intval($this->getId())));
               }
             //  $listener->emptyEvent();
-       //       $listener->setOption(array('cmd_id' => intval($cmd->getId()))); // si on met ici les valeurs, ca va nous creer un nouveau listener par capteur confort. C'est un choix a faire : un seul listener pour tout le monde et apres on cherche les infos selon qui l'a declanché, ou un listener chacun avec les details des infos dans les $_option. Choix aujourd'hui : on va faire 1 seul listener par type (signe de vie, confort, securité, ...), ca sera probablement plus lisible et 1 seule ligne pour le remove dans le preRemove()
-              $listener->addEvent($cmd->getValue()); // on ajoute les event à écouter de chacun des capteurs conforts definis, quelque soit son type. On cherchera le trigger a l'appel de la fonction.
+       //       $listener->setOption(array('cmd_id' => intval($cmd->getId()))); // si on met ici les valeurs, ca va nous creer un nouveau listener par capteur confort. C'est un choix a faire : un seul listener pour tout le monde et apres on cherche les infos selon qui l'a déclenché, ou un listener chacun avec les details des infos dans les $_option. Choix aujourd'hui : on va faire 1 seul listener par type (signe de vie, confort, securité, ...), ca sera probablement plus lisible et 1 seule ligne pour le remove dans le preRemove()
+       //       Pourquoi pas plutôt un listener par groupe de capteurs confort ? Sinon, on risque d'avoir des problèmes de détection de seuils différents en fonction du type de capteur.
+              $listener->addEvent($cmd->getValue()); // on ajoute les event à écouter de chacun des capteurs conforts définis, quelque soit son type. On cherchera le trigger à l'appel de la fonction.
 
               log::add('seniorcare', 'debug', 'Capteurs confort set listener - cmd :' . $cmd->getHumanName() . ' - event : ' . $cmd->getValue());
 
@@ -303,15 +305,15 @@ class seniorcare extends eqLogic {
       if (is_array($this->getConfiguration('confort'))) {
         foreach ($this->getConfiguration('confort') as $confort) {
           if ($confort['name'] == '') {
-            throw new Exception(__('Le champs Nom pour les capteurs de confort ne peut être vide',__FILE__));
+            throw new Exception(__('Le champ Nom pour les capteurs de confort ne peut être vide',__FILE__));
           }
 
           if ($confort['cmd'] == '') {
-            throw new Exception(__('Le champs Capteur pour les capteurs de confort ne peut être vide',__FILE__));
+            throw new Exception(__('Le champ Capteur pour les capteurs de confort ne peut être vide',__FILE__));
           }
 
           if ($confort['seuilHaut'] !='' && !is_numeric($confort['seuilHaut']) || $confort['seuilBas'] !='' && !is_numeric($confort['seuilBas'])) {
-            throw new Exception(__('Capteur confort - ' . $confort['name'] . ', les valeurs des seuils doivent être numérique', __FILE__));
+            throw new Exception(__('Capteur confort - ' . $confort['name'] . ', les valeurs des seuils doivent être numériques', __FILE__));
           }
 
           if ($confort['seuilBas'] > $confort['seuilHaut']) {
