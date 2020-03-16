@@ -34,11 +34,15 @@ class seniorcare extends eqLogic {
       $seniorcare = seniorcare::byId($_option['seniorcare_id']);
 
       foreach ($seniorcare->getConfiguration('action_alert_bt') as $action) { // on boucle pour executer toutes les actions définies
-      log::add('seniorcare', 'debug', 'Un bouton d\'alerte a été activé, on va executer l action : ' . $action['cmd']);
+      log::add('seniorcare', 'debug', 'Un bouton d\'alerte a été activé, on va executer l action : ' . $action['cmd'] . ' - ' . $action['name']);
         try {
           $options = array(); // va permettre d'appeller les options de configuration des actions, par exemple un scenario un message
           if (isset($action['options'])) {
             $options = $action['options'];
+            foreach ($options as $key => $value) { // ici on peut définir les "tag" de configuration qui seront à remplacer par des variables
+              // str_replace ($search, $replace, $subject) retourne une chaîne ou un tableau, dont toutes les occurrences de search dans subject ont été remplacées par replace.
+              $options[$key] = str_replace('#nom_personne#', $seniorcare->getName(), $value);
+            }
           }
           scenarioExpression::createAndExec('action', $action['cmd'], $options);
         } catch (Exception $e) {

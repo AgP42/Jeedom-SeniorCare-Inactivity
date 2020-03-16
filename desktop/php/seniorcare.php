@@ -51,7 +51,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
     <li role="presentation"><a href="#absencestab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-calendar-alt"></i> {{Gestion absences}}</a></li>
 
-    <li role="presentation"><a href="#lifesigntab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-heartbeat"></i> {{Détection chute}}</a></li>
+    <li role="presentation"><a href="#lifesigntab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-heartbeat"></i> {{Détection d'inactivité}}</a></li>
 
     <li role="presentation"><a href="#alertbttab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-toggle-on"></i> {{Bouton d'alerte}}</a></li>
 
@@ -209,7 +209,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-bomb"></i> {{Actions alerte immédiate vers les aidants}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées à l'activation d'un des boutons d'alerte par la personne dépendante.}}"></i></sup>
+          <legend><i class="fas fa-bomb"></i> {{Actions alerte immédiate vers les aidants}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées à l'activation d'un des boutons d'alerte par la personne dépendante. Pour les messages, vous pouvez utiliser le tag #nom_personne#. Voir la doc pour plus de détails.}}"></i></sup>
             <a class="btn btn-success btn-sm addActionBtAlert" data-type="action_alert_bt" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
           </legend>
           <div id="div_action_alert_bt"></div>
