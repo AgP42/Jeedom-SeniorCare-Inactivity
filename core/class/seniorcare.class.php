@@ -26,7 +26,7 @@ class seniorcare extends eqLogic {
 
     /*     * ***********************Methode static*************************** */
 
-    public static function buttonAlerte($_option) { // fct appelée par le listener des buttons d'alerte, n'importe quel bouton arrive ici
+    public static function buttonAlert($_option) { // fct appelée par le listener des buttons d'alerte, n'importe quel bouton arrive ici
       log::add('seniorcare', 'debug', '################ Detection d\'un trigger d\'un bouton d\'alerte ############');
 
     //  log::add('seniorcare', 'debug', 'Fct sensorConfort appelé par le listener : $_option[seniorcare_id] : ' . $_option['seniorcare_id'] . ' - value : ' . $_option['value'] . ' - event_id : ' . $_option['event_id']);
@@ -189,16 +189,30 @@ class seniorcare extends eqLogic {
     public function postSave() {
 
 
-      //########## 1 - On va lire la configuration dans le JS et on la stocke dans des tableaux #########//
+      //########## 1 - On va lire la configuration des capteurs dans le JS et on la stocke dans des tableaux #########//
+
+      //********** Pour les capteurs de détection d'activité ***********//
+
+      $jsSensorLifeSign = array();
+      if (is_array($this->getConfiguration('life_sign'))) {
+        foreach ($this->getConfiguration('life_sign') as $life_sign) {
+          if ($life_sign['name'] != '' && $life_sign['cmd'] != '') {
+
+            $jsSensorLifeSign[$life_sign['name']] = $life_sign;
+            log::add('seniorcare', 'debug', 'Capteurs life_sign config lue : ' . $life_sign['name'] . ' - ' . $life_sign['cmd']);
+
+          }
+        }
+      } //*/
 
       //********** Pour les boutons d'alerte immediate ***********//
 
-      $jsButtonAlerte = array();
+      $jsButtonAlert = array();
       if (is_array($this->getConfiguration('alert_bt'))) {
         foreach ($this->getConfiguration('alert_bt') as $alert_bt) {
           if ($alert_bt['name'] != '' && $alert_bt['cmd'] != '') {
 
-            $jsButtonAlerte[$alert_bt['name']] = $alert_bt;
+            $jsButtonAlert[$alert_bt['name']] = $alert_bt;
             log::add('seniorcare', 'debug', 'Capteurs alert_bt config lue : ' . $alert_bt['name'] . ' - ' . $alert_bt['cmd']);
 
           }
@@ -223,16 +237,16 @@ class seniorcare extends eqLogic {
 
       foreach ($this->getCmd() as $cmd) {
 
-        //********** Pour les boutons d'alerte immediate ***********//
+        //********** Pour les capteurs de détection d'activité ***********//
 
-        if ($cmd->getLogicalId() == 'ButtonAlerte') { // si c'est une cmd "ButtonAlerte"
-          if (isset($jsButtonAlerte[$cmd->getName()])) { // on regarde si le nom correspond a un nom dans le tableau qu'on vient de recuperer du JS, si oui, on actualise les infos qui pourraient avoir bougé
+        if ($cmd->getLogicalId() == 'SensorLifeSign') { // si c'est une cmd "ButtonAlert"
+          if (isset($jsSensorLifeSign[$cmd->getName()])) { // on regarde si le nom correspond a un nom dans le tableau qu'on vient de recuperer du JS, si oui, on actualise les infos qui pourraient avoir bougé
 
-            $buttonAlerte = $jsButtonAlerte[$cmd->getName()];
+            $sensorLifeSign = $jsSensorLifeSign[$cmd->getName()];
 
-          //  log::add('seniorcare', 'error', 'Dans la boucle des cmd existantes pour : ' . $cmd->getName() . ' - ' . $buttonAlerte['cmd']);
+          //  log::add('seniorcare', 'error', 'Dans la boucle des cmd existantes pour : ' . $cmd->getName() . ' - ' . $sensorLifeSign['cmd']);
 
-            $cmd->setValue($buttonAlerte['cmd']);
+            $cmd->setValue($sensorLifeSign['cmd']);
             $cmd->save();
 
             // va chopper la valeur de la commande puis la suivre a chaque changement
@@ -241,7 +255,32 @@ class seniorcare extends eqLogic {
               $cmd->event($cmd->execute());
             }
 
-            unset($jsButtonAlerte[$cmd->getName()]); // on a traité notre ligne, on la vire
+            unset($jsSensorLifeSign[$cmd->getName()]); // on a traité notre ligne, on la vire
+
+          } else { // on a un SensorConfort qui était dans la DB mais dont le nom n'est plus dans notre JS : on la supprime ! Attention, si on a juste changé le nom, on va le supprimer et le recreer, donc perdre l'historique éventuel. //TODO : voir si ca pose probleme
+            $cmd->remove();
+          }
+        } // fin bouton alerte //*/
+
+        //********** Pour les boutons d'alerte immediate ***********//
+
+        if ($cmd->getLogicalId() == 'ButtonAlert') { // si c'est une cmd "ButtonAlert"
+          if (isset($jsButtonAlert[$cmd->getName()])) { // on regarde si le nom correspond a un nom dans le tableau qu'on vient de recuperer du JS, si oui, on actualise les infos qui pourraient avoir bougé
+
+            $buttonAlert = $jsButtonAlert[$cmd->getName()];
+
+            log::add('seniorcare', 'error', 'Dans la boucle des cmd existantes pour : ' . $cmd->getName() . ' - ' . $buttonAlert['cmd']);
+
+            $cmd->setValue($buttonAlert['cmd']);
+            $cmd->save();
+
+            // va chopper la valeur de la commande puis la suivre a chaque changement
+            if (is_nan($cmd->execCmd()) || $cmd->execCmd() == '') {
+              $cmd->setCollectDate('');
+              $cmd->event($cmd->execute());
+            }
+
+            unset($jsButtonAlert[$cmd->getName()]); // on a traité notre ligne, on la vire
 
           } else { // on a un SensorConfort qui était dans la DB mais dont le nom n'est plus dans notre JS : on la supprime ! Attention, si on a juste changé le nom, on va le supprimer et le recreer, donc perdre l'historique éventuel. //TODO : voir si ca pose probleme
             $cmd->remove();
@@ -296,28 +335,54 @@ class seniorcare extends eqLogic {
 
       //########## 3 - Maintenant on va creer les cmd nouvelles de notre conf (= celles qui restent dans nos tableaux) #########//
 
+      //********** Pour les capteurs de détection d'activité ***********//
+
+      foreach ($jsSensorLifeSign as $life_sign) {
+
+      //    log::add('seniorcare', 'debug', 'Capteurs life_sign config : ' . $life_sign['cmd'] . ' - ' . $life_sign['sensor_life_sign_type'] . ' - ' . $life_sign['seuilBas'] . ' - ' . $life_sign['seuilHaut']);
+
+        $cmdSensorLifeSign = new seniorcareCmd();
+        $cmdSensorLifeSign->setEqLogic_id($this->getId());
+        $cmdSensorLifeSign->setLogicalId('SensorLifeSign');
+        $cmdSensorLifeSign->setName($life_sign['name']);
+        $cmdSensorLifeSign->setValue($life_sign['cmd']);
+        $cmdSensorLifeSign->setType('info');
+        $cmdSensorLifeSign->setSubType('numeric');
+        $cmdSensorLifeSign->setIsVisible(0);
+        $cmdSensorLifeSign->setIsHistorized(1);
+        $cmdSensorLifeSign->setConfiguration('historizeMode', 'none');
+        $cmdSensorLifeSign->save();
+
+        // va chopper la valeur de la commande puis la suivre a chaque changement
+        if (is_nan($cmdSensorLifeSign->execCmd()) || $cmdSensorLifeSign->execCmd() == '') {
+          $cmdSensorLifeSign->setCollectDate('');
+          $cmdSensorLifeSign->event($cmdSensorLifeSign->execute());
+        }
+
+      } //*/ // fin foreach restant. A partir de maintenant on a des capteurs de détection d'activité qui refletent notre config lue en JS
+
       //********** Pour les boutons d'alerte immediate ***********//
 
-      foreach ($jsButtonAlerte as $bt_alerte) {
+      foreach ($jsButtonAlert as $bt_alerte) {
 
       //    log::add('seniorcare', 'debug', 'Capteurs bt_alerte config : ' . $bt_alerte['cmd'] . ' - ' . $bt_alerte['sensor_bt_alerte_type'] . ' - ' . $bt_alerte['seuilBas'] . ' - ' . $bt_alerte['seuilHaut']);
 
-        $cmdButtonAlerte = new seniorcareCmd();
-        $cmdButtonAlerte->setEqLogic_id($this->getId());
-        $cmdButtonAlerte->setLogicalId('ButtonAlerte');
-        $cmdButtonAlerte->setName($bt_alerte['name']);
-        $cmdButtonAlerte->setValue($bt_alerte['cmd']);
-        $cmdButtonAlerte->setType('info');
-        $cmdButtonAlerte->setSubType('numeric');
-        $cmdButtonAlerte->setIsVisible(0);
-        $cmdButtonAlerte->setIsHistorized(1);
-        $cmdButtonAlerte->setConfiguration('historizeMode', 'none');
-        $cmdButtonAlerte->save();
+        $cmdButtonAlert = new seniorcareCmd();
+        $cmdButtonAlert->setEqLogic_id($this->getId());
+        $cmdButtonAlert->setLogicalId('ButtonAlert');
+        $cmdButtonAlert->setName($bt_alerte['name']);
+        $cmdButtonAlert->setValue($bt_alerte['cmd']);
+        $cmdButtonAlert->setType('info');
+        $cmdButtonAlert->setSubType('numeric');
+        $cmdButtonAlert->setIsVisible(0);
+        $cmdButtonAlert->setIsHistorized(1);
+        $cmdButtonAlert->setConfiguration('historizeMode', 'none');
+        $cmdButtonAlert->save();
 
         // va chopper la valeur de la commande puis la suivre a chaque changement
-        if (is_nan($cmdButtonAlerte->execCmd()) || $cmdButtonAlerte->execCmd() == '') {
-          $cmdButtonAlerte->setCollectDate('');
-          $cmdButtonAlerte->event($cmdButtonAlerte->execute());
+        if (is_nan($cmdButtonAlert->execCmd()) || $cmdButtonAlert->execCmd() == '') {
+          $cmdButtonAlert->setCollectDate('');
+          $cmdButtonAlert->event($cmdButtonAlert->execute());
         }
 
       } //*/ // fin foreach restant. A partir de maintenant on a des cmd bouton d'alerte qui refletent notre config lue en JS
@@ -375,13 +440,18 @@ class seniorcare extends eqLogic {
         // on boucle dans toutes les cmd existantes
         foreach ($this->getCmd() as $cmd) {
 
-          if ($cmd->getLogicalId() == 'ButtonAlerte') { // si c'est une cmd "ButtonAlerte"
+          //********** Pour les capteurs de détection d'activité ***********//
+          // TODO
 
-            $listener = listener::byClassAndFunction('seniorcare', 'buttonAlerte', array('seniorcare_id' => intval($this->getId())));
+          //********** Pour les boutons d'alerte immediate ***********//
+
+          if ($cmd->getLogicalId() == 'ButtonAlert') {
+
+            $listener = listener::byClassAndFunction('seniorcare', 'buttonAlert', array('seniorcare_id' => intval($this->getId())));
             if (!is_object($listener)) { // s'il existe pas, on le cree, sinon on le reprend
               $listener = new listener();
               $listener->setClass('seniorcare');
-              $listener->setFunction('buttonAlerte'); // la fct qui sera appellée a chaque evenement sur une des sources écoutée
+              $listener->setFunction('buttonAlert'); // la fct qui sera appellée a chaque evenement sur une des sources écoutée
               $listener->setOption(array('seniorcare_id' => intval($this->getId())));
             }
             //  $listener->emptyEvent();
@@ -392,9 +462,12 @@ class seniorcare extends eqLogic {
 
             $listener->save();
 
-          } // fin cmd "ButtonAlerte"
+          } // fin cmd "ButtonAlert"
 
-          if ($cmd->getLogicalId() == 'SensorConfort') { // si c'est une cmd "SensorConfort"
+
+          //********** Pour les capteurs confort ***********//
+
+          if ($cmd->getLogicalId() == 'SensorConfort') {
           // TODO a-t-on vraiment besoin d'un listener par sensor confort ? un cron5 ou cron15 ne serait-il pas suffisant ? => actuellement j'ai codé cron15 et listener, à voir a l'usage -> d'acord avec toi, un cron15 au maximum devrait suffire ... TODO
 
             if($cmd->getConfiguration('seuilBas') != '' || $cmd->getConfiguration('seuilHaut') != '') { // si on a au moins 1 seuil défini, sinon sert a rien de traquer
@@ -425,6 +498,20 @@ class seniorcare extends eqLogic {
     // preUpdate ⇒ Méthode appellée avant la mise à jour de votre objet
     // ici on vérifie la présence de nos champs de config obligatoire
     public function preUpdate() {
+
+      /************ Pour les capteur de detection d'inactivité, il faut un nom et une cmd ***********/
+      if (is_array($this->getConfiguration('life_sign'))) {
+        foreach ($this->getConfiguration('life_sign') as $life_sign) {
+          if ($life_sign['name'] == '') {
+            throw new Exception(__('Le champs Nom pour les capteurs d\'activités ne peut être vide',__FILE__));
+          }
+
+          if ($life_sign['cmd'] == '') {
+            throw new Exception(__('Le champs Capteur pour les capteurs d\'activités ne peut être vide',__FILE__));
+          }
+
+        }
+      } //*/
 
       /************ Pour les boutons d'alerte, il faut un nom et une cmd ***********/
       if (is_array($this->getConfiguration('alert_bt'))) {
@@ -476,7 +563,7 @@ class seniorcare extends eqLogic {
         $listener->remove();
       }
 
-      $listener = listener::byClassAndFunction('seniorcare', 'buttonAlerte', array('seniorcare_id' => intval($this->getId())));
+      $listener = listener::byClassAndFunction('seniorcare', 'buttonAlert', array('seniorcare_id' => intval($this->getId())));
       if (is_object($listener)) {
         $listener->remove();
       }
@@ -536,10 +623,12 @@ class seniorcareCmd extends cmd {
         return round(jeedom::evaluateExpression($this->getValue()), 1);
       }
 
-      if ($this->getLogicalId() == 'ButtonAlerte') {
-        log::add('seniorcare', 'debug', 'Fct execute - ButtonAlerte, valeur renvoyée : ' . jeedom::evaluateExpression($this->getValue()));
+      if ($this->getLogicalId() == 'ButtonAlert' || $this->getLogicalId() == 'SensorLifeSign') {
+        log::add('seniorcare', 'debug', 'Fct execute - ButtonAlert or SensorLifeSign, valeur renvoyée : ' . jeedom::evaluateExpression($this->getValue()));
         return jeedom::evaluateExpression($this->getValue());
-      } //*/ // TODO erreur ici
+      } //*/
+
+
 
     }
 

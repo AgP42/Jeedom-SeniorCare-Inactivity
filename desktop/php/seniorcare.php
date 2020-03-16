@@ -130,28 +130,28 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
     </div>
 
-    <!-- TAB Capteurs Signes de vie -->
+    <!-- TAB Capteurs Détection d'inactivité (qui s'appellera life_sign dans le code !) -->
     <div class="tab-pane" id="lifesigntab">
       <br/>
       <div class="alert alert-info">
-        {{Cet onglet permet de configurer les capteurs indiquant au système une activité de la personne dépendante. Si aucun de ces capteurs n'est activé pendant un certain temps, une alerte de "suspicion de chute" sera envoyé aux aidants.}}
+        {{Cet onglet permet de configurer les capteurs indiquant au système une activité de la personne dépendante. Un premier niveau d'alerte permet à la personne dépendante d'être avertie d'une alerte imminente pour pouvoir la désactiver. Sans réaction de sa part, une alerte sera envoyée aux aidants.}}
       </div>
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-heartbeat"></i> {{Capteurs de signe de vie}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces capteurs déclencheront une alerte si aucun d'entre eux n'est activé pendant un certain délai}}"></i></sup>
+          <legend><i class="fas fa-heartbeat"></i> {{Capteurs d'activités}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces capteurs déclencheront une alerte si aucun d'entre eux n'est activé pendant un certain délai}}"></i></sup>
             <a class="btn btn-success btn-sm addSensorLifeSign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un capteur}}</a>
           </legend>
 
           <div id="div_life_sign"></div>
 
-          <legend><i class="fas fa-stopwatch"></i> {{Délai avant alerte}} <sup><i class="fas fa-question-circle tooltips" title="{{Délai au terme duquel une alerte se déclenchera si aucun des signes de vie ci-dessus n'est activé. TODO - A paufiner selon jour/nuit, etc.}}"></i></sup>
+          <legend><i class="fas fa-stopwatch"></i> {{Délai avant avertissement d'inactivité}} <sup><i class="fas fa-question-circle tooltips" title="{{Délai au terme duquel une alerte se déclenchera si aucun des capteurs d'activités ci-dessus n'est activé. TODO - A paufiner selon jour/nuit, etc.}}"></i></sup>
           </legend>
 
           <div class="form-group">
             <label class="col-sm-2 control-label">{{Délai en minutes}}</label>
             <div class="col-sm-1">
-              <input type="number" min="0" class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="order_max" />
+              <input type="number" min="0" class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="life_sign_timer" />
             </div>
           </div>
 
@@ -162,14 +162,14 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-bomb"></i> {{Actions avertissement alerte - personne dépendante}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées dés que le système détectera qu'aucun signe de vie n'est présent depuis la durée considerée. La personne dépendante disposera d'un certain temps pour désactiver l'alerte avant qu'elle ne soit transmise aux aidants}}"></i></sup>
+          <legend><i class="fas fa-bomb"></i> {{Actions avertissement de détection d'inactivité - pour la personne dépendante}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées dés que le système détectera qu'aucun signe de vie n'est présent depuis la durée considerée. La personne dépendante disposera d'un certain temps pour désactiver l'alerte avant qu'elle ne soit transmise aux aidants}}"></i></sup>
             <a class="btn btn-success btn-sm addActionWarningLifeSign" data-type="action_warning_life_sign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
           </legend>
           <div id="div_action_warning_life_sign"></div>
 
-          <label class="col-sm-3 control-label">{{Durée de ces actions avant de prévenir les aidants}} <sup><i class="fas fa-question-circle tooltips" title="{{Durée pendant laquelle la personne dépendante peut désactiver l'alerte (en activant n'importe quel signe de vie) avant qu'elle ne soit transmise aux aidants}}"></i></sup></label>
+          <label class="col-sm-3 control-label">{{Délai avant de prévenir les aidants}} <sup><i class="fas fa-question-circle tooltips" title="{{Durée pendant laquelle la personne dépendante peut désactiver l'alerte (en activant n'importe quel signe de vie) avant qu'elle ne soit transmise aux aidants}}"></i></sup></label>
           <div class="col-sm-2">
-            <input type="text" class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="order_max" title="{{}}"/>
+            <input type="number" class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="warning_life_sign_timer" title="{{}}"/>
           </div>
 
         </fieldset>
@@ -179,8 +179,8 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-bomb"></i> {{Actions alerte "suspicion de chute" vers les aidants}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées à l'échéance du délai de désactivation de l'alerte par la personne dépendante.}}"></i></sup>
-            <a class="btn btn-success btn-sm addActionWarningLifeSign" data-type="action_alert_life_sign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
+          <legend><i class="fas fa-bomb"></i> {{Actions alerte de détection d'inactivité - pour les aidants}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées à l'échéance du délai de désactivation de l'alerte par la personne dépendante.}}"></i></sup>
+            <a class="btn btn-success btn-sm addActionAlertLifeSign" data-type="action_alert_life_sign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
           </legend>
           <div id="div_action_alert_life_sign"></div>
 
