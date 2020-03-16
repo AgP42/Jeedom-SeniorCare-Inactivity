@@ -125,7 +125,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
     <div class="tab-pane" id="absencestab">
       <br/>
       <div class="alert alert-info">
-        {{TODO : gerer la liaison avec le plugin Agenda pour saisir les absences prévues, et ajouter les boutons ou capteurs du logement à utiliser pour détecter la présence/absence de la personne de son logement}}
+        {{TODO : gérer la liaison avec le plugin Agenda pour saisir les absences prévues, et ajouter les boutons ou capteurs du logement à utiliser pour détecter la présence/absence de la personne de son logement}}
       </div>
 
     </div>
@@ -139,17 +139,17 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-heartbeat"></i> {{Capteurs de signe de vie}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces capteurs déclancheront une alerte si aucun d'entre eux n'est activé pendant une certaine durée}}"></i></sup>
+          <legend><i class="fas fa-heartbeat"></i> {{Capteurs de signe de vie}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces capteurs déclencheront une alerte si aucun d'entre eux n'est activé pendant un certain délai}}"></i></sup>
             <a class="btn btn-success btn-sm addSensorLifeSign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un capteur}}</a>
           </legend>
 
           <div id="div_life_sign"></div>
 
-          <legend><i class="fas fa-stopwatch"></i> {{Délai avant alerte}} <sup><i class="fas fa-question-circle tooltips" title="{{Durée au bout de laquelle aucun des signes de vie ci-dessus déclanchera une alerte. TODO - A paufiner selon jour/nuit, etc.}}"></i></sup>
+          <legend><i class="fas fa-stopwatch"></i> {{Délai avant alerte}} <sup><i class="fas fa-question-circle tooltips" title="{{Délai au terme duquel une alerte se déclenchera si aucun des signes de vie ci-dessus n'est activé. TODO - A paufiner selon jour/nuit, etc.}}"></i></sup>
           </legend>
 
           <div class="form-group">
-            <label class="col-sm-2 control-label">{{Durée en minutes}}</label>
+            <label class="col-sm-2 control-label">{{Délai en minutes}}</label>
             <div class="col-sm-1">
               <input type="number" min="0" class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="order_max" />
             </div>
@@ -223,7 +223,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
     <div class="tab-pane" id="conforttab">
       <br/>
       <div class="alert alert-info">
-        {{Cet onglet permet de configurer les capteurs du confort du logement de la personne dépendante. Vous pouvez définir les actions à réaliser lors des dépassement de seuils définis.}}
+        {{Cet onglet permet de configurer les capteurs du confort du logement de la personne dépendante. Vous pouvez définir les actions à réaliser lors des dépassements de seuils définis.}}
       </div>
 
       <form class="form-horizontal">
@@ -251,12 +251,12 @@ $eqLogics = eqLogic::byType($plugin->getId());
     <div class="tab-pane" id="securitytab">
       <br/>
       <div class="alert alert-info">
-        {{Cet onglet permet de configurer les capteurs de sécurité du logement de la personne dépendante ainsi que les actions à réaliser en cas de déchenchement}}
+        {{Cet onglet permet de configurer les capteurs de sécurité du logement de la personne dépendante ainsi que les actions à réaliser en cas de déclenchement}}
       </div>
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-exclamation-triangle"></i> {{Capteurs Sécurité}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces capteurs déclancheront une alerte de sécurité immédiate à chaque déclanchement}}"></i></sup>
+          <legend><i class="fas fa-exclamation-triangle"></i> {{Capteurs Sécurité}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces capteurs déclencheront une alerte de sécurité immédiate à chaque déclenchement}}"></i></sup>
             <a class="btn btn-success btn-sm addSensorSecurity" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un capteur}}</a>
           </legend>
           <div id="div_security"></div>
@@ -269,7 +269,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
     <div class="tab-pane" id="alertesPerteAutonomietab">
       <br/>
       <div class="alert alert-info">
-        {{TODO : en attente de la liste des critéres à prendre en compte pour gerer la perte d'autonomie}}
+        {{TODO : en attente de la liste des critères à prendre en compte pour gèrer la perte d'autonomie}}
       </div>
 
     </div>
