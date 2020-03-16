@@ -216,9 +216,10 @@ function addSensorBtAlert(_info) {
         div += '</div>';
       div += '</div>';
 
-      div += '<div class="col-sm-1">';
-        div += '<label class="checkbox-inline"><input type="checkbox" class="expressionAttr cmdInfo" data-l1key="invert" title="{{Cocher si ce capteur renvoie un 0 lors d\'une activation}}"/>{{Inverser}}</label>';
-      div += '</div>';
+  // TODO : ajouter gestion des boutons inversés ?
+  //    div += '<div class="col-sm-1">';
+  //      div += '<label class="checkbox-inline"><input type="checkbox" class="expressionAttr cmdInfo" data-l1key="invert" title="{{Cocher si ce capteur renvoie un 0 lors d\'une activation}}"/>{{Inverser}}</label>';
+  //    div += '</div>';
 
     div += '</div>';
   div += '</div>';
