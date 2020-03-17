@@ -118,8 +118,19 @@ class seniorcare extends eqLogic {
       $seniorcare = seniorcare::byId($_option['seniorcare_id']);
       $seniorcare->setCache('lastLifeSignTimestamp', time()); // on met en cache le timestamp à l'heure du dernier event. C'est le cron qui regardera toutes les min si on est dans le seuil ou non
 
-      // TODO : lancer les actions de desactivation des alertes et remettre les variables d'alerte en cours a 0
+      // on recupere l'état des des warning et alertes
+      $actionWarningLifeSignOngoing = $seniorcare->getCache('actionWarningLifeSignOngoing');
+      $actionAlertLifeSignOngoing = $seniorcare->getCache('actionAlertLifeSignOngoing');
 
+      if ($actionWarningLifeSignOngoing){ // si on était en phase d'avertissement, on lance les actions d'arret warning
+        $seniorcare->execActions('action_desactivate_warning_life_sign');
+      }
+
+      if ($actionAlertLifeSignOngoing){ // si on était en phase d'alerte, on lance les actions d'arret alerte
+        $seniorcare->execActions('action_desactivate_alert_life_sign');
+      }
+
+      // dans tous les cas on declare qu'on est pas en phase de warning ni d'alerte, puisqu'on vient de recevoir un signe de vie
       $seniorcare->setCache('actionWarningLifeSignOngoing', false);
       $seniorcare->setCache('actionAlertLifeSignOngoing', false);
 

@@ -59,7 +59,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
     <li role="presentation"><a href="#securitytab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-exclamation-triangle"></i> {{Sécurité}}</a></li>
 
-    <li role="presentation"><a href="#alertesPerteAutonomietab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-brain"></i> {{Alertes Perte d'autonomie}}</a></li>
+    <li role="presentation"><a href="#alertesPerteAutonomietab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-brain"></i> {{Dérive comportementale}}</a></li>
 
     <li role="presentation"><a href="#commandtab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-list-alt"></i> {{Avancé - Commandes Jeedom}}</a></li>
 
@@ -131,6 +131,9 @@ $eqLogics = eqLogic::byType($plugin->getId());
     </div>
 
     <!-- TAB Capteurs Détection d'inactivité (qui s'appellera life_sign dans le code !) -->
+
+    <!-- TODO : ajouter des actions pour que l'aidant puisse prévenir la personne dépendante de la bonne prise en compte de l'alerte ? Beaucoup plus simple a faire en externe du plugin... a voir !! -->
+
     <div class="tab-pane" id="lifesigntab">
       <br/>
       <div class="alert alert-info">
@@ -160,32 +163,64 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <br>
 
-      <form class="form-horizontal">
-        <fieldset>
-          <legend><i class="fas fa-bomb"></i> {{Actions avertissement de détection d'inactivité - pour la personne dépendante}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées dès que le système ne détectera aucune activité depuis le délai consideré. La personne dépendante disposera d'un certain temps pour désactiver l'alerte avant qu'elle ne soit transmise aux aidants}}"></i></sup>
-            <a class="btn btn-success btn-sm addActionWarningLifeSign" data-type="action_warning_life_sign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
-          </legend>
-          <div id="div_action_warning_life_sign"></div>
+      <div class="row">
+        <div class="col-lg-6">
+          <form class="form-horizontal">
+            <fieldset>
+              <legend><i class="fas fa-user-clock"></i> {{Actions avertissement de détection d'inactivité - pour la personne dépendante}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées dès que le système ne détectera aucune activité depuis le délai consideré. La personne dépendante disposera d'un certain temps pour désactiver l'alerte avant qu'elle ne soit transmise aux aidants}}"></i></sup>
+                <a class="btn btn-success btn-sm addActionWarningLifeSign" data-type="action_warning_life_sign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
+              </legend>
+              <div id="div_action_warning_life_sign"></div>
 
-          <label class="col-sm-3 control-label">{{Délai avant de prévenir les aidants}} <sup><i class="fas fa-question-circle tooltips" title="{{Délai pendant laquelle la personne dépendante peut désactiver l'alerte (en activant n'importe quel capteur d'activité) avant qu'elle ne soit transmise aux aidants}}"></i></sup></label>
-          <div class="col-sm-2">
-            <input type="number" class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="warning_life_sign_timer" title="{{}}"/>
-          </div>
 
-        </fieldset>
-      </form>
+              <label class="col-lg-4 control-label">{{Délai avant de prévenir les aidants}} <sup><i class="fas fa-question-circle tooltips" title="{{Délai pendant laquelle la personne dépendante peut désactiver l'alerte (en activant n'importe quel capteur d'activité) avant qu'elle ne soit transmise aux aidants}}"></i></sup></label>
+              <div class="col-lg-2">
+                <input type="number" class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="warning_life_sign_timer" title="{{}}"/>
+              </div>
+            </fieldset>
+          </form>
+        </div>
+
+        <div class="col-lg-6">
+          <form class="form-horizontal">
+            <fieldset>
+              <legend><i class="fas fa-user-slash"></i> {{Actions de désactivation des avertissements}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées lorsqu'un des capteurs d'activité est déclenché alors que les actions d'avertissement ont été précédemment activées. //TODO préciser dans la doc que ces actions ne sont pas activées lorsque l'on active les alertes, mais uniquement si signe de vie pendant la phase de warning}}"></i></sup>
+                <a class="btn btn-danger btn-sm addActionDesactivateWarningLifeSign" data-type="action_desactivate_warning_life_sign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
+              </legend>
+              <div id="div_action_desactivate_warning_life_sign"></div>
+
+            </fieldset>
+          </form>
+        </div>
+      </div>
 
       <br>
 
-      <form class="form-horizontal">
-        <fieldset>
-          <legend><i class="fas fa-bomb"></i> {{Actions alerte de détection d'inactivité - pour les aidants}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées à l'échéance du délai de désactivation de l'alerte par la personne dépendante.}}"></i></sup>
-            <a class="btn btn-success btn-sm addActionAlertLifeSign" data-type="action_alert_life_sign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
-          </legend>
-          <div id="div_action_alert_life_sign"></div>
+      <div class="row">
+        <div class="col-lg-6">
+          <form class="form-horizontal">
+            <fieldset>
+              <legend><i class="fas fa-bell"></i> {{Actions alerte de détection d'inactivité - pour les aidants}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées à l'échéance du délai de désactivation de l'alerte par la personne dépendante.}}"></i></sup>
+                <a class="btn btn-success btn-sm addActionAlertLifeSign" data-type="action_alert_life_sign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
+              </legend>
+              <div id="div_action_alert_life_sign"></div>
 
-        </fieldset>
-      </form>
+            </fieldset>
+          </form>
+        </div>
+
+        <div class="col-lg-6">
+          <form class="form-horizontal">
+            <fieldset>
+              <legend><i class="fas fa-bell-slash"></i> {{Actions de désactivation des alertes}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées lorsqu'un des capteurs d'activité est déclenché alors que les actions d'alerte vers les aidants ont été précédemment activées.}}"></i></sup>
+                <a class="btn btn-danger btn-sm addActionDesactivateAlertLifeSign" data-type="action_desactivate_alert_life_sign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
+              </legend>
+              <div id="div_action_desactivate_alert_life_sign"></div>
+
+            </fieldset>
+          </form>
+        </div>
+      </div>
 
     </div>
 

@@ -18,7 +18,9 @@
 // permet de reorganiser les elements de la div en les cliquant/deplacant
 $("#div_life_sign").sortable({axis: "y", cursor: "move", items: ".life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_action_warning_life_sign").sortable({axis: "y", cursor: "move", items: ".action_warning_life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
+$("#div_action_desactivate_warning_life_sign").sortable({axis: "y", cursor: "move", items: ".action_desactivate_warning_life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_action_alert_life_sign").sortable({axis: "y", cursor: "move", items: ".action_alert_life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
+$("#div_action_desactivate_alert_life_sign").sortable({axis: "y", cursor: "move", items: ".action_desactivate_alert_life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 
 $("#div_alert_bt").sortable({axis: "y", cursor: "move", items: ".alert_bt", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_action_alert_bt").sortable({axis: "y", cursor: "move", items: ".action_alert_bt", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
@@ -33,14 +35,22 @@ $('.addSensorLifeSign').off('click').on('click', function () {
   addSensorLifeSign({});
 });
 
-// le bouton "ajouter une action" de l'onglet détection d'inactivité
+// le bouton "ajouter une action warning" de l'onglet détection d'inactivité
 $('.addActionWarningLifeSign').off('click').on('click', function () {
   addActionWarningLifeSign({});
 });
+// le bouton "ajouter une action desactivation warning" de l'onglet détection d'inactivité
+$('.addActionDesactivateWarningLifeSign').off('click').on('click', function () {
+  addActionDesactivateWarningLifeSign({});
+});
 
-// le bouton "ajouter une action" de l'onglet détection d'inactivité
+// le bouton "ajouter une action alerte" de l'onglet détection d'inactivité
 $('.addActionAlertLifeSign').off('click').on('click', function () {
   addActionAlertLifeSign({});
+});
+// le bouton "ajouter une action desactivation alerte" de l'onglet détection d'inactivité
+$('.addActionDesactivateAlertLifeSign').off('click').on('click', function () {
+  addActionDesactivateAlertLifeSign({});
 });
 
 // le bouton "ajouter un bt d'alerte" de l'onglet bouton d'alerte
@@ -198,6 +208,36 @@ function addActionWarningLifeSign(_info) {
   $('#div_action_warning_life_sign .action_warning_life_sign').last().setValues(_info, '.expressionAttr');
 }
 
+// ajoute chaque ligne d'action DESACTIVATION AVERTISSEMENT détection d'inactivité, à la demande
+function addActionDesactivateWarningLifeSign(_info) {
+  var div = '<div class="action_desactivate_warning_life_sign">';
+    div += '<div class="form-group ">';
+
+      div += '<label class="col-sm-1 control-label">Action</label>';
+      div += '<div class="col-sm-4">';
+        div += '<div class="input-group">';
+          div += '<span class="input-group-btn">';
+            div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="action_desactivate_warning_life_sign"><i class="fas fa-minus-circle"></i></a>';
+          div += '</span>';
+          div += '<input class="expressionAttr form-control cmdAction" data-l1key="cmd" data-type="action_desactivate_warning_life_sign" />';
+          div += '<span class="input-group-btn">';
+            div += '<a class="btn btn-default listAction" data-type="action_desactivate_warning_life_sign" title="{{Sélectionner un mot-clé}}"><i class="fa fa-tasks"></i></a>';
+            div += '<a class="btn btn-default listCmdAction roundedRight" data-type="action_desactivate_warning_life_sign" title="{{Sélectionner une commande}}"><i class="fas fa-list-alt"></i></a>';
+          div += '</span>';
+        div += '</div>';
+      div += '</div>';
+
+      div += '<div class="col-sm-7 actionOptions">';
+        div += jeedom.cmd.displayActionOption(init(_info.cmd, ''), _info.options);
+      div += '</div>';
+
+    div += '</div>';
+  div += '</div>';
+
+  $('#div_action_desactivate_warning_life_sign').append(div);
+  $('#div_action_desactivate_warning_life_sign .action_desactivate_warning_life_sign').last().setValues(_info, '.expressionAttr');
+}
+
 // ajoute chaque ligne d'action ALERTE détection d'inactivité, à la demande
 function addActionAlertLifeSign(_info) {
   var div = '<div class="action_alert_life_sign">';
@@ -227,6 +267,37 @@ function addActionAlertLifeSign(_info) {
 
   $('#div_action_alert_life_sign').append(div);
   $('#div_action_alert_life_sign .action_alert_life_sign').last().setValues(_info, '.expressionAttr');
+}
+
+// ajoute chaque ligne d'action DESACTIVATION ALERTE détection d'inactivité, à la demande
+function addActionDesactivateAlertLifeSign(_info) {
+  var div = '<div class="action_desactivate_alert_life_sign">';
+    div += '<div class="form-group ">';
+
+      div += '<label class="col-sm-1 control-label">Action</label>';
+      div += '<div class="col-sm-4">';
+        div += '<div class="input-group">';
+          div += '<span class="input-group-btn">';
+            div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="action_desactivate_alert_life_sign"><i class="fas fa-minus-circle"></i></a>';
+          div += '</span>';
+          div += '<input class="expressionAttr form-control cmdAction" data-l1key="cmd" data-type="action_desactivate_alert_life_sign" />';
+          div += '<span class="input-group-btn">';
+            div += '<a class="btn btn-default listAction" data-type="action_desactivate_alert_life_sign" title="{{Sélectionner un mot-clé}}"><i class="fa fa-tasks"></i></a>';
+            div += '<a class="btn btn-default listCmdAction roundedRight" data-type="action_desactivate_alert_life_sign" title="{{Sélectionner une commande}}"><i class="fas fa-list-alt"></i></a>';
+          div += '</span>';
+
+        div += '</div>';
+      div += '</div>';
+
+      div += '<div class="col-sm-7 actionOptions">';
+        div += jeedom.cmd.displayActionOption(init(_info.cmd, ''), _info.options);
+      div += '</div>';
+
+    div += '</div>';
+  div += '</div>';
+
+  $('#div_action_desactivate_alert_life_sign').append(div);
+  $('#div_action_desactivate_alert_life_sign .action_desactivate_alert_life_sign').last().setValues(_info, '.expressionAttr');
 }
 
 // ajoute chaque ligne de bt alerte immédiate
@@ -418,7 +489,9 @@ function saveEqLogic(_eqLogic) {
   }
   _eqLogic.configuration.life_sign = $('#div_life_sign .life_sign').getValues('.expressionAttr');
   _eqLogic.configuration.action_warning_life_sign = $('#div_action_warning_life_sign .action_warning_life_sign').getValues('.expressionAttr');
+  _eqLogic.configuration.action_desactivate_warning_life_sign = $('#div_action_desactivate_warning_life_sign .action_desactivate_warning_life_sign').getValues('.expressionAttr');
   _eqLogic.configuration.action_alert_life_sign = $('#div_action_alert_life_sign .action_alert_life_sign').getValues('.expressionAttr');
+  _eqLogic.configuration.action_desactivate_alert_life_sign = $('#div_action_desactivate_alert_life_sign .action_desactivate_alert_life_sign').getValues('.expressionAttr');
 
   _eqLogic.configuration.alert_bt = $('#div_alert_bt .alert_bt').getValues('.expressionAttr');
   _eqLogic.configuration.action_alert_bt = $('#div_action_alert_bt .action_alert_bt').getValues('.expressionAttr');
@@ -436,7 +509,9 @@ function printEqLogic(_eqLogic) {
 
   $('#div_life_sign').empty();
   $('#div_action_warning_life_sign').empty();
+  $('#div_action_desactivate_warning_life_sign').empty();
   $('#div_action_alert_life_sign').empty();
+  $('#div_action_desactivate_alert_life_sign').empty();
 
   $('#div_alert_bt').empty();
   $('#div_action_alert_bt').empty();
@@ -457,9 +532,19 @@ function printEqLogic(_eqLogic) {
         addActionWarningLifeSign(_eqLogic.configuration.action_warning_life_sign[i]);
       }
     }
+    if (isset(_eqLogic.configuration.action_desactivate_warning_life_sign)) {
+      for (var i in _eqLogic.configuration.action_desactivate_warning_life_sign) {
+        addActionDesactivateWarningLifeSign(_eqLogic.configuration.action_desactivate_warning_life_sign[i]);
+      }
+    }
     if (isset(_eqLogic.configuration.action_alert_life_sign)) {
       for (var i in _eqLogic.configuration.action_alert_life_sign) {
         addActionAlertLifeSign(_eqLogic.configuration.action_alert_life_sign[i]);
+      }
+    }
+    if (isset(_eqLogic.configuration.action_desactivate_alert_life_sign)) {
+      for (var i in _eqLogic.configuration.action_desactivate_alert_life_sign) {
+        addActionDesactivateAlertLifeSign(_eqLogic.configuration.action_desactivate_alert_life_sign[i]);
       }
     }
     if (isset(_eqLogic.configuration.alert_bt)) {
