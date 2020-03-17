@@ -26,6 +26,16 @@ class seniorcare extends eqLogic {
 
     /*     * ***********************Methode static*************************** */
 
+    public static function sensorLifeSign($_option) { // fct appelée par le listener des capteurs d'activité, n'importe quel capteur arrive ici
+      log::add('seniorcare', 'debug', '################ Detection d\'un trigger d\'activité ############');
+
+      log::add('seniorcare', 'debug', 'Fct sensorLifeSign appelé par le listener, seniorcare_id : ' . $_option['seniorcare_id'] . ' - value : ' . $_option['value'] . ' - event_id : ' . $_option['event_id'] . ' - timestamp mis en cache : ' . time());
+
+      $seniorcare = seniorcare::byId($_option['seniorcare_id']);
+      $seniorcare->setCache('lastLifeSignTimestamp', time()); // on met en cache le timestamp à l'heure du dernier event. C'est le cron qui regardera toutes les min si on est dans le seuil ou non
+
+    }
+
     public static function buttonAlert($_option) { // fct appelée par le listener des buttons d'alerte, n'importe quel bouton arrive ici
       log::add('seniorcare', 'debug', '################ Detection d\'un trigger d\'un bouton d\'alerte ############');
 
@@ -125,6 +135,36 @@ class seniorcare extends eqLogic {
 
     }
 
+    public static function cron() { //executée toutes les min par Jeedom
+
+      log::add('seniorcare', 'debug', '#################### CRON ###################');
+
+      //pour chaque equipement (personne) declaré par l'utilisateur
+      foreach (self::byType('seniorcare',true) as $seniorcare) {
+
+        if (is_object($seniorcare) && $seniorcare->getIsEnable() == 1) { // si notre eq existe et est actif
+
+          $lifeSignDetectionTimer = $seniorcare->getConfiguration('life_sign_timer'); // on va lire la durée voulue dans la conf
+
+          $lastLifeSign = $seniorcare->getCache('lastLifeSignTimestamp'); // on va lire le dernier timestamp en cache
+
+          $secSinceLastLifeSign = time() - $lastLifeSign; // on calcule le nb de secondes écoulées depuis le dernier event
+
+          if ($secSinceLastLifeSign > $lifeSignDetectionTimer * 60){
+            log::add('seniorcare', 'debug', 'Alerte Life Sign A lancer. Timer lu : ' . $lifeSignDetectionTimer . ', temps depuis last event : ' . $secSinceLastLifeSign/60);
+          } else {
+            log::add('seniorcare', 'debug', 'Life Sign OK. Timer lu : ' . $lifeSignDetectionTimer . ', temps depuis last event : ' . $secSinceLastLifeSign/60);
+          }
+
+
+
+        } // fin if eq actif
+
+      } // fin foreach equipement
+
+
+    }
+
     //*
     // * Fonction exécutée automatiquement toutes les 15 minutes par Jeedom - sert de backup si on rate un listener. A voir a l'usage si on veut garder ca et la fréquence... TODO
   /*    public static function cron15() {
@@ -172,6 +212,21 @@ class seniorcare extends eqLogic {
 
 
     /*     * *********************Méthodes d'instance************************* */
+
+    public function cleanAllListener() {
+
+      log::add('seniorcare', 'debug', 'Fct cleanAllListener');
+
+      $listener = listener::byClassAndFunction('seniorcare', 'sensorConfort', array('seniorcare_id' => intval($this->getId())));
+      if (is_object($listener)) {
+        $listener->remove();
+      }
+
+      $listener = listener::byClassAndFunction('seniorcare', 'buttonAlert', array('seniorcare_id' => intval($this->getId())));
+      if (is_object($listener)) {
+        $listener->remove();
+      }
+    }
 
     public function preInsert() {
 
@@ -239,14 +294,16 @@ class seniorcare extends eqLogic {
 
         //********** Pour les capteurs de détection d'activité ***********//
 
-        if ($cmd->getLogicalId() == 'SensorLifeSign') { // si c'est une cmd "ButtonAlert"
+        if ($cmd->getLogicalId() == 'SensorLifeSign') {
           if (isset($jsSensorLifeSign[$cmd->getName()])) { // on regarde si le nom correspond a un nom dans le tableau qu'on vient de recuperer du JS, si oui, on actualise les infos qui pourraient avoir bougé
 
             $sensorLifeSign = $jsSensorLifeSign[$cmd->getName()];
 
-          //  log::add('seniorcare', 'error', 'Dans la boucle des cmd existantes pour : ' . $cmd->getName() . ' - ' . $sensorLifeSign['cmd']);
+          //  log::add('seniorcare', 'debug', 'Dans la boucle des cmd existantes pour : ' . $cmd->getName() . ' - ' . $sensorLifeSign['cmd']);
 
             $cmd->setValue($sensorLifeSign['cmd']);
+            $cmd->setGeneric_type($sensorLifeSign['life_sign_type']);
+
             $cmd->save();
 
             // va chopper la valeur de la commande puis la suivre a chaque changement
@@ -257,44 +314,43 @@ class seniorcare extends eqLogic {
 
             unset($jsSensorLifeSign[$cmd->getName()]); // on a traité notre ligne, on la vire
 
-          } else { // on a un SensorConfort qui était dans la DB mais dont le nom n'est plus dans notre JS : on la supprime ! Attention, si on a juste changé le nom, on va le supprimer et le recreer, donc perdre l'historique éventuel. //TODO : voir si ca pose probleme
+          } else { // on a un SensorLifeSign qui était dans la DB mais dont le nom n'est plus dans notre JS : on la supprime ! Attention, si on a juste changé le nom, on va le supprimer et le recreer, donc perdre l'historique éventuel. //TODO : voir si ça pose problème (est-il possible d'effectuer un transfert d'id préalable? --> la question est : comment tu sais que c'est le meme puisqu'il n'a plus le meme nom ?) Oui à améliorer, quand tout le reste sera ok ! ;-)
             $cmd->remove();
           }
-        } // fin bouton alerte //*/
+        } // fin capteur signe d'activité //*/
 
         //********** Pour les boutons d'alerte immediate ***********//
 
-        if ($cmd->getLogicalId() == 'ButtonAlert') { // si c'est une cmd "ButtonAlert"
-          if (isset($jsButtonAlert[$cmd->getName()])) { // on regarde si le nom correspond a un nom dans le tableau qu'on vient de recuperer du JS, si oui, on actualise les infos qui pourraient avoir bougé
+        if ($cmd->getLogicalId() == 'ButtonAlert') {
+          if (isset($jsButtonAlert[$cmd->getName()])) {
 
             $buttonAlert = $jsButtonAlert[$cmd->getName()];
 
-            log::add('seniorcare', 'error', 'Dans la boucle des cmd existantes pour : ' . $cmd->getName() . ' - ' . $buttonAlert['cmd']);
+        //    log::add('seniorcare', 'debug', 'Dans la boucle des cmd existantes pour : ' . $cmd->getName() . ' - ' . $buttonAlert['cmd']);
 
             $cmd->setValue($buttonAlert['cmd']);
             $cmd->save();
 
-            // va chopper la valeur de la commande puis la suivre a chaque changement
             if (is_nan($cmd->execCmd()) || $cmd->execCmd() == '') {
               $cmd->setCollectDate('');
               $cmd->event($cmd->execute());
             }
 
-            unset($jsButtonAlert[$cmd->getName()]); // on a traité notre ligne, on la vire
+            unset($jsButtonAlert[$cmd->getName()]);
 
-          } else { // on a un SensorConfort qui était dans la DB mais dont le nom n'est plus dans notre JS : on la supprime ! Attention, si on a juste changé le nom, on va le supprimer et le recreer, donc perdre l'historique éventuel. //TODO : voir si ca pose probleme
+          } else {
             $cmd->remove();
           }
         } // fin bouton alerte
 
         //********** Pour les capteurs confort ***********//
 
-        if ($cmd->getLogicalId() == 'SensorConfort') { // si c'est une cmd "SensorConfort"
-          if (isset($jsSensorConfort[$cmd->getName()])) { // on regarde si le nom correspond a un nom dans le tableau qu'on vient de recuperer du JS, si oui, on actualise les infos qui pourraient avoir bougé
+        if ($cmd->getLogicalId() == 'SensorConfort') {
+          if (isset($jsSensorConfort[$cmd->getName()])) {
 
             $confort = $jsSensorConfort[$cmd->getName()];
 
-        //    log::add('seniorcare', 'error', 'Dans la boucle des cmd existantes pour : ' . $cmd->getName() . ' - ' . $confort['cmd'] . ' - ' . $confort['sensor_confort_type'] . ' - ' . $confort['seuilBas'] . ' - ' . $confort['seuilHaut']);
+        //    log::add('seniorcare', 'debug', 'Dans la boucle des cmd existantes pour : ' . $cmd->getName() . ' - ' . $confort['cmd'] . ' - ' . $confort['sensor_confort_type'] . ' - ' . $confort['seuilBas'] . ' - ' . $confort['seuilHaut']);
 
             $cmd->setValue($confort['cmd']);
             $cmd->setConfiguration('seuilBas', $confort['seuilBas']);
@@ -318,15 +374,14 @@ class seniorcare extends eqLogic {
 
             $cmd->save();
 
-            // va choper la valeur de la commande puis la suivre a chaque changement
             if (is_nan($cmd->execCmd()) || $cmd->execCmd() == '') {
               $cmd->setCollectDate('');
               $cmd->event($cmd->execute());
             }
 
-            unset($jsSensorConfort[$cmd->getName()]); // on a traité notre ligne, on la vire pour pas repasser dessus
+            unset($jsSensorConfort[$cmd->getName()]);
 
-          } else { // on a un SensorConfort qui était dans la DB mais dont le nom n'est plus dans notre JS : on la supprime ! Attention, si on a juste changé le nom, on va le supprimer et le recréer, donc perdre l'historique éventuel. //TODO : voir si ça pose problème (est-il possible d'effectuer un transfert d'id préalable? --> la question est : comment tu sais que c'est le meme puisqu'il n'a plus le meme nom ?)
+          } else {
             $cmdSensorConfort->remove();
           }
         } // fin capteurs confort
@@ -346,6 +401,7 @@ class seniorcare extends eqLogic {
         $cmdSensorLifeSign->setLogicalId('SensorLifeSign');
         $cmdSensorLifeSign->setName($life_sign['name']);
         $cmdSensorLifeSign->setValue($life_sign['cmd']);
+        $cmdSensorLifeSign->setGeneric_type($life_sign['life_sign_type']);
         $cmdSensorLifeSign->setType('info');
         $cmdSensorLifeSign->setSubType('numeric');
         $cmdSensorLifeSign->setIsVisible(0);
@@ -437,11 +493,30 @@ class seniorcare extends eqLogic {
 
       if ($this->getIsEnable() == 1) { // si notre eq est actif, on va lui definir nos listeners de capteurs
 
+        // un peu de menage dans nos events avant de remettre tout ca en ligne avec la conf actuelle
+        $this->cleanAllListener();
+
         // on boucle dans toutes les cmd existantes
         foreach ($this->getCmd() as $cmd) {
 
           //********** Pour les capteurs de détection d'activité ***********//
-          // TODO
+
+          if ($cmd->getLogicalId() == 'SensorLifeSign') {
+
+            $listener = listener::byClassAndFunction('seniorcare', 'sensorLifeSign', array('seniorcare_id' => intval($this->getId())));
+            if (!is_object($listener)) { // s'il existe pas, on le cree, sinon on le reprend
+              $listener = new listener();
+              $listener->setClass('seniorcare');
+              $listener->setFunction('sensorLifeSign'); // la fct qui sera appellée a chaque evenement sur une des sources écoutée
+              $listener->setOption(array('seniorcare_id' => intval($this->getId())));
+            }
+            $listener->addEvent($cmd->getValue()); // on ajoute les event à écouter de chacun des capteurs conforts definis, quelque soit son type. On cherchera le trigger a l'appel de la fonction.
+
+            log::add('seniorcare', 'debug', 'SensorLifeSign set listener - cmd :' . $cmd->getHumanName() . ' - event : ' . $cmd->getValue());
+
+            $listener->save();
+
+          } // fin cmd "ButtonAlert"
 
           //********** Pour les boutons d'alerte immediate ***********//
 
@@ -473,24 +548,27 @@ class seniorcare extends eqLogic {
             if($cmd->getConfiguration('seuilBas') != '' || $cmd->getConfiguration('seuilHaut') != '') { // si on a au moins 1 seuil défini, sinon sert a rien de traquer
 
               $listener = listener::byClassAndFunction('seniorcare', 'sensorConfort', array('seniorcare_id' => intval($this->getId())));
-              if (!is_object($listener)) { // s'il existe pas, on le cree, sinon on le reprend
+              if (!is_object($listener)) {
                 $listener = new listener();
                 $listener->setClass('seniorcare');
-                $listener->setFunction('sensorConfort'); // la fct qui sera appellée a chaque evenement sur une des sources écoutée
+                $listener->setFunction('sensorConfort');
                 $listener->setOption(array('seniorcare_id' => intval($this->getId())));
               }
-            //  $listener->emptyEvent();
-       //       $listener->setOption(array('cmd_id' => intval($cmd->getId()))); // si on met ici les valeurs, ca va nous creer un nouveau listener par capteur confort. C'est un choix a faire : un seul listener pour tout le monde et apres on cherche les infos selon qui l'a déclenché, ou un listener chacun avec les details des infos dans les $_option. Choix aujourd'hui : on va faire 1 seul listener par type (signe de vie, confort, securité, ...), ca sera probablement plus lisible et 1 seule ligne pour le remove dans le preRemove()
-       //       Pourquoi pas plutôt un listener par groupe de capteurs confort ? Sinon, on risque d'avoir des problèmes de détection de seuils différents en fonction du type de capteur.
-              $listener->addEvent($cmd->getValue()); // on ajoute les event à écouter de chacun des capteurs conforts définis, quelque soit son type. On cherchera le trigger à l'appel de la fonction.
+              $listener->addEvent($cmd->getValue());
 
               log::add('seniorcare', 'debug', 'Capteurs confort set listener - cmd :' . $cmd->getHumanName() . ' - event : ' . $cmd->getValue());
 
               $listener->save();
             }
           } // fin cmd "SensorConfort"
+
         } // fin foreach cmd du plugin
       } // fin if eq actif
+      else { // notre eq n'est pas actif ou il a ete desactivé, on supprime les listeners s'ils existaient
+
+        $this->cleanAllListener();
+
+      }
 
 
     } // fin fct postSave
@@ -558,15 +636,8 @@ class seniorcare extends eqLogic {
     public function preRemove() {
 
       // quand on supprime notre eqLogic, on vire nos listeners associés
-      $listener = listener::byClassAndFunction('seniorcare', 'sensorConfort', array('seniorcare_id' => intval($this->getId())));
-      if (is_object($listener)) {
-        $listener->remove();
-      }
+      $this->cleanAllListener();
 
-      $listener = listener::byClassAndFunction('seniorcare', 'buttonAlert', array('seniorcare_id' => intval($this->getId())));
-      if (is_object($listener)) {
-        $listener->remove();
-      }
 
 
 
