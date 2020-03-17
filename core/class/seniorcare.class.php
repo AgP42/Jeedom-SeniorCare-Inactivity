@@ -26,39 +26,14 @@ class seniorcare extends eqLogic {
 
     /*     * ***********************Methode static*************************** */
 
-    public static function sensorLifeSign($_option) { // fct appelée par le listener des capteurs d'activité, n'importe quel capteur arrive ici
-      log::add('seniorcare', 'debug', '################ Detection d\'un trigger d\'activité ############');
-
-      log::add('seniorcare', 'debug', 'Fct sensorLifeSign appelé par le listener, seniorcare_id : ' . $_option['seniorcare_id'] . ' - value : ' . $_option['value'] . ' - event_id : ' . $_option['event_id'] . ' - timestamp mis en cache : ' . time());
-
-      $seniorcare = seniorcare::byId($_option['seniorcare_id']);
-      $seniorcare->setCache('lastLifeSignTimestamp', time()); // on met en cache le timestamp à l'heure du dernier event. C'est le cron qui regardera toutes les min si on est dans le seuil ou non
-
-    }
 
     public static function buttonAlert($_option) { // fct appelée par le listener des buttons d'alerte, n'importe quel bouton arrive ici
       log::add('seniorcare', 'debug', '################ Detection d\'un trigger d\'un bouton d\'alerte ############');
 
     //  log::add('seniorcare', 'debug', 'Fct sensorConfort appelé par le listener : $_option[seniorcare_id] : ' . $_option['seniorcare_id'] . ' - value : ' . $_option['value'] . ' - event_id : ' . $_option['event_id']);
 
-      $seniorcare = seniorcare::byId($_option['seniorcare_id']);
-
-      foreach ($seniorcare->getConfiguration('action_alert_bt') as $action) { // on boucle pour executer toutes les actions définies
-      log::add('seniorcare', 'debug', 'Un bouton d\'alerte a été activé, on va executer l action : ' . $action['cmd'] . ' - ' . $action['name']);
-        try {
-          $options = array(); // va permettre d'appeller les options de configuration des actions, par exemple un scenario un message
-          if (isset($action['options'])) {
-            $options = $action['options'];
-            foreach ($options as $key => $value) { // ici on peut définir les "tag" de configuration qui seront à remplacer par des variables
-              // str_replace ($search, $replace, $subject) retourne une chaîne ou un tableau, dont toutes les occurrences de search dans subject ont été remplacées par replace.
-              $options[$key] = str_replace('#nom_personne#', $seniorcare->getName(), $value);
-            }
-          }
-          scenarioExpression::createAndExec('action', $action['cmd'], $options);
-        } catch (Exception $e) {
-          log::add('seniorcare', 'error', $this->getHumanName() . __(' : Erreur lors de l\'éxecution de ', __FILE__) . $action['cmd'] . __('. Détails : ', __FILE__) . $e->getMessage());
-        }
-      }
+      $seniorcare = seniorcare::byId($_option['seniorcare_id']); // on cherche la personne correspondant au bouton d'alerte
+      $seniorcare->execActions('action_alert_bt'); // on appelle les actions definies pour cette personne
 
     }
 
@@ -135,6 +110,22 @@ class seniorcare extends eqLogic {
 
     }
 
+    public static function sensorLifeSign($_option) { // fct appelée par le listener des capteurs d'activité, n'importe quel capteur arrive ici
+      log::add('seniorcare', 'debug', '################ Detection d\'un trigger d\'activité ############');
+
+      log::add('seniorcare', 'debug', 'Fct sensorLifeSign appelé par le listener, seniorcare_id : ' . $_option['seniorcare_id'] . ' - value : ' . $_option['value'] . ' - event_id : ' . $_option['event_id'] . ' - timestamp mis en cache : ' . time());
+
+      $seniorcare = seniorcare::byId($_option['seniorcare_id']);
+      $seniorcare->setCache('lastLifeSignTimestamp', time()); // on met en cache le timestamp à l'heure du dernier event. C'est le cron qui regardera toutes les min si on est dans le seuil ou non
+
+      // TODO : lancer les actions de desactivation des alertes et remettre les variables d'alerte en cours a 0
+
+      $seniorcare->setCache('actionWarningLifeSignOngoing', false);
+      $seniorcare->setCache('actionAlertLifeSignOngoing', false);
+
+    }
+
+
     public static function cron() { //executée toutes les min par Jeedom
 
       log::add('seniorcare', 'debug', '#################### CRON ###################');
@@ -143,25 +134,71 @@ class seniorcare extends eqLogic {
       foreach (self::byType('seniorcare',true) as $seniorcare) {
 
         if (is_object($seniorcare) && $seniorcare->getIsEnable() == 1) { // si notre eq existe et est actif
+          //TODO : c'est ici qu'il faudra gerer l'absence de la personne de son logement
 
-          $lifeSignDetectionTimer = $seniorcare->getConfiguration('life_sign_timer'); // on va lire la durée voulue dans la conf
+          $lifeSignDetectionDelay = $seniorcare->getConfiguration('life_sign_timer') * 60; // on va lire la durée voulue dans la conf et on le met en secondes
+          $lifeSignWarningDelay = $seniorcare->getConfiguration('warning_life_sign_timer') * 60;
 
-          $lastLifeSign = $seniorcare->getCache('lastLifeSignTimestamp'); // on va lire le dernier timestamp en cache
+          $lastLifeSignTimestamp = $seniorcare->getCache('lastLifeSignTimestamp'); // on va lire le timestamp du dernier trigger, en secondes
+          $actionWarningStartTimestamp = $seniorcare->getCache('actionWarningStartTimestamp'); // on va lire le timestamp du lancement du warning, en secondes
+          $now = time(); // timestamp courant, en s
+          $secSinceLastLifeSign = $now - $lastLifeSignTimestamp; // le nb de secondes écoulées depuis le dernier event
+          $secSinceWarningLifeSign = $now - $actionWarningStartTimestamp; // le nb de secondes écoulées depuis le lancement des actions de warning
 
-          $secSinceLastLifeSign = time() - $lastLifeSign; // on calcule le nb de secondes écoulées depuis le dernier event
+          $actionWarningLifeSignOngoing = $seniorcare->getCache('actionWarningLifeSignOngoing'); // on recupere l'état des des warning et alertes
+          $actionAlertLifeSignOngoing = $seniorcare->getCache('actionAlertLifeSignOngoing');
 
-          if ($secSinceLastLifeSign > $lifeSignDetectionTimer * 60){
-            log::add('seniorcare', 'debug', 'Alerte Life Sign A lancer. Timer lu : ' . $lifeSignDetectionTimer . ', temps depuis last event : ' . $secSinceLastLifeSign/60);
-          } else {
-            log::add('seniorcare', 'debug', 'Life Sign OK. Timer lu : ' . $lifeSignDetectionTimer . ', temps depuis last event : ' . $secSinceLastLifeSign/60);
+          if ($secSinceLastLifeSign > $lifeSignDetectionDelay && !$actionWarningLifeSignOngoing && !$actionAlertLifeSignOngoing){
+          //= le premier timer est échu mais aucune action ni warning si alerte n'est en cours --> on va lancer les actions warning
+            log::add('seniorcare', 'debug', 'Actions Warning Life Sign A lancer. Timer lu : ' . $lifeSignDetectionDelay . ', s depuis last event : ' . $secSinceLastLifeSign);
+
+            //lance les actions warning
+            $seniorcare->execActions('action_warning_life_sign');
+
+            $seniorcare->setCache('actionWarningLifeSignOngoing', true); // on memorise qu'on a lancé les actions pour ne pas avoir 1 alerte par min...
+            $seniorcare->setCache('actionWarningStartTimestamp', $now); // on memorise l'heure du lancement du warning
+
+          } else if ($secSinceLastLifeSign > $lifeSignDetectionDelay // 1er timer toujours échu
+            && $actionWarningLifeSignOngoing && $secSinceWarningLifeSign > $lifeSignWarningDelay // on a deja lancé les actions warning et le timer de warning est échu aussi
+            && !$actionAlertLifeSignOngoing){ // mais on a pas encore lancé d'alerte --> c'est le moment de le faire !
+            log::add('seniorcare', 'debug', 'Actions Alerte Life Sign à lancer, temps depuis last event : ' . $secSinceLastLifeSign . ', temps depuis le lancement du warning : ' . $secSinceWarningLifeSign);
+
+            // lance les actions alertes
+            $seniorcare->execActions('action_alert_life_sign');
+
+            $seniorcare->setCache('actionAlertLifeSignOngoing', true); // on memorise l'heure du lancement de l'alerte
+            //TODO : gerer la repetition d'alerte toutes les 5min par exemple ?
           }
-
-
 
         } // fin if eq actif
 
       } // fin foreach equipement
 
+
+    } //fin cron
+
+    public function execActions($_config) { // on donne le type d'action en argument et ca nous execute toute la liste
+
+      log::add('seniorcare', 'debug', '################ Execution des actions du type ' . $_config . ' pour ' . $this->getHumanName() .  ' ############');
+
+    //  log::add('seniorcare', 'debug', 'Fct sensorConfort appelé par le listener : $_option[seniorcare_id] : ' . $_option['seniorcare_id'] . ' - value : ' . $_option['value'] . ' - event_id : ' . $_option['event_id']);
+
+      foreach ($this->getConfiguration($_config) as $action) { // on boucle pour executer toutes les actions définies
+      log::add('seniorcare', 'debug', 'Avertissement d\'inactivité, on va executer l action : ' . $action['name'] . ' - ' . $action['cmd']);
+        try {
+          $options = array(); // va permettre d'appeller les options de configuration des actions, par exemple un scenario un message
+          if (isset($action['options'])) {
+            $options = $action['options'];
+            foreach ($options as $key => $value) { // ici on peut définir les "tag" de configuration qui seront à remplacer par des variables
+              // str_replace ($search, $replace, $subject) retourne une chaîne ou un tableau, dont toutes les occurrences de search dans subject ont été remplacées par replace.
+              $options[$key] = str_replace('#nom_personne#', $this->getName(), $value);
+            }
+          }
+          scenarioExpression::createAndExec('action', $action['cmd'], $options);
+        } catch (Exception $e) {
+          log::add('seniorcare', 'error', $this->getHumanName() . __(' : Erreur lors de l\'éxecution de ', __FILE__) . $action['cmd'] . __('. Détails : ', __FILE__) . $e->getMessage());
+        }
+      } //*/
 
     }
 
@@ -217,7 +254,7 @@ class seniorcare extends eqLogic {
 
       log::add('seniorcare', 'debug', 'Fct cleanAllListener');
 
-      $listener = listener::byClassAndFunction('seniorcare', 'sensorConfort', array('seniorcare_id' => intval($this->getId())));
+      $listener = listener::byClassAndFunction('seniorcare', 'sensorLifeSign', array('seniorcare_id' => intval($this->getId())));
       if (is_object($listener)) {
         $listener->remove();
       }
@@ -226,6 +263,12 @@ class seniorcare extends eqLogic {
       if (is_object($listener)) {
         $listener->remove();
       }
+
+      $listener = listener::byClassAndFunction('seniorcare', 'sensorConfort', array('seniorcare_id' => intval($this->getId())));
+      if (is_object($listener)) {
+        $listener->remove();
+      }
+
     }
 
     public function preInsert() {
