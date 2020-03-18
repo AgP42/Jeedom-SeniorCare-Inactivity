@@ -299,6 +299,17 @@ $eqLogics = eqLogic::byType($plugin->getId());
         </fieldset>
       </form>
 
+      <br>
+
+      <form class="form-horizontal">
+        <fieldset>
+          <legend><i class="fas fa-bomb"></i> {{Actions alerte immédiate}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées à l'activation d'un des capteur de sécurité. Pour les messages, vous pouvez utiliser le tag #nom_personne#.}}"></i></sup>
+            <a class="btn btn-success btn-sm addActionSecurity" data-type="action_security" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
+          </legend>
+          <div id="div_action_security"></div>
+
+        </fieldset>
+
     </div>
 
     <!-- TAB Perte Autonomie -->

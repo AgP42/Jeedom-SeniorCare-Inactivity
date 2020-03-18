@@ -29,6 +29,7 @@ $("#div_confort").sortable({axis: "y", cursor: "move", items: ".confort", placeh
 $("#div_action_warning_confort").sortable({axis: "y", cursor: "move", items: ".action_warning_confort", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 
 $("#div_security").sortable({axis: "y", cursor: "move", items: ".security", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
+$("#div_action_security").sortable({axis: "y", cursor: "move", items: ".action_security", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 
 // le bouton "ajouter un capteur" de l'onglet détection d'inactivité
 $('.addSensorLifeSign').off('click').on('click', function () {
@@ -75,6 +76,10 @@ $('.addActionWarningConfort').off('click').on('click', function () {
 // le bouton "ajouter un capteur" de l'onglet security
 $('.addSensorSecurity').off('click').on('click', function () {
   addSensorSecurity({});
+});
+// le bouton "ajouter une action" de l'onglet security
+$('.addActionSecurity').off('click').on('click', function () {
+  addActionSecurity({});
 });
 
 // tous les - qui permettent de supprimer la ligne
@@ -453,33 +458,74 @@ function addActionWarningConfort(_info) {
 // ajoute chaque ligne de capteur sécurite à la demande
 function addSensorSecurity(_info) {
   var div = '<div class="security">';
-  div += '<div class="form-group ">';
-  div += '<label class="col-sm-1 control-label">Capteur</label>';
-  div += '<div class="col-sm-4">';
-  div += '<div class="input-group">';
-  div += '<span class="input-group-btn">';
-  div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="security"><i class="fas fa-minus-circle"></i></a>';
-  div += '</span>';
-  div += '<input class="expressionAttr form-control cmdInfo" data-l1key="cmd" />';
-  div += '<span class="input-group-btn">';
-  div += '<a class="btn btn-default listCmdInfoWindow roundedRight"><i class="fas fa-list-alt"></i></a>';
-  div += '</span>';
-  div += '</div>';
-  div += '</div>';
-  div += '<label class="col-sm-2 control-label">{{Type de capteur }}</label>';
-  div += '<div class="col-sm-2">';
-  div += '<select class="expressionAttr eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="type_security">';
-  div += '<option value="CO2">CO2</option>';
-  div += '<option value="smoke">Fumées</option>';
-  div += '<option value="gaz">gaz</option>';
-  div += '<option value="other">Divers</option>';
-  div += '</select>';
+    div += '<div class="form-group ">';
 
-  div += '</div>';
-  div += '</div>';
+      div += '<label class="col-sm-1 control-label">{{Nom}}</label>';
+      div += '<div class="col-sm-2">';
+        div += '<div class="input-group">';
+          div += '<span class="input-group-btn">';
+          div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="security" title="{{Supprimer le capteur}}""><i class="fas fa-minus-circle"></i></a>';
+          div += '</span>';
+          div += '<input class="expressionAttr form-control cmdInfo" data-l1key="name" title="{{Le nom doit être unique}}"/>';
+        div += '</div>';
+      div += '</div>';
+
+      div += '<label class="col-sm-1 control-label">Bouton</label>';
+      div += '<div class="col-sm-2">';
+        div += '<div class="input-group">';
+          div += '<input class="expressionAttr form-control cmdInfo" data-l1key="cmd" />';
+          div += '<span class="input-group-btn">';
+            div += '<a class="btn btn-default listCmdInfoWindow roundedRight"><i class="fas fa-list-alt"></i></a>';
+          div += '</span>';
+        div += '</div>';
+      div += '</div>';
+
+      div += '<label class="col-sm-1 control-label">{{Type de capteur }}</label>';
+      div += '<div class="col-sm-1">';
+        div += '<select class="expressionAttr eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="type_security">';
+          div += '<option value="CO2">CO2</option>';
+          div += '<option value="smoke">Fumées</option>';
+          div += '<option value="gaz">gaz</option>';
+          div += '<option value="other">Divers</option>';
+        div += '</select>';
+      div += '</div>';
+
+    div += '</div>';
   div += '</div>';
   $('#div_security').append(div);
   $('#div_security .security').last().setValues(_info, '.expressionAttr');
+}
+
+// ajoute chaque ligne d'action sécurité
+function addActionSecurity(_info) {
+  var div = '<div class="action_security">';
+    div += '<div class="form-group ">';
+
+      div += '<label class="col-sm-1 control-label">Action</label>';
+      div += '<div class="col-sm-3">';
+
+        div += '<div class="input-group">';
+          div += '<span class="input-group-btn">';
+            div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="action_security" title="{{Supprimer l\'action}}"><i class="fas fa-minus-circle"></i></a>';
+          div += '</span>';
+          div += '<input class="expressionAttr form-control cmdAction" data-l1key="cmd" data-type="action_security" />';
+          div += '<span class="input-group-btn">';
+            div += '<a class="btn btn-default listAction" data-type="action_security" title="{{Sélectionner un mot-clé}}"><i class="fa fa-tasks"></i></a>';
+            div += '<a class="btn btn-default listCmdAction roundedRight" data-type="action_security" title="{{Sélectionner une commande}}"><i class="fas fa-list-alt"></i></a>';
+          div += '</span>';
+        div += '</div>';
+
+      div += '</div>';
+
+      div += '<div class="col-sm-7 actionOptions">';
+        div += jeedom.cmd.displayActionOption(init(_info.cmd, ''), _info.options);
+      div += '</div>';
+
+    div += '</div>';
+  div += '</div>';
+
+  $('#div_action_security').append(div);
+  $('#div_action_security .action_security').last().setValues(_info, '.expressionAttr');
 }
 
 // Fct core permettant de sauvegarder
@@ -500,6 +546,7 @@ function saveEqLogic(_eqLogic) {
   _eqLogic.configuration.action_warning_confort = $('#div_action_warning_confort .action_warning_confort').getValues('.expressionAttr');
 
   _eqLogic.configuration.security = $('#div_security .security').getValues('.expressionAttr');
+  _eqLogic.configuration.action_security = $('#div_action_security .action_security').getValues('.expressionAttr');
 
   return _eqLogic;
 }
@@ -520,6 +567,7 @@ function printEqLogic(_eqLogic) {
   $('#div_action_warning_confort').empty();
 
   $('#div_security').empty();
+  $('#div_action_security').empty();
 
   if (isset(_eqLogic.configuration)) {
     if (isset(_eqLogic.configuration.life_sign)) {
@@ -570,6 +618,11 @@ function printEqLogic(_eqLogic) {
     if (isset(_eqLogic.configuration.security)) {
       for (var i in _eqLogic.configuration.security) {
         addSensorSecurity(_eqLogic.configuration.security[i]);
+      }
+    }
+    if (isset(_eqLogic.configuration.action_security)) {
+      for (var i in _eqLogic.configuration.action_security) {
+        addActionSecurity(_eqLogic.configuration.action_security[i]);
       }
     }
   }
