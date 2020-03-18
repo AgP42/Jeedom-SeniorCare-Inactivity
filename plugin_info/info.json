@@ -10,12 +10,12 @@
 	"hasDependency" : false,
 	"hasOwnDeamon" : false,
 	"maxDependancyInstallTime" : 0,
-	"changelog" : "https://jeedom.github.io/seniorcare/#language#/changelog",
-	"documentation" : "https://jeedom.github.io/seniorcare/#language#/",
+	"changelog" : "https://agp42.github.io/seniorcare/#language#/changelog",
+	"documentation" : "https://agp42.github.io/seniorcare/#language#/",
 	"link" : {
 		"forum":"Lien vers le forum",
 		"video" : "Lien vers une video"
 	},
 	"language" : ["fr_FR","en_US"],
-	"compatibility" : ["miniplus","smart","rpi","docker","diy"]
+	"compatibility" : ["miniplus","smart","rpi","docker","diy", "v4"]
 }
