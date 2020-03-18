@@ -142,7 +142,8 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-heartbeat"></i> {{Capteurs d'activités}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces capteurs déclencheront une alerte si aucun d'entre eux n'est activé pendant un certain délai}}"></i></sup>
+          <legend><i class="fas fa-heartbeat"></i> {{Capteurs d'activités}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces capteurs déclencheront une alerte
+            si aucun d'entre eux n'est activé pendant un certain délai}}"></i></sup>
             <a class="btn btn-success btn-sm addSensorLifeSign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un capteur}}</a>
           </legend>
 
