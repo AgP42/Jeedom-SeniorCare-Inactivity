@@ -166,7 +166,7 @@ function addSensorLifeSign(_info) {
 
       div += '<label class="col-sm-1 control-label">{{Type de capteur }}</label>';
       div += '<div class="col-sm-1">';
-        div += '<select class="expressionAttr eqLogicAttr form-control tooltips" data-l1key="life_sign_type">';
+        div += '<select class="expressionAttr eqLogicAttr form-control tooltips" data-l1key="sensor_life_sign_type">';
         div += '<option value="other">Divers</option>';
         div += '<option value="frigo">Frigidaire</option>';
         div += '<option value="toilettes">Chasse d\'eau</option>';
@@ -482,7 +482,7 @@ function addSensorSecurity(_info) {
 
       div += '<label class="col-sm-1 control-label">{{Type de capteur }}</label>';
       div += '<div class="col-sm-1">';
-        div += '<select class="expressionAttr eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="type_security">';
+        div += '<select class="expressionAttr eqLogicAttr form-control tooltips" data-l1key="type_security">';
           div += '<option value="CO2">CO2</option>';
           div += '<option value="smoke">Fumées</option>';
           div += '<option value="gaz">gaz</option>';
