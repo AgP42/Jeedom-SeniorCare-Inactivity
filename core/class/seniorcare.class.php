@@ -298,7 +298,7 @@ class seniorcare extends eqLogic {
     public function postSave() {
 
 
-      //########## 1 - On va lire la configuration des capteurs dans le JS et on la stocke dans un tableau #########//
+      //########## 1 - On va lire la configuration des capteurs dans le JS et on la stocke dans un grand tableau #########//
 
       $jsSensors = array(
         'life_sign' => array(), // sous-tableau pour stocker toutes les infos des capteurs de détection d'activité
@@ -314,7 +314,7 @@ class seniorcare extends eqLogic {
           foreach ($this->getConfiguration($key) as $sensor) {
             if ($sensor['name'] != '' && $sensor['cmd'] != '') { // si le nom et la cmd sont remplis
 
-              $jsSensors[$key][$sensor['name']] = $sensor; // on stocke toute la conf, c'est à dire tout ce qui dans notre js avait la class "expressionAttr". Pour retrouver notre champs exact : $jsSensors[$key][$sensor['name']][data-l1key].
+              $jsSensors[$key][$sensor['name']] = $sensor; // on stocke toute la conf, c'est à dire tout ce qui dans notre js avait la class "expressionAttr". Pour retrouver notre champs exact : $jsSensors[$key][$sensor['name']][data-l1key]. // attention ici a ne pas remplacer $jsSensors[$key] par $jsSensor. C'est bien dans le tableau d'origine qu'on veut écrire, pas dans la variable qui le represente dans cette boucle
               log::add('seniorcare', 'debug', 'Capteurs sensor config lue : ' . $sensor['name'] . ' - ' . $sensor['cmd']);
 
             }
@@ -324,29 +324,21 @@ class seniorcare extends eqLogic {
 
       //########## 2 - On boucle dans toutes les cmd existantes, pour les modifier si besoin #########//
 
-      foreach ($this->getCmd() as $cmd) {
 
-        foreach ($jsSensors as $key => $jsSensor) { // on boucle dans tous nos différents types de capteurs
+      foreach ($jsSensors as $key => $jsSensor) { // on boucle dans tous nos différents types de capteurs. $key va prendre les valeurs suivantes : life_sign, alert_bt, confort puis security
 
+        foreach ($this->getCmd() as $cmd) {
           if ($cmd->getLogicalId() == 'sensor_' . $key) {
-            if (isset($jsSensors[$key][$cmd->getName()])) { // on regarde si le nom correspond a un nom dans le tableau qu'on vient de recuperer du JS, si oui, on actualise les infos qui pourraient avoir bougé
+            if (isset($jsSensor[$cmd->getName()])) { // on regarde si le nom correspond a un nom dans le tableau qu'on vient de recuperer du JS, si oui, on actualise les infos qui pourraient avoir bougé
 
-              $sensor = $jsSensors[$key][$cmd->getName()];
-
-        //      log::add('seniorcare', 'debug', 'Dans la boucle des cmd existantes pour : ' . $cmd->getName());
-        //      log::add('seniorcare', 'debug', 'Dans la boucle des cmd existantes pour : ' . $sensor['cmd']);
-
+              $sensor = $jsSensor[$cmd->getName()];
               $cmd->setValue($sensor['cmd']);
 
-
               if(isset($sensor['sensor_'.$key.'_type'])){ // ce sera vrai pour les types life-sign et confort
-
-            //    log::add('seniorcare', 'debug', 'Dans le if isset du type : ' . $sensor['sensor_'.$key.'_type']);
-
                 $cmd->setGeneric_type($sensor['sensor_'.$key.'_type']);
               }
 
-              if($key == 'confort'){ // uniquement pour les commandes de types confort
+              if($key == 'confort'){ // uniquement pour confort
 
                 $cmd->setConfiguration('seuilBas', $sensor['seuilBas']);
                 $cmd->setConfiguration('seuilHaut', $sensor['seuilHaut']);
@@ -376,115 +368,73 @@ class seniorcare extends eqLogic {
                 $cmd->event($cmd->execute());
               }
 
-              unset($jsSensors[$key][$cmd->getName()]); // on a traité notre ligne, on la vire
+              unset($jsSensors[$key][$cmd->getName()]); // on a traité notre ligne, on la vire // attention ici a ne pas remplacer $jsSensors[$key] par $jsSensor. C'est bien dans le tableau d'origine qu'on veut virer notre ligne
 
             } else { // on a un sensor qui était dans la DB mais dont le nom n'est plus dans notre JS : on la supprime ! Attention, si on a juste changé le nom, on va le supprimer et le recreer, donc perdre l'historique éventuel. //TODO : voir si ça pose problème (est-il possible d'effectuer un transfert d'id préalable? --> la question est : comment tu sais que c'est le meme puisqu'il n'a plus le meme nom ?) Oui à améliorer, quand tout le reste sera ok ! ;-)
               $cmd->remove();
             }
           }
-        } // fin foreach nos differents types de capteurs
-      } // fin foreach toutes les cmd du plugin
+        } // fin foreach toutes les cmd du plugin
+      } // fin foreach nos differents types de capteurs
 
-      //########## 3 - Maintenant on va creer les cmd nouvelles de notre conf (= celles qui restent dans nos tableaux) #########//
+      //########## 3 - Maintenant on va creer les cmd nouvelles de notre conf (= celles qui restent dans notre tableau) #########//
 
-      //********** Pour les capteurs de détection d'activité ***********//
+      foreach ($jsSensors as $key => $jsSensor) { // on boucle dans tous nos types de capteurs. $key va prendre les valeurs suivantes : life_sign, alert_bt, confort puis security
 
-      foreach ($jsSensors['life_sign'] as $life_sign) {
+        foreach ($jsSensor as $sensor) { // pour chacun des capteurs de ce type
 
-      //    log::add('seniorcare', 'debug', 'Capteurs life_sign config : ' . $life_sign['cmd'] . ' - ' . $life_sign['sensor_life_sign_type'] . ' - ' . $life_sign['seuilBas'] . ' - ' . $life_sign['seuilHaut']);
+          log::add('seniorcare', 'debug', 'New Capteurs config : type : ' . $key . ', sensor name : ' . $sensor['name'] . ', sensor cmd : ' . $sensor['cmd']);
 
-        $cmd = new seniorcareCmd();
-        $cmd->setEqLogic_id($this->getId());
-        $cmd->setLogicalId('sensor_life_sign');
-        $cmd->setName($life_sign['name']);
-        $cmd->setValue($life_sign['cmd']);
-        $cmd->setGeneric_type($life_sign['sensor_life_sign_type']);
-        $cmd->setType('info');
-        $cmd->setSubType('numeric');
-        $cmd->setIsVisible(0);
-        $cmd->setIsHistorized(1);
-        $cmd->setConfiguration('historizeMode', 'none');
-        $cmd->save();
+          $cmd = new seniorcareCmd();
+          $cmd->setEqLogic_id($this->getId());
+          $cmd->setLogicalId('sensor_' . $key);
+          $cmd->setName($sensor['name']);
+          $cmd->setValue($sensor['cmd']);
+          $cmd->setType('info');
+          $cmd->setSubType('numeric');
+          $cmd->setIsVisible(0);
+          $cmd->setIsHistorized(1);
+          $cmd->setConfiguration('historizeMode', 'none');
 
-        // va chopper la valeur de la commande puis la suivre a chaque changement
-        if (is_nan($cmd->execCmd()) || $cmd->execCmd() == '') {
-          $cmd->setCollectDate('');
-          $cmd->event($cmd->execute());
-        }
+          if(isset($sensor['sensor_'.$key.'_type'])){ // ce sera vrai pour les types life-sign et confort
+            $cmd->setGeneric_type($sensor['sensor_'.$key.'_type']);
+          }
 
-      } //*/ // fin foreach restant. A partir de maintenant on a des capteurs de détection d'activité qui refletent notre config lue en JS
+          if($key == 'confort'){ // uniquement pour les commandes de types confort
 
-      //********** Pour les boutons d'alerte immediate ***********//
+            $cmd->setConfiguration('seuilBas', $sensor['seuilBas']);
+            $cmd->setConfiguration('seuilHaut', $sensor['seuilHaut']);
+            switch ($sensor['sensor_confort_type']) {
+                case 'temperature':
+                    $unit = '°C';
+                    break;
+                case 'humidite':
+                    $unit = '%';
+                    break;
+                case 'co2':
+                    $unit = 'ppm'; //Les sondes de CO2 présentent généralement une plage de mesure de 0-5000 ppm. Il faudra recommander dans la doc une alerte à partir de 1000ppm max
+                    break;
+                default:
+                    $unit = '-'; //TODO
+                    break;
+            }
+            $cmd->setUnite($unit);
+            $cmd->setConfiguration('historizeMode', 'avg');
+            $cmd->setConfiguration('historizeRound', 2);
 
-      foreach ($jsSensors['alert_bt'] as $bt_alerte) {
+          }
 
-      //    log::add('seniorcare', 'debug', 'Capteurs bt_alerte config : ' . $bt_alerte['cmd'] . ' - ' . $bt_alerte['sensor_bt_alerte_type'] . ' - ' . $bt_alerte['seuilBas'] . ' - ' . $bt_alerte['seuilHaut']);
+          $cmd->save();
 
-        $cmd = new seniorcareCmd();
-        $cmd->setEqLogic_id($this->getId());
-        $cmd->setLogicalId('sensor_alert_bt');
-        $cmd->setName($bt_alerte['name']);
-        $cmd->setValue($bt_alerte['cmd']);
-        $cmd->setType('info');
-        $cmd->setSubType('numeric');
-        $cmd->setIsVisible(0);
-        $cmd->setIsHistorized(1);
-        $cmd->setConfiguration('historizeMode', 'none');
-        $cmd->save();
+          // va chopper la valeur de la commande puis la suivre a chaque changement
+          if (is_nan($cmd->execCmd()) || $cmd->execCmd() == '') {
+            $cmd->setCollectDate('');
+            $cmd->event($cmd->execute());
+          }
 
-        // va chopper la valeur de la commande puis la suivre a chaque changement
-        if (is_nan($cmd->execCmd()) || $cmd->execCmd() == '') {
-          $cmd->setCollectDate('');
-          $cmd->event($cmd->execute());
-        }
+        } //*/ // fin foreach restant. A partir de maintenant on a des capteurs qui refletent notre config lue en JS
+      }
 
-      } //*/ // fin foreach restant. A partir de maintenant on a des cmd bouton d'alerte qui refletent notre config lue en JS
-
-
-      //********** Pour les capteurs confort ***********//
-
-      foreach ($jsSensors['confort'] as $confort) {
-
-    //    log::add('seniorcare', 'debug', 'Capteurs confort config : ' . $confort['cmd'] . ' - ' . $confort['sensor_confort_type'] . ' - ' . $confort['seuilBas'] . ' - ' . $confort['seuilHaut']);
-
-        $cmd = new seniorcareCmd();
-        $cmd->setEqLogic_id($this->getId());
-        $cmd->setLogicalId('sensor_confort');
-        $cmd->setName($confort['name']);
-        $cmd->setValue($confort['cmd']);
-        $cmd->setConfiguration('seuilBas', $confort['seuilBas']);
-        $cmd->setConfiguration('seuilHaut', $confort['seuilHaut']);
-        $cmd->setGeneric_type($confort['sensor_confort_type']);
-        $cmd->setType('info');
-        $cmd->setSubType('numeric');
-        switch ($confort['sensor_confort_type']) {
-            case 'temperature':
-                $unit = '°C';
-                break;
-            case 'humidite':
-                $unit = '%';
-                break;
-            case 'co2':
-                $unit = 'ppm';
-                break;
-            default:
-                $unit = '-';  //TODO
-                break;
-        }
-        $cmd->setUnite($unit);
-        $cmd->setIsVisible(0);
-        $cmd->setIsHistorized(1);
-        $cmd->setConfiguration('historizeMode', 'avg');
-        $cmd->setConfiguration('historizeRound', 2);
-        $cmd->save();
-
-        // va choper la valeur de la commande puis la suivre à chaque changement
-        if (is_nan($cmd->execCmd()) || $cmd->execCmd() == '') {
-          $cmd->setCollectDate('');
-          $cmd->event($cmd->execute());
-        }
-
-      } // fin foreach restant. A partir de maintenant on a des cmd confort qui reflètent notre config lue en JS
 
       //########## 4 - Mise en place des listeners de capteurs pour réagir aux events #########//
 
@@ -691,8 +641,8 @@ class seniorcareCmd extends cmd {
         return round(jeedom::evaluateExpression($this->getValue()), 1);
       }
 
-      if ($this->getLogicalId() == 'sensor_alert_bt' || $this->getLogicalId() == 'sensor_life_sign') {
-        log::add('seniorcare', 'debug', 'Fct execute - sensor_alert_bt or sensor_life_sign, valeur renvoyée : ' . jeedom::evaluateExpression($this->getValue()));
+      if ($this->getLogicalId() == 'sensor_alert_bt' || $this->getLogicalId() == 'sensor_life_sign' || $this->getLogicalId() == 'sensor_security') {
+        log::add('seniorcare', 'debug', 'Fct execute - sensor_alert_bt or sensor_life_sign or sensor_security, valeur renvoyée : ' . jeedom::evaluateExpression($this->getValue()));
         return jeedom::evaluateExpression($this->getValue());
       } //*/
 
