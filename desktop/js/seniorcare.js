@@ -320,7 +320,7 @@ function addSensorBtAlert(_info) {
         div += '</div>';
       div += '</div>';
 
-      div += '<label class="col-sm-1 control-label">Bouton</label>';
+      div += '<label class="col-sm-1 control-label">Capteur</label>';
       div += '<div class="col-sm-2">';
         div += '<div class="input-group">';
           div += '<input class="expressionAttr form-control cmdInfo" data-l1key="cmd" />';
