@@ -121,7 +121,6 @@ class seniorcare extends eqLogic {
     public static function sensorLifeSign($_option) { // fct appelée par le listener des capteurs d'activité, n'importe quel capteur arrive ici
       log::add('seniorcare', 'debug', '################ Detection d\'un capteur d\'activité ############');
 
-      log::add('seniorcare', 'debug', 'Fct sensorLifeSign appelé par le listener, seniorcare_id : ' . $_option['seniorcare_id'] . ' - value : ' . $_option['value'] . ' - event_id : ' . $_option['event_id'] . ' - timestamp mis en cache : ' . time());
 
       $seniorcare = seniorcare::byId($_option['seniorcare_id']);
       $seniorcare->setCache('lastLifeSignTimestamp', time()); // on met en cache le timestamp à l'heure du dernier event. C'est le cron qui regardera toutes les min si on est hors timer
@@ -129,6 +128,8 @@ class seniorcare extends eqLogic {
       // on recupere l'état des des warning et alertes
       $actionWarningLifeSignOngoing = $seniorcare->getCache('actionWarningLifeSignOngoing');
       $actionAlertLifeSignOngoing = $seniorcare->getCache('actionAlertLifeSignOngoing');
+
+      log::add('seniorcare', 'debug', 'Fct sensorLifeSign appelé par le listener, seniorcare_id : ' . $_option['seniorcare_id'] . ' - value : ' . $_option['value'] . ' - event_id : ' . $_option['event_id'] . ' - timestamp mis en cache : ' . time() . ' cache lu : ' . $actionWarningLifeSignOngoing . ' - '. $actionAlertLifeSignOngoing);
 
       if ($actionWarningLifeSignOngoing){ // si on était en phase d'avertissement, on lance les actions d'arret warning
         $seniorcare->execActions('action_desactivate_warning_life_sign');
@@ -162,12 +163,15 @@ class seniorcare extends eqLogic {
 
           $lastLifeSignTimestamp = $seniorcare->getCache('lastLifeSignTimestamp'); // on va lire le timestamp du dernier trigger, en secondes
           $actionWarningStartTimestamp = $seniorcare->getCache('actionWarningStartTimestamp'); // on va lire le timestamp du lancement du warning, en secondes
+
           $now = time(); // timestamp courant, en s
           $secSinceLastLifeSign = $now - $lastLifeSignTimestamp; // le nb de secondes écoulées depuis le dernier event
           $secSinceWarningLifeSign = $now - $actionWarningStartTimestamp; // le nb de secondes écoulées depuis le lancement des actions de warning
 
           $actionWarningLifeSignOngoing = $seniorcare->getCache('actionWarningLifeSignOngoing'); // on recupere l'état des des warning et alertes
           $actionAlertLifeSignOngoing = $seniorcare->getCache('actionAlertLifeSignOngoing');
+
+          log::add('seniorcare', 'debug', 'Cache lu : ' . $actionWarningLifeSignOngoing . ' - ' . $actionAlertLifeSignOngoing);
 
           if ($secSinceLastLifeSign > $lifeSignDetectionDelay && !$actionWarningLifeSignOngoing && !$actionAlertLifeSignOngoing){
           //= le premier timer est échu mais aucune action ni warning si alerte n'est en cours --> on va lancer les actions warning
@@ -504,6 +508,12 @@ class seniorcare extends eqLogic {
         $this->cleanAllListener();
 
       }
+
+      //########## 5 - initialisation du cache #########//
+
+      // on declare qu'on est pas en phase de warning ni d'alerte
+  //    $this->setCache('actionWarningLifeSignOngoing', false);
+  //    $this->setCache('actionAlertLifeSignOngoing', false);
 
 
     } // fin fct postSave
