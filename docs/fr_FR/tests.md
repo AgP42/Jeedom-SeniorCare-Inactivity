@@ -19,3 +19,29 @@ Tests sur détection inactivité
 
 5. Tests de desactivation warning puis alerte => OK
 
+Tests sur bouton d'alerte (apres avoir ajouté les capteurs et actions de desactivation)
+---
+
+0. Creation de la conf et vérification en DB que les capteurs et les listeners sont bien présents => OK
+1. Trigger bouton alerte => action alerte ok
+2. Trigger bouton desactivation alerte => action desactivation alerte ok
+3. Trigger bouton alerte plusieurs fois => action alerte relancée a chaque fois
+4. idem bouton desactivation => idem
+=> Test OK
+
+Tests sur capteurs sécurité (apres avoir ajouté les capteurs et actions de désactivation)
+---
+
+0. Creation de la conf et vérification en DB que les capteurs et les listeners sont bien présents et tests d'erreurs si nom identiques ou absents => OK
+1. Trigger capteur securité => action ok
+2. Trigger bouton desactivation alerte => action desactivation alerte ok
+3. Trigger bouton alerte plusieurs fois => action alerte relancée a chaque fois
+4. idem bouton desactivation => idem
+=> Test OK
+
+Tests sur capteurs conforts (apres ajout actions desactivation et menu deroulant de repetition de l'alerte)
+---
+
+Pourquoi a l'enregistrement la fct execute s'applique a tout le monde si commande nouvelle ou à toutes hors confort pour les commandes existantes ??? Alors que c'est traité par une boucle, donc forcement identique !!! (mais semble marcher quand meme...)
+
+0. Creation de la conf, vérif en DB et tests d'erreurs de saisie de conf => OK (après correction bug...)

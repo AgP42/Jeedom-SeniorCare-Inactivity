@@ -305,10 +305,10 @@ $eqLogics = eqLogic::byType($plugin->getId());
           </label>
           <div class="col-sm-2">
             <select class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="repetition_warning">
-              <option value="all">A chaque nouvelle valeur hors seuil</option>
+              <option value="all" selected>A chaque nouvelle valeur hors seuil</option>
               <option value="once">Une seule fois</option>
-              <option value="15min">Toutes les 15 min</option>
-              <option value="1hour">Toutes les heures</option>
+              <option value="15min">Maximum toutes les 15 min</option>
+              <option value="1hour">Maximum toutes les heures</option>
             </select>
           </div>
 

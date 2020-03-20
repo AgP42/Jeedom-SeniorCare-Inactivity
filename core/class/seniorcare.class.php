@@ -35,6 +35,14 @@ class seniorcare extends eqLogic {
 
     }
 
+    public static function buttonAlertCancel($_option) { // fct appelée par le listener des buttons d'annulation d'alerte, n'importe quel bouton arrive ici
+      log::add('seniorcare', 'debug', '################ Detection d\'un trigger d\'un bouton d\'annulation d\'alerte ############');
+
+      $seniorcare = seniorcare::byId($_option['seniorcare_id']); // on cherche la personne correspondant au bouton d'alerte
+      $seniorcare->execActions('action_cancel_alert_bt'); // on appelle les actions definies pour cette personne pour les boutons d'alertes
+
+    }
+
     public static function sensorSecurity($_option) { // fct appelée par le listener des capteurs de sécurité, n'importe quel capteur arrive ici
       log::add('seniorcare', 'debug', '################ Detection d\'un trigger de sécurité ############');
 
@@ -43,58 +51,51 @@ class seniorcare extends eqLogic {
 
     }
 
-    public static function checkAndActionSeuilsSensorConfort($seniorcare, $_name, $_value, $_seuilBas, $_seuilHaut, $_type) { // appelée soit par le cron, soit par un listener (via la fct sensorConfort), va regarder si on est dans les seuils définis et si non appliquer les actions voulues
+    public static function sensorSecurityCancel($_option) { // fct appelée par le listener des boutons d'annulation de l'alerte de sécurité, n'importe quel capteur arrive ici
+      log::add('seniorcare', 'debug', '################ Detection d\'un bouton d\'annulation d\'alerte de sécurité ############');
+
+      $seniorcare = seniorcare::byId($_option['seniorcare_id']); // on cherche la personne correspondant au bouton d'alerte
+      $seniorcare->execActions('action_cancel_security'); // on appelle les actions definies pour cette personne
+
+    }
+
+    public static function checkAndActionSeuilsSensorConfort($seniorcare, $_name, $_value, $_seuilBas, $_seuilHaut, $_type) { // appelée soit par le cron15 (desactivé), soit par un listener (via la fct sensorConfort), va regarder si on est dans les seuils définis et si non appliquer les actions voulues
 
     // TODO on pourrait ajouter une durée min pendant laquelle le capteur est hors seuils avant de déclencher l'alerte
-    // TODO on pourrait limiter l'alerte à 1 fois par heure (à parametrer ?)
+    // TODO on pourrait limiter l'alerte à 1 fois par heure (à parametrer ?) => ok ajouté à la demande du forum
     // TODO on pourrait ajouter la date de collecte de la valeur pour ne pas faire des alertes sur une vieille info, ou au contraire ajouter une alerte si pas de valeur fraiche pendant un certain temps. Mais ça peut etre aussi géré par le core dans les configuration de la cmd...
 
-      log::add('seniorcare', 'debug', 'Fct checkAndActionSeuilsSensorConfort, name : ' . $_name . ' - ' . $_type . ' - ' . $_value . ' - ' . $_seuilBas . ' - ' . $_seuilHaut);
+      $now = time();
+      $rep_warning = $seniorcare->getConfiguration('repetition_warning');
+      $tempsDepuisActionWarningConfort = $now - $seniorcare->getCache('actionWarningConfortStartTimestamp' . $_name);
 
-      if ($_value > $_seuilHaut || $_value < $_seuilBas){
-        foreach ($seniorcare->getConfiguration('action_warning_confort') as $action) {
-        log::add('seniorcare', 'debug', 'Capteurs confort :' . $_name . ' sort des seuils !, on va executer l action : ' . $action['cmd']);
-          try {
-            $options = array(); // va permettre d'appeler les options de configuration des actions, par exemple quel scenario ou le message si action messagerie
-            if (isset($action['options'])) {
-              $options = $action['options'];
-              foreach ($options as $key => $value) { // ici on peut définir les "tag" de configuration qui seront à remplacer par des variables
-                // str_replace ($search, $replace, $subject) retourne une chaîne ou un tableau, dont toutes les occurrences de search dans subject ont été remplacées par replace.
-                $value = str_replace('#nom_personne#', $seniorcare->getName(), $value);
-                $value = str_replace('#nom_capteur#', $_name, $value);
-                $value = str_replace('#type_capteur#', $_type, $value);
-                $value = str_replace('#valeur#', $_value, $value);
-                $value = str_replace('#seuil_bas#', $_seuilBas, $value);
-                switch ($_type) {
-                    case 'temperature':
-                        $unit = '°C';
-                        break;
-                    case 'humidite':
-                        $unit = '%';
-                        break;
-                    case 'co2':
-                        $unit = 'ppm';
-                        break;
-                    default:
-                        $unit = '-';
-                        break;
-                }
-                $value = str_replace('#unite#', $unit, $value);
-                $options[$key] = str_replace('#seuil_haut#', $_seuilHaut, $value);
-              }
-            }
-            scenarioExpression::createAndExec('action', $action['cmd'], $options);
-          } catch (Exception $e) {
-            log::add('seniorcare', 'error', $this->getHumanName() . __(' : Erreur lors de l\'éxecution de ', __FILE__) . $action['cmd'] . __('. Détails : ', __FILE__) . $e->getMessage());
-          }
-        }
+      log::add('seniorcare', 'debug', 'Fct checkAndActionSeuilsSensorConfort, name : ' . $_name . ' - ' . $_type . ' - ' . $_value . ' - ' . $_seuilBas . ' - ' . $_seuilHaut . ' - Rep warning : ' . $seniorcare->getConfiguration('repetition_warning'));
+      log::add('seniorcare', 'debug', 'Fct checkAndActionSeuilsSensorConfort, WarningConfortLauched : ' . $seniorcare->getCache('WarningConfortLauched' . $_name) . ' - timestamp last action lancé : ' . $seniorcare->getCache('actionWarningConfortStartTimestamp' . $_name) . ' - Il y a : ' . $tempsDepuisActionWarningConfort / 60);
+
+
+      if (($_value > $_seuilHaut || $_value < $_seuilBas) && // si la valeur sort des seuils et selon le choix de repetition
+         ($rep_warning == '' || $rep_warning == 'all' || // si on a pas defini la repetition de warning ou si defini sur "all" ou si
+         ($rep_warning == 'once' && !$seniorcare->getCache('WarningConfortLauched' . $_name)) || // rep_warning est sur "1fois" et qu'on l'a pas encore lancé ou si
+         ($rep_warning == '15min' && $tempsDepuisActionWarningConfort > 15*60) || // rep_warning sur 15 min et dernier lancement depuis plus de 15min
+         ($rep_warning == '1hour' && $tempsDepuisActionWarningConfort > 60*60) // rep_warning sur 1h et dernier lancement depuis plus d'1h
+        )){
+
+        $seniorcare->setCache('WarningConfortLauched' . $_name, true); // on garde en cache qu'on a lancé nos actions au mois 1 fois
+        $seniorcare->setCache('actionWarningConfortStartTimestamp' . $_name, $now); // on memorise l'heure du lancement du warning
+
+        $seniorcare->execActions('action_warning_confort', $_name, $_type, $_value, $_seuilBas, $_seuilHaut);
+
+      } else if (($_value >= $_seuilHaut || $_value >= $_seuilBas) && $seniorcare->getCache('WarningConfortLauched' . $_name)){ // on est dans les seuils et on a deja lancé notre warning au moins 1 fois, il faut lancer les actions de retour à la normal
+        log::add('seniorcare', 'debug', 'Capteurs confort :' . $_name . ' retour à la normal !');
+        $seniorcare->setCache('WarningConfortLauched' . $_name, false); // on remet dans le cache qu'on a pas lancé les actions
+        $seniorcare->execActions('action_cancel_warning_confort', $_name, $_type, $_value, $_seuilBas, $_seuilHaut); // appel de la boucle d'execution des actions avec les infos pour les tag des messages
       } else {
-        log::add('seniorcare', 'debug', 'Capteurs confort :' . $_name . ' OK, dans les seuils !');
+        log::add('seniorcare', 'debug', 'Capteurs confort :' . $_name . ' est hors seuils, mais il faut pas le dire...chutttt...');
       }
 
     }
 
-    public static function sensorConfort($_option) { // fct appelée par le listener des capteurs conforts (on sait pas lequel, ça serait trop simple, mais on connait l'event_id).
+    public static function sensorConfort($_option) { // fct appelée par le listener des capteurs conforts (on sait pas lequel, ça serait trop simple, mais on connait l'event_id et la valeur).
 
       log::add('seniorcare', 'debug', '################ Detection d\'un changement d\'un capteur confort ############');
 
@@ -126,22 +127,22 @@ class seniorcare extends eqLogic {
       $seniorcare->setCache('lastLifeSignTimestamp', time()); // on met en cache le timestamp à l'heure du dernier event. C'est le cron qui regardera toutes les min si on est hors timer
 
       // on recupere l'état des des warning et alertes
-      $actionWarningLifeSignOngoing = $seniorcare->getCache('actionWarningLifeSignOngoing');
-      $actionAlertLifeSignOngoing = $seniorcare->getCache('actionAlertLifeSignOngoing');
+      $actionWarningLifeSignLaunched = $seniorcare->getCache('actionWarningLifeSignLaunched');
+      $actionAlertLifeSignLaunched = $seniorcare->getCache('actionAlertLifeSignLaunched');
 
-      log::add('seniorcare', 'debug', 'Fct sensorLifeSign appelé par le listener, seniorcare_id : ' . $_option['seniorcare_id'] . ' - value : ' . $_option['value'] . ' - event_id : ' . $_option['event_id'] . ' - timestamp mis en cache : ' . time() . ' cache lu : ' . $actionWarningLifeSignOngoing . ' - '. $actionAlertLifeSignOngoing);
+      log::add('seniorcare', 'debug', 'Fct sensorLifeSign appelé par le listener, seniorcare_id : ' . $_option['seniorcare_id'] . ' - value : ' . $_option['value'] . ' - event_id : ' . $_option['event_id'] . ' - timestamp mis en cache : ' . time() . ' cache lu : ' . $actionWarningLifeSignLaunched . ' - '. $actionAlertLifeSignLaunched);
 
-      if ($actionWarningLifeSignOngoing){ // si on était en phase d'avertissement, on lance les actions d'arret warning
+      if ($actionWarningLifeSignLaunched){ // si on était en phase d'avertissement, on lance les actions d'arret warning
         $seniorcare->execActions('action_desactivate_warning_life_sign');
       }
 
-      if ($actionAlertLifeSignOngoing){ // si on était en phase d'alerte, on lance les actions d'arret alerte
+      if ($actionAlertLifeSignLaunched){ // si on était en phase d'alerte, on lance les actions d'arret alerte
         $seniorcare->execActions('action_desactivate_alert_life_sign');
       }
 
       // dans tous les cas on declare qu'on est pas en phase de warning ni d'alerte, puisqu'on vient de recevoir un signe de vie
-      $seniorcare->setCache('actionWarningLifeSignOngoing', false);
-      $seniorcare->setCache('actionAlertLifeSignOngoing', false);
+      $seniorcare->setCache('actionWarningLifeSignLaunched', false);
+      $seniorcare->setCache('actionAlertLifeSignLaunched', false);
 
     }
 
@@ -162,35 +163,35 @@ class seniorcare extends eqLogic {
           $lifeSignWarningDelay = $seniorcare->getConfiguration('warning_life_sign_timer') * 60;
 
           $lastLifeSignTimestamp = $seniorcare->getCache('lastLifeSignTimestamp'); // on va lire le timestamp du dernier trigger, en secondes
-          $actionWarningStartTimestamp = $seniorcare->getCache('actionWarningStartTimestamp'); // on va lire le timestamp du lancement du warning, en secondes
+          $actionWarningLifeSignTimestamp = $seniorcare->getCache('actionWarningLifeSignTimestamp'); // on va lire le timestamp du lancement du warning, en secondes
 
           $now = time(); // timestamp courant, en s
           $secSinceLastLifeSign = $now - $lastLifeSignTimestamp; // le nb de secondes écoulées depuis le dernier event
-          $secSinceWarningLifeSign = $now - $actionWarningStartTimestamp; // le nb de secondes écoulées depuis le lancement des actions de warning
+          $secSinceWarningLifeSign = $now - $actionWarningLifeSignTimestamp; // le nb de secondes écoulées depuis le lancement des actions de warning
 
-          $actionWarningLifeSignOngoing = $seniorcare->getCache('actionWarningLifeSignOngoing'); // on recupere l'état des des warning et alertes
-          $actionAlertLifeSignOngoing = $seniorcare->getCache('actionAlertLifeSignOngoing');
+          $actionWarningLifeSignLaunched = $seniorcare->getCache('actionWarningLifeSignLaunched'); // on recupere l'état des des warning et alertes
+          $actionAlertLifeSignLaunched = $seniorcare->getCache('actionAlertLifeSignLaunched');
 
-          log::add('seniorcare', 'debug', 'Cache lu : ' . $actionWarningLifeSignOngoing . ' - ' . $actionAlertLifeSignOngoing);
+          log::add('seniorcare', 'debug', 'Cache lu : ' . $actionWarningLifeSignLaunched . ' - ' . $actionAlertLifeSignLaunched);
 
-          if ($secSinceLastLifeSign > $lifeSignDetectionDelay && !$actionWarningLifeSignOngoing && !$actionAlertLifeSignOngoing){
+          if ($secSinceLastLifeSign > $lifeSignDetectionDelay && !$actionWarningLifeSignLaunched && !$actionAlertLifeSignLaunched){
           //= le premier timer est échu mais aucune action ni warning si alerte n'est en cours --> on va lancer les actions warning
             log::add('seniorcare', 'debug', 'Actions Warning Life Sign A lancer. Timer lu : ' . $lifeSignDetectionDelay . ', sec depuis last event : ' . $secSinceLastLifeSign);
 
             $seniorcare->execActions('action_warning_life_sign');
 
-            $seniorcare->setCache('actionWarningLifeSignOngoing', true); // on memorise qu'on a lancé les actions pour ne pas repeter toutes les min
-            $seniorcare->setCache('actionWarningStartTimestamp', $now); // on memorise l'heure du lancement du warning
+            $seniorcare->setCache('actionWarningLifeSignLaunched', true); // on memorise qu'on a lancé les actions pour ne pas repeter toutes les min
+            $seniorcare->setCache('actionWarningLifeSignTimestamp', $now); // on memorise l'heure du lancement du warning
 
           } else if ($secSinceLastLifeSign > $lifeSignDetectionDelay // 1er timer toujours échu
-            && $actionWarningLifeSignOngoing && $secSinceWarningLifeSign > $lifeSignWarningDelay // on a deja lancé les actions warning et le timer de warning est échu aussi
-            && !$actionAlertLifeSignOngoing){ // mais on a pas encore lancé d'alerte --> c'est le moment de le faire !
+            && $actionWarningLifeSignLaunched && $secSinceWarningLifeSign > $lifeSignWarningDelay // on a deja lancé les actions warning et le timer de warning est échu aussi
+            && !$actionAlertLifeSignLaunched){ // mais on a pas encore lancé d'alerte --> c'est le moment de le faire !
             log::add('seniorcare', 'debug', 'Actions Alerte Life Sign à lancer, temps depuis last event : ' . $secSinceLastLifeSign . ', sec depuis le lancement du warning : ' . $secSinceWarningLifeSign);
 
             // lance les actions alertes
             $seniorcare->execActions('action_alert_life_sign');
 
-            $seniorcare->setCache('actionAlertLifeSignOngoing', true); // on memorise qu'on a lancé les actions d'alertes
+            $seniorcare->setCache('actionAlertLifeSignLaunched', true); // on memorise qu'on a lancé les actions d'alertes
             //TODO : gerer la repetition d'alerte toutes les 5min par exemple ?
           }
 
@@ -200,9 +201,10 @@ class seniorcare extends eqLogic {
 
     } //fin cron
 
-    public function execActions($_config) { // on donne le type d'action en argument et ca nous execute toute la liste
 
-      log::add('seniorcare', 'debug', '################ Execution des actions du type ' . $_config . ' pour ' . $this->getHumanName() .  ' ############');
+    public function execActions($_config, $_sensor_name = NULL, $_sensor_type = NULL, $_sensor_value = NULL, $_seuilBas = NULL, $_seuilHaut = NULL) { // on donne le type d'action en argument et ca nous execute toute la liste. Les autres arguments sont pour les tag des messages si applicable
+
+      log::add('seniorcare', 'debug', '################ Execution des actions du type ' . $_config . ' pour ' . $this->getName() .  ' ############');
 
       foreach ($this->getConfiguration($_config) as $action) { // on boucle pour executer toutes les actions définies
         try {
@@ -211,7 +213,27 @@ class seniorcare extends eqLogic {
             $options = $action['options'];
             foreach ($options as $key => $value) { // ici on peut définir les "tag" de configuration qui seront à remplacer par des variables
               // str_replace ($search, $replace, $subject) retourne une chaîne ou un tableau, dont toutes les occurrences de search dans subject ont été remplacées par replace.
-              $options[$key] = str_replace('#nom_personne#', $this->getName(), $value);
+              $value = str_replace('#nom_personne#', $this->getName(), $value);
+              $value = str_replace('#nom_capteur#', $_sensor_name, $value);
+              $value = str_replace('#type_capteur#', $_sensor_type, $value);
+              $value = str_replace('#valeur#', $_sensor_value, $value);
+              $value = str_replace('#seuil_bas#', $_seuilBas, $value);
+              switch ($_sensor_type) {
+                  case 'temperature':
+                      $unit = '°C';
+                      break;
+                  case 'humidite':
+                      $unit = '%';
+                      break;
+                  case 'co2':
+                      $unit = 'ppm';
+                      break;
+                  default:
+                      $unit = '';
+                      break;
+              }
+              $value = str_replace('#unite#', $unit, $value);
+              $options[$key] = str_replace('#seuil_haut#', $_seuilHaut, $value);
             }
           }
           scenarioExpression::createAndExec('action', $action['cmd'], $options);
@@ -328,8 +350,10 @@ class seniorcare extends eqLogic {
       $jsSensors = array(
         'life_sign' => array(), // sous-tableau pour stocker toutes les infos des capteurs de détection d'activité
         'alert_bt' => array(), // idem bouton d'alertes
+        'cancel_alert_bt' => array(), // boutons d'annulation alerte immédiate
         'confort' => array(), // idem capteurs conforts
         'security' => array(), // idem capteurs sécurité
+        'cancel_security' => array(), // boutons d'annulation alerte sécurité
       );
 
       foreach ($jsSensors as $key => $jsSensor) { // on boucle dans tous nos types de capteurs pour recuperer les infos
@@ -485,6 +509,10 @@ class seniorcare extends eqLogic {
             $listenerFunction = 'sensorConfort';
           } else if ($cmd->getLogicalId() == 'sensor_security'){
             $listenerFunction = 'sensorSecurity';
+          } else if ($cmd->getLogicalId() == 'sensor_cancel_alert_bt'){
+            $listenerFunction = 'buttonAlertCancel';
+          } else if ($cmd->getLogicalId() == 'sensor_cancel_security'){
+            $listenerFunction = 'sensorSecurityCancel';
           }
 
           // on set le listener associée
@@ -512,8 +540,8 @@ class seniorcare extends eqLogic {
       //########## 5 - initialisation du cache #########//
 
       // on declare qu'on est pas en phase de warning ni d'alerte
-  //    $this->setCache('actionWarningLifeSignOngoing', false);
-  //    $this->setCache('actionAlertLifeSignOngoing', false);
+  //    $this->setCache('actionWarningLifeSignLaunched', false);
+  //    $this->setCache('actionAlertLifeSignLaunched', false);
 
 
     } // fin fct postSave
@@ -526,28 +554,30 @@ class seniorcare extends eqLogic {
         'life_sign',
         'alert_bt',
         'confort',
-        'security'
+        'security',
+        'cancel_alert_bt',
+        'cancel_security'
       );
 
       foreach ($sensorsType as $type) {
         if (is_array($this->getConfiguration($type))) {
           foreach ($this->getConfiguration($type) as $sensor) { // pour tous les capteurs de tous les types, on veut un nom et une cmd
             if ($sensor['name'] == '') {
-              throw new Exception(__('Le champs Nom pour les capteurs ne peut être vide',__FILE__));
+              throw new Exception(__('Le champs Nom pour les capteurs ('.$type.') ne peut être vide',__FILE__));
             }
 
             if ($sensor['cmd'] == '') { // TODO on pourrait aussi ici vérifier que notre commande existe pour pas avoir de problemes apres...
-              throw new Exception(__('Le champs Capteur ne peut être vide',__FILE__));
+              throw new Exception(__('Le champs Capteur ('.$type.') ne peut être vide',__FILE__));
             }
 
             if($type == 'confort'){ // uniquement pour les capteurs conforts, vérif sur les champs seuils
 
-              if ($confort['seuilHaut'] !='' && !is_numeric($confort['seuilHaut']) || $confort['seuilBas'] !='' && !is_numeric($confort['seuilBas'])) {
-                throw new Exception(__('Capteur confort - ' . $confort['name'] . ', les valeurs des seuils doivent être numériques', __FILE__));
+              if ($sensor['seuilHaut'] !='' && !is_numeric($sensor['seuilHaut']) || $sensor['seuilBas'] !='' && !is_numeric($sensor['seuilBas'])) {
+                throw new Exception(__('Capteur confort - ' . $sensor['name'] . ', les valeurs des seuils doivent être numériques', __FILE__));
               }
 
-              if ($confort['seuilBas'] > $confort['seuilHaut']) {
-                throw new Exception(__('Capteur confort - ' . $confort['name'] . ', le seuil bas ne peut pas être supérieur au seuil haut', __FILE__)); // consequence : on peut pas ne definir qu'un seul seuil
+              if ($sensor['seuilBas'] > $sensor['seuilHaut']) {
+                throw new Exception(__('Capteur confort - ' . $sensor['name'] . ', le seuil bas ne peut pas être supérieur au seuil haut', __FILE__)); // consequence : on peut pas ne definir qu'un seul seuil
               }
 
             }
@@ -612,7 +642,7 @@ class seniorcareCmd extends cmd {
 
     public function execute($_options = array()) {
 
-      log::add('seniorcare', 'debug', 'Fct execute - valeur renvoyée : ' . jeedom::evaluateExpression($this->getValue()));
+      log::add('seniorcare', 'debug', 'Fct execute pour : ' . $this->getLogicalId() . $this->getHumanName() . '- valeur renvoyée : ' . jeedom::evaluateExpression($this->getValue()));
 
       return jeedom::evaluateExpression($this->getValue());
 
