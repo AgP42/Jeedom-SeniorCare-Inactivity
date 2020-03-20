@@ -4,6 +4,6 @@
 
 * Dans la détection d'inactivité, comment l'aidant signale qu'il a vu l'alerte et arrive ?
 * Idem pour les boutons d'alerte
-* Comment desactiver les actions des boutons d'alertes
+* Comment desactiver les actions des boutons d'alertes => done
 * Comment desactiver les alertes conforts ?
-* Comment desactiver les alertes sécurité ?
+* Comment desactiver les alertes sécurité ? => done

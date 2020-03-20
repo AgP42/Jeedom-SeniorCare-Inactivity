@@ -24,12 +24,17 @@ $("#div_action_desactivate_alert_life_sign").sortable({axis: "y", cursor: "move"
 
 $("#div_alert_bt").sortable({axis: "y", cursor: "move", items: ".alert_bt", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_action_alert_bt").sortable({axis: "y", cursor: "move", items: ".action_alert_bt", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
+$("#div_cancel_alert_bt").sortable({axis: "y", cursor: "move", items: ".cancel_alert_bt", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
+$("#div_action_cancel_alert_bt").sortable({axis: "y", cursor: "move", items: ".action_cancel_alert_bt", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 
 $("#div_confort").sortable({axis: "y", cursor: "move", items: ".confort", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_action_warning_confort").sortable({axis: "y", cursor: "move", items: ".action_warning_confort", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
+$("#div_action_cancel_warning_confort").sortable({axis: "y", cursor: "move", items: ".action_cancel_warning_confort", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 
 $("#div_security").sortable({axis: "y", cursor: "move", items: ".security", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_action_security").sortable({axis: "y", cursor: "move", items: ".action_security", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
+$("#div_cancel_security").sortable({axis: "y", cursor: "move", items: ".cancel_security", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
+$("#div_action_cancel_security").sortable({axis: "y", cursor: "move", items: ".action_cancel_security", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 
 // le bouton "ajouter un capteur" de l'onglet détection d'inactivité
 $('.addSensorLifeSign').off('click').on('click', function () {
@@ -39,6 +44,10 @@ $('.addSensorLifeSign').off('click').on('click', function () {
 $('.addSensorBtAlert').off('click').on('click', function () {
   addSensorBtAlert({});
 });
+// le bouton "ajouter un bt d'annulation d'alerte" de l'onglet bouton d'alerte
+$('.addSensorCancelBtAlert').off('click').on('click', function () {
+  addSensorCancelBtAlert({});
+});
 // le bouton "ajouter un capteur" de l'onglet confort
 $('.addSensorConfort').off('click').on('click', function () {
   addSensorConfort({});
@@ -47,9 +56,13 @@ $('.addSensorConfort').off('click').on('click', function () {
 $('.addSensorSecurity').off('click').on('click', function () {
   addSensorSecurity({});
 });
+// le bouton "ajouter un bt d'annulation d'alerte" de l'onglet bouton d'alerte
+$('.addSensorCancelSecurity').off('click').on('click', function () {
+  addSensorCancelSecurity({});
+});
 
 
-
+// tous les boutons d'action regroupés !
 $('.addAction').off('click').on('click', function () {
   addAction({}, $(this).attr('data-type'));
 });
@@ -192,6 +205,42 @@ function addSensorBtAlert(_info) {
   $('#div_alert_bt .alert_bt').last().setValues(_info, '.expressionAttr');
 }
 
+// ajoute chaque ligne de bt alerte immédiate
+function addSensorCancelBtAlert(_info) {
+  var div = '<div class="cancel_alert_bt">';
+    div += '<div class="form-group ">';
+
+      div += '<label class="col-sm-1 control-label">{{Nom}}</label>';
+      div += '<div class="col-sm-2">';
+        div += '<div class="input-group">';
+          div += '<span class="input-group-btn">';
+          div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="cancel_alert_bt" title="{{Supprimer le bouton}}""><i class="fas fa-minus-circle"></i></a>';
+          div += '</span>';
+          div += '<input class="expressionAttr form-control cmdInfo" data-l1key="name" title="{{Le nom doit être unique}}"/>'; // dans la class ['name']
+        div += '</div>';
+      div += '</div>';
+
+      div += '<label class="col-sm-1 control-label">Capteur</label>';
+      div += '<div class="col-sm-2">';
+        div += '<div class="input-group">';
+          div += '<input class="expressionAttr form-control cmdInfo" data-l1key="cmd" />';
+          div += '<span class="input-group-btn">';
+            div += '<a class="btn btn-default listCmdInfoWindow roundedRight"><i class="fas fa-list-alt"></i></a>';
+          div += '</span>';
+        div += '</div>';
+      div += '</div>';
+
+  // TODO : ajouter gestion des boutons inversés ?
+  //    div += '<div class="col-sm-1">';
+  //      div += '<label class="checkbox-inline"><input type="checkbox" class="expressionAttr cmdInfo" data-l1key="invert" title="{{Cocher si ce capteur renvoie un 0 lors d\'une activation}}"/>{{Inverser}}</label>';
+  //    div += '</div>';
+
+    div += '</div>';
+  div += '</div>';
+  $('#div_cancel_alert_bt').append(div);
+  $('#div_cancel_alert_bt .cancel_alert_bt').last().setValues(_info, '.expressionAttr');
+}
+
 // ajoute chaque ligne de capteur confort
 // tout ce qui a la class expressionAttr sera enregistré et retrouvable dans la class.php
 function addSensorConfort(_info) {
@@ -284,6 +333,42 @@ function addSensorSecurity(_info) {
   $('#div_security .security').last().setValues(_info, '.expressionAttr');
 }
 
+// ajoute chaque ligne de bt alerte immédiate
+function addSensorCancelSecurity(_info) {
+  var div = '<div class="cancel_security">';
+    div += '<div class="form-group ">';
+
+      div += '<label class="col-sm-1 control-label">{{Nom}}</label>';
+      div += '<div class="col-sm-2">';
+        div += '<div class="input-group">';
+          div += '<span class="input-group-btn">';
+          div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="cancel_security" title="{{Supprimer le bouton}}""><i class="fas fa-minus-circle"></i></a>';
+          div += '</span>';
+          div += '<input class="expressionAttr form-control cmdInfo" data-l1key="name" title="{{Le nom doit être unique}}"/>'; // dans la class ['name']
+        div += '</div>';
+      div += '</div>';
+
+      div += '<label class="col-sm-1 control-label">Capteur</label>';
+      div += '<div class="col-sm-2">';
+        div += '<div class="input-group">';
+          div += '<input class="expressionAttr form-control cmdInfo" data-l1key="cmd" />';
+          div += '<span class="input-group-btn">';
+            div += '<a class="btn btn-default listCmdInfoWindow roundedRight"><i class="fas fa-list-alt"></i></a>';
+          div += '</span>';
+        div += '</div>';
+      div += '</div>';
+
+  // TODO : ajouter gestion des boutons inversés ?
+  //    div += '<div class="col-sm-1">';
+  //      div += '<label class="checkbox-inline"><input type="checkbox" class="expressionAttr cmdInfo" data-l1key="invert" title="{{Cocher si ce capteur renvoie un 0 lors d\'une activation}}"/>{{Inverser}}</label>';
+  //    div += '</div>';
+
+    div += '</div>';
+  div += '</div>';
+  $('#div_cancel_security').append(div);
+  $('#div_cancel_security .cancel_security').last().setValues(_info, '.expressionAttr');
+}
+
 //////////////// Les fonctions ACTIONS /////////////////////////////////
 
 // fonction générique pour ajouter chaque ligne d'action.
@@ -329,12 +414,17 @@ function saveEqLogic(_eqLogic) {
 
   _eqLogic.configuration.alert_bt = $('#div_alert_bt .alert_bt').getValues('.expressionAttr');
   _eqLogic.configuration.action_alert_bt = $('#div_action_alert_bt .action_alert_bt').getValues('.expressionAttr');
+  _eqLogic.configuration.cancel_alert_bt = $('#div_cancel_alert_bt .cancel_alert_bt').getValues('.expressionAttr');
+  _eqLogic.configuration.action_cancel_alert_bt = $('#div_action_cancel_alert_bt .action_cancel_alert_bt').getValues('.expressionAttr');
 
   _eqLogic.configuration.confort = $('#div_confort .confort').getValues('.expressionAttr');
   _eqLogic.configuration.action_warning_confort = $('#div_action_warning_confort .action_warning_confort').getValues('.expressionAttr');
+  _eqLogic.configuration.action_cancel_warning_confort = $('#div_action_cancel_warning_confort .action_cancel_warning_confort').getValues('.expressionAttr');
 
   _eqLogic.configuration.security = $('#div_security .security').getValues('.expressionAttr');
   _eqLogic.configuration.action_security = $('#div_action_security .action_security').getValues('.expressionAttr');
+  _eqLogic.configuration.cancel_security = $('#div_cancel_security .cancel_security').getValues('.expressionAttr');
+  _eqLogic.configuration.action_cancel_security = $('#div_action_cancel_security .action_cancel_security').getValues('.expressionAttr');
 
   return _eqLogic;
 }
@@ -350,12 +440,17 @@ function printEqLogic(_eqLogic) {
 
   $('#div_alert_bt').empty();
   $('#div_action_alert_bt').empty();
+  $('#div_cancel_alert_bt').empty();
+  $('#div_action_cancel_alert_bt').empty();
 
   $('#div_confort').empty();
   $('#div_action_warning_confort').empty();
+  $('#div_action_cancel_warning_confort').empty();
 
   $('#div_security').empty();
   $('#div_action_security').empty();
+  $('#div_cancel_security').empty();
+  $('#div_action_cancel_security').empty();
 
   if (isset(_eqLogic.configuration)) {
     if (isset(_eqLogic.configuration.life_sign)) {
@@ -393,6 +488,16 @@ function printEqLogic(_eqLogic) {
         addAction(_eqLogic.configuration.action_alert_bt[i], 'action_alert_bt');
       }
     }
+    if (isset(_eqLogic.configuration.cancel_alert_bt)) {
+      for (var i in _eqLogic.configuration.cancel_alert_bt) {
+        addSensorCancelBtAlert(_eqLogic.configuration.cancel_alert_bt[i]);
+      }
+    }
+    if (isset(_eqLogic.configuration.action_cancel_alert_bt)) {
+      for (var i in _eqLogic.configuration.action_cancel_alert_bt) {
+        addAction(_eqLogic.configuration.action_cancel_alert_bt[i], 'action_cancel_alert_bt');
+      }
+    }
     if (isset(_eqLogic.configuration.confort)) {
       for (var i in _eqLogic.configuration.confort) {
         addSensorConfort(_eqLogic.configuration.confort[i]);
@@ -403,6 +508,11 @@ function printEqLogic(_eqLogic) {
         addAction(_eqLogic.configuration.action_warning_confort[i], 'action_warning_confort');
       }
     }
+    if (isset(_eqLogic.configuration.action_cancel_warning_confort)) {
+      for (var i in _eqLogic.configuration.action_cancel_warning_confort) {
+        addAction(_eqLogic.configuration.action_cancel_warning_confort[i], 'action_cancel_warning_confort');
+      }
+    }
     if (isset(_eqLogic.configuration.security)) {
       for (var i in _eqLogic.configuration.security) {
         addSensorSecurity(_eqLogic.configuration.security[i]);
@@ -411,6 +521,16 @@ function printEqLogic(_eqLogic) {
     if (isset(_eqLogic.configuration.action_security)) {
       for (var i in _eqLogic.configuration.action_security) {
         addAction(_eqLogic.configuration.action_security[i], 'action_security');
+      }
+    }
+    if (isset(_eqLogic.configuration.security)) {
+      for (var i in _eqLogic.configuration.security) {
+        addSensorCancelSecurity(_eqLogic.configuration.cancel_security[i]);
+      }
+    }
+    if (isset(_eqLogic.configuration.action_security)) {
+      for (var i in _eqLogic.configuration.action_security) {
+        addAction(_eqLogic.configuration.action_cancel_security[i], 'action_cancel_security');
       }
     }
   }
