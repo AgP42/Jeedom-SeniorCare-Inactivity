@@ -59,7 +59,7 @@ class seniorcare extends eqLogic {
 
     }
 
-    public static function checkAndActionSeuilsSensorConfort($seniorcare, $_name, $_value, $_seuilBas, $_seuilHaut, $_type) { // appelée soit par le cron15 (desactivé), soit par un listener (via la fct sensorConfort), va regarder si on est dans les seuils définis et si non appliquer les actions voulues
+    public static function checkAndActionSeuilsSensorConfort($seniorcare, $_name, $_cmd, $_seuilBas, $_seuilHaut, $_type) { // appelée soit par le cron15, soit par un listener (via la fct sensorConfort - desactivée), va regarder si on est dans les seuils définis et si non appliquer les actions voulues
 
     // TODO on pourrait ajouter une durée min pendant laquelle le capteur est hors seuils avant de déclencher l'alerte
     // TODO on pourrait limiter l'alerte à 1 fois par heure (à parametrer ?) => ok ajouté à la demande du forum
@@ -67,35 +67,42 @@ class seniorcare extends eqLogic {
 
       $now = time();
       $rep_warning = $seniorcare->getConfiguration('repetition_warning');
-      $tempsDepuisActionWarningConfort = $now - $seniorcare->getCache('actionWarningConfortStartTimestamp' . $_name);
+      $tempsDepuisActionWarningConfort = $now - $seniorcare->getCache('actionWarningConfortStartTimestamp' . $_cmd); // on garde 1 cache par cmd
+      $warningConfortLauched = $seniorcare->getCache('WarningConfortLauched' . $_cmd);
 
-      log::add('seniorcare', 'debug', 'Fct checkAndActionSeuilsSensorConfort, name : ' . $_name . ' - ' . $_type . ' - ' . $_value . ' - ' . $_seuilBas . ' - ' . $_seuilHaut . ' - Rep warning : ' . $seniorcare->getConfiguration('repetition_warning'));
+      $valeur = jeedom::evaluateExpression($_cmd);
+
+      log::add('seniorcare', 'debug', 'Fct checkAndActionSeuilsSensorConfort, name : ' . $_name . ' - ' . $_type . ' - ' . $_cmd . ' - ' . $valeur . ' - ' . $_seuilBas . ' - ' . $_seuilHaut . ' - Rep warning : ' . $seniorcare->getConfiguration('repetition_warning'));
+
       log::add('seniorcare', 'debug', 'Fct checkAndActionSeuilsSensorConfort, WarningConfortLauched : ' . $seniorcare->getCache('WarningConfortLauched' . $_name) . ' - timestamp last action lancé : ' . $seniorcare->getCache('actionWarningConfortStartTimestamp' . $_name) . ' - Il y a : ' . $tempsDepuisActionWarningConfort / 60);
 
 
-      if (($_value > $_seuilHaut || $_value < $_seuilBas) && // si la valeur sort des seuils et selon le choix de repetition
-         ($rep_warning == '' || $rep_warning == 'all' || // si on a pas defini la repetition de warning ou si defini sur "all" ou si
-         ($rep_warning == 'once' && !$seniorcare->getCache('WarningConfortLauched' . $_name)) || // rep_warning est sur "1fois" et qu'on l'a pas encore lancé ou si
-         ($rep_warning == '15min' && $tempsDepuisActionWarningConfort > 15*60) || // rep_warning sur 15 min et dernier lancement depuis plus de 15min
-         ($rep_warning == '1hour' && $tempsDepuisActionWarningConfort > 60*60) // rep_warning sur 1h et dernier lancement depuis plus d'1h
+      if (($valeur > $_seuilHaut || $valeur < $_seuilBas) && // si la valeur sort des seuils et selon le choix de repetition
+         ($rep_warning == '' || $rep_warning == '15min' || // si on a pas defini la repetition de warning ou si defini sur "15min" ou si
+         ($rep_warning == 'once' && !$warningConfortLauched) || // rep_warning est sur "1fois" et qu'on l'a pas encore lancé ou si
+         ($rep_warning == '1hour' && $tempsDepuisActionWarningConfort >= 60*59) || // rep_warning sur 1h et dernier lancement depuis plus de 59min (pour éviter de tomber 1s apres 1h et donc de louper le rappel...)
+         ($rep_warning == '6hours' && $tempsDepuisActionWarningConfort >= 60*59*6) // rep_warning sur 6h et dernier lancement depuis 6h-6min
         )){
 
-        $seniorcare->setCache('WarningConfortLauched' . $_name, true); // on garde en cache qu'on a lancé nos actions au mois 1 fois
-        $seniorcare->setCache('actionWarningConfortStartTimestamp' . $_name, $now); // on memorise l'heure du lancement du warning
+        $seniorcare->setCache('WarningConfortLauched' . $_cmd, true); // on garde en cache qu'on a lancé nos actions au moins 1 fois
+        $seniorcare->setCache('actionWarningConfortStartTimestamp' . $_cmd, $now); // on memorise l'heure du lancement du warning
 
-        $seniorcare->execActions('action_warning_confort', $_name, $_type, $_value, $_seuilBas, $_seuilHaut);
+        $seniorcare->execActions('action_warning_confort', $_name, $_type, $valeur, $_seuilBas, $_seuilHaut); // on execute les actions pour chacun
 
-      } else if (($_value >= $_seuilHaut || $_value >= $_seuilBas) && $seniorcare->getCache('WarningConfortLauched' . $_name)){ // on est dans les seuils et on a deja lancé notre warning au moins 1 fois, il faut lancer les actions de retour à la normal
+      } else if (($valeur >= $_seuilHaut || $valeur >= $_seuilBas) && $warningConfortLauched){ // on est dans les seuils et on a deja lancé notre warning au moins 1 fois, il faut lancer les actions de retour à la normal
         log::add('seniorcare', 'debug', 'Capteurs confort :' . $_name . ' retour à la normal !');
-        $seniorcare->setCache('WarningConfortLauched' . $_name, false); // on remet dans le cache qu'on a pas lancé les actions
-        $seniorcare->execActions('action_cancel_warning_confort', $_name, $_type, $_value, $_seuilBas, $_seuilHaut); // appel de la boucle d'execution des actions avec les infos pour les tag des messages
+        $seniorcare->setCache('WarningConfortLauched' . $_cmd, false); // on remet dans le cache qu'on a pas lancé les actions
+        $seniorcare->execActions('action_cancel_warning_confort', $_name, $_type, $valeur, $_seuilBas, $_seuilHaut); // appel de la boucle d'execution des actions avec les infos pour les tag des messages
+      } else if (($valeur >= $_seuilHaut || $valeur >= $_seuilBas) && !$warningConfortLauched){ // on est dans les seuils et on a pas lancé notre warning : rien a faire...
+        log::add('seniorcare', 'debug', 'Capteurs confort :' . $_name . ' dans les seuils, on fait rien');
       } else {
         log::add('seniorcare', 'debug', 'Capteurs confort :' . $_name . ' est hors seuils, mais il faut pas le dire...chutttt...');
-      }
+      } //*/
 
     }
 
-    public static function sensorConfort($_option) { // fct appelée par le listener des capteurs conforts (on sait pas lequel, ça serait trop simple, mais on connait l'event_id et la valeur).
+// commenté car on utilise plus les listener pour les confort, juste le cron 15
+/*    public static function sensorConfort($_option) { // fct appelée par le listener des capteurs conforts (on sait pas lequel, ça serait trop simple, mais on connait l'event_id et la valeur).
 
       log::add('seniorcare', 'debug', '################ Detection d\'un changement d\'un capteur confort ############');
 
@@ -115,9 +122,9 @@ class seniorcare extends eqLogic {
           }
 
         }
-      } //*/
+      }
 
-    }
+    } //*/
 
     public static function sensorLifeSign($_option) { // fct appelée par le listener des capteurs d'activité, n'importe quel capteur arrive ici
       log::add('seniorcare', 'debug', '################ Detection d\'un capteur d\'activité ############');
@@ -245,8 +252,9 @@ class seniorcare extends eqLogic {
     }
 
     //*
-    // * Fonction exécutée automatiquement toutes les 15 minutes par Jeedom - sert de backup si on rate un listener. A voir a l'usage si on veut garder ca et la fréquence... TODO
-  /*    public static function cron15() {
+    // * Fonction exécutée automatiquement toutes les 15 minutes par Jeedom
+    // Sert ici pour les capteurs conforts
+      public static function cron15() {
 
         log::add('seniorcare', 'debug', '#################### CRON 15 ###################');
 
@@ -257,12 +265,12 @@ class seniorcare extends eqLogic {
 
             foreach ($seniorcare->getConfiguration('confort') as $confort) { // on boucle direct dans la conf
 
-          //    log::add('seniorcare', 'debug', 'Fct sensorConfort appelé par le cron, name : ' . $confort['name'] . ' - cmd : ' . $confort['cmd']  . ' - ' . $confort['sensor_confort_type'] . ' - ' . $confort['seuilBas'] . ' - ' . $confort['seuilHaut']);
+              log::add('seniorcare', 'debug', 'Cron15 boucle capteurs confort, name : ' . $confort['name'] . ' - cmd : ' . $confort['cmd']  . ' - ' . $confort['sensor_confort_type'] . ' - ' . $confort['seuilBas'] . ' - ' . $confort['seuilHaut']);
 
               if($confort['seuilBas'] != '' || $confort['seuilHaut'] != '') { // évalue si on a au moins 1 seuil defini (de toute facon on peut pas n'en remplir qu'1 des deux)
 
-                $valeur = jeedom::evaluateExpression($confort['cmd']);
-                $seniorcare->checkAndActionSeuilsSensorConfort($seniorcare, $confort['name'], $valeur, $confort['seuilBas'], $confort['seuilHaut'], $confort['sensor_confort_type']);
+            //    $valeur = jeedom::evaluateExpression($confort['cmd']);
+                $seniorcare->checkAndActionSeuilsSensorConfort($seniorcare, $confort['name'], $confort['cmd'], $confort['seuilBas'], $confort['seuilHaut'], $confort['sensor_confort_type']);
 
               }
 
@@ -506,7 +514,8 @@ class seniorcare extends eqLogic {
           } else if ($cmd->getLogicalId() == 'sensor_alert_bt'){
             $listenerFunction = 'buttonAlert';
           } else if ($cmd->getLogicalId() == 'sensor_confort'){
-            $listenerFunction = 'sensorConfort';
+            continue; // on veut pas de listener pour les capteurs confort ! Donc on coupe la boucle et on passe au prochain cmd
+        //    $listenerFunction = 'sensorConfort';
           } else if ($cmd->getLogicalId() == 'sensor_security'){
             $listenerFunction = 'sensorSecurity';
           } else if ($cmd->getLogicalId() == 'sensor_cancel_alert_bt'){
@@ -576,8 +585,8 @@ class seniorcare extends eqLogic {
                 throw new Exception(__('Capteur confort - ' . $sensor['name'] . ', les valeurs des seuils doivent être numériques', __FILE__));
               }
 
-              if ($sensor['seuilBas'] > $sensor['seuilHaut']) {
-                throw new Exception(__('Capteur confort - ' . $sensor['name'] . ', le seuil bas ne peut pas être supérieur au seuil haut', __FILE__)); // consequence : on peut pas ne definir qu'un seul seuil
+              if ($sensor['seuilBas'] >= $sensor['seuilHaut']) {
+                throw new Exception(__('Capteur confort - ' . $sensor['name'] . ', le seuil bas ne peut pas être supérieur ou égal au seuil haut', __FILE__)); // consequence : on peut pas ne definir qu'un seul seuil
               }
 
             }

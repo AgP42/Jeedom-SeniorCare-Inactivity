@@ -30,6 +30,7 @@ $("#div_action_cancel_alert_bt").sortable({axis: "y", cursor: "move", items: ".a
 $("#div_confort").sortable({axis: "y", cursor: "move", items: ".confort", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_action_warning_confort").sortable({axis: "y", cursor: "move", items: ".action_warning_confort", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_action_cancel_warning_confort").sortable({axis: "y", cursor: "move", items: ".action_cancel_warning_confort", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
+$("#div_action_cancel_all_warning_confort").sortable({axis: "y", cursor: "move", items: ".action_cancel_all_warning_confort", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 
 $("#div_security").sortable({axis: "y", cursor: "move", items: ".security", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_action_security").sortable({axis: "y", cursor: "move", items: ".action_security", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
@@ -66,6 +67,7 @@ $('.addSensorCancelSecurity').off('click').on('click', function () {
 $('.addAction').off('click').on('click', function () {
   addAction({}, $(this).attr('data-type'));
 });
+
 
 // tous les - qui permettent de supprimer la ligne
 $("body").off('click','.bt_removeAction').on('click','.bt_removeAction',function () {
@@ -420,6 +422,7 @@ function saveEqLogic(_eqLogic) {
   _eqLogic.configuration.confort = $('#div_confort .confort').getValues('.expressionAttr');
   _eqLogic.configuration.action_warning_confort = $('#div_action_warning_confort .action_warning_confort').getValues('.expressionAttr');
   _eqLogic.configuration.action_cancel_warning_confort = $('#div_action_cancel_warning_confort .action_cancel_warning_confort').getValues('.expressionAttr');
+  _eqLogic.configuration.action_cancel_all_warning_confort = $('#div_action_cancel_all_warning_confort .action_cancel_all_warning_confort').getValues('.expressionAttr');
 
   _eqLogic.configuration.security = $('#div_security .security').getValues('.expressionAttr');
   _eqLogic.configuration.action_security = $('#div_action_security .action_security').getValues('.expressionAttr');
@@ -446,6 +449,7 @@ function printEqLogic(_eqLogic) {
   $('#div_confort').empty();
   $('#div_action_warning_confort').empty();
   $('#div_action_cancel_warning_confort').empty();
+  $('#div_action_cancel_all_warning_confort').empty();
 
   $('#div_security').empty();
   $('#div_action_security').empty();
@@ -511,6 +515,11 @@ function printEqLogic(_eqLogic) {
     if (isset(_eqLogic.configuration.action_cancel_warning_confort)) {
       for (var i in _eqLogic.configuration.action_cancel_warning_confort) {
         addAction(_eqLogic.configuration.action_cancel_warning_confort[i], 'action_cancel_warning_confort');
+      }
+    }
+    if (isset(_eqLogic.configuration.action_cancel_warning_confort)) {
+      for (var i in _eqLogic.configuration.action_cancel_warning_confort) {
+        addAction(_eqLogic.configuration.action_cancel_all_warning_confort[i], 'action_cancel_all_warning_confort');
       }
     }
     if (isset(_eqLogic.configuration.security)) {

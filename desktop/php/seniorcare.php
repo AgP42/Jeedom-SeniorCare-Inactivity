@@ -296,7 +296,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-bomb"></i> {{Actions avertissement}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées simultanément dés que le système détectera qu'un capteur de confort sort des seuils prédéfinis. Vous pouvez définir des actions pour la personne dépendante et/ou pour les aidants. Vous pouvez appeler un scenario pour des actions plus complexes. Pour les messages, vous pouvez utiliser les tag suivants : #nom_personne#, #nom_capteur#, #type_capteur#, #valeur#, #seuil_bas#, #seuil_haut# et #unite#. Voir la doc pour plus de détails.}}"></i></sup>
+          <legend><i class="fas fa-bomb"></i> {{Actions avertissement (pour chaque capteur hors seuils, je dois ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées simultanément dés que le système détectera qu'un capteur de confort sort des seuils prédéfinis. Vous pouvez définir des actions pour la personne dépendante et/ou pour les aidants. Vous pouvez appeler un scenario pour des actions plus complexes. Pour les messages, vous pouvez utiliser les tag suivants : #nom_personne#, #nom_capteur#, #type_capteur#, #valeur#, #seuil_bas#, #seuil_haut# et #unite#. Voir la doc pour plus de détails.}}"></i></sup>
             <a class="btn btn-success btn-sm addAction" data-type="action_warning_confort" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
           </legend>
           <div id="div_action_warning_confort"></div>
@@ -305,10 +305,10 @@ $eqLogics = eqLogic::byType($plugin->getId());
           </label>
           <div class="col-sm-2">
             <select class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="repetition_warning">
-              <option value="all" selected>A chaque nouvelle valeur hors seuil</option>
               <option value="once">Une seule fois</option>
-              <option value="15min">Maximum toutes les 15 min</option>
-              <option value="1hour">Maximum toutes les heures</option>
+              <option value="15min">Toutes les 15 min</option>
+              <option value="1hour">Toutes les heures</option>
+              <option value="6hours">Toutes les 6 heures</option>
             </select>
           </div>
 
@@ -317,10 +317,20 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-hand-paper"></i> {{Actions pour arrêter l'avertissement}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées lorsqu'un capteur qui était hors seuil retrouve une valeur dans les seuils définis. Pour les messages, vous pouvez utiliser le tag #nom_personne#.}}"></i></sup>
+          <legend><i class="fas fa-hand-paper"></i> {{Actions arrêt l'avertissement - pour chaque capteur de retour dans les seuils, je dois ?}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées lorsqu'un capteur qui était hors seuils retrouve une valeur dans les seuils définis. Pour les messages, vous pouvez utiliser le tag #nom_personne#.}}"></i></sup>
             <a class="btn btn-success btn-sm addAction" data-type="action_cancel_warning_confort" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
           </legend>
           <div id="div_action_cancel_warning_confort"></div>
+
+        </fieldset>
+      </form>
+
+      <form class="form-horizontal">
+        <fieldset>
+          <legend><i class="fas fa-hand-peace"></i> {{Actions arrêt l'avertissement - lorsque tous les capteurs sont dans les seuils, je dois ?}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées lorsque tous les capteurs ont leur valeur dans les seuils définis. Pour les messages, vous pouvez utiliser le tag #nom_personne#.}}"></i></sup>
+            <a class="btn btn-success btn-sm addAction" data-type="action_cancel_all_warning_confort" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
+          </legend>
+          <div id="div_action_cancel_all_warning_confort"></div>
 
         </fieldset>
       </form>
