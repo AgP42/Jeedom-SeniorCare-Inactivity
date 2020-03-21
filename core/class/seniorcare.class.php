@@ -89,14 +89,19 @@ class seniorcare extends eqLogic {
 
         $seniorcare->execActions('action_warning_confort', $_name, $_type, $valeur, $_seuilBas, $_seuilHaut); // on execute les actions pour chacun
 
+        return 0; // on a au moins 1 capteur hors seuil, ils doivent repondre tous true pour que le cron lance les actions "tous ok"
+
       } else if (($valeur >= $_seuilHaut || $valeur >= $_seuilBas) && $warningConfortLauched){ // on est dans les seuils et on a deja lancé notre warning au moins 1 fois, il faut lancer les actions de retour à la normal
         log::add('seniorcare', 'debug', 'Capteurs confort :' . $_name . ' retour à la normal !');
         $seniorcare->setCache('WarningConfortLauched' . $_cmd, false); // on remet dans le cache qu'on a pas lancé les actions
         $seniorcare->execActions('action_cancel_warning_confort', $_name, $_type, $valeur, $_seuilBas, $_seuilHaut); // appel de la boucle d'execution des actions avec les infos pour les tag des messages
+        return 1;
       } else if (($valeur >= $_seuilHaut || $valeur >= $_seuilBas) && !$warningConfortLauched){ // on est dans les seuils et on a pas lancé notre warning : rien a faire...
         log::add('seniorcare', 'debug', 'Capteurs confort :' . $_name . ' dans les seuils, on fait rien');
-      } else {
+        return 1;
+      } else { // on est pas dans les seuils mais on a deja lancé les alertes selon la repetition voulu
         log::add('seniorcare', 'debug', 'Capteurs confort :' . $_name . ' est hors seuils, mais il faut pas le dire...chutttt...');
+        return 0;
       } //*/
 
     }
@@ -263,18 +268,23 @@ class seniorcare extends eqLogic {
 
           if (is_object($seniorcare) && $seniorcare->getIsEnable() == 1) { // si notre eq existe et est actif
 
+            $etatSensor = 1;
             foreach ($seniorcare->getConfiguration('confort') as $confort) { // on boucle direct dans la conf
 
               log::add('seniorcare', 'debug', 'Cron15 boucle capteurs confort, name : ' . $confort['name'] . ' - cmd : ' . $confort['cmd']  . ' - ' . $confort['sensor_confort_type'] . ' - ' . $confort['seuilBas'] . ' - ' . $confort['seuilHaut']);
 
               if($confort['seuilBas'] != '' || $confort['seuilHaut'] != '') { // évalue si on a au moins 1 seuil defini (de toute facon on peut pas n'en remplir qu'1 des deux)
 
-            //    $valeur = jeedom::evaluateExpression($confort['cmd']);
-                $seniorcare->checkAndActionSeuilsSensorConfort($seniorcare, $confort['name'], $confort['cmd'], $confort['seuilBas'], $confort['seuilHaut'], $confort['sensor_confort_type']);
-
+                $etatSensor *= $seniorcare->checkAndActionSeuilsSensorConfort($seniorcare, $confort['name'], $confort['cmd'], $confort['seuilBas'], $confort['seuilHaut'], $confort['sensor_confort_type']);
+                log::add('seniorcare', 'debug', 'Cron15 boucle capteurs confort, etatSensor : ' . $etatSensor);
+                // il suffit qu'il y ai 1 capteur qui renvoie 0 pour que notre $etatSensor passe a 0
               }
 
             } // fin foreach tous les capteurs conforts de la conf
+
+            if($etatSensor){ // ils ont tous repondu 1, on va lancer les actions
+              $seniorcare->execActions('action_cancel_all_warning_confort'); // appel de la boucle d'execution des actions avec les infos pour les tag des messages
+            }
 
           } // fin if eq actif
 
