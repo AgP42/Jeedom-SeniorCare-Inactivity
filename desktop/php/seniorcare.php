@@ -137,19 +137,20 @@ $eqLogics = eqLogic::byType($plugin->getId());
     <div class="tab-pane" id="lifesigntab">
       <br/>
       <div class="alert alert-info">
-        {{Cet onglet permet de configurer les capteurs indiquant au système une activité de la personne dépendante. Un premier niveau d'alerte permet à la personne dépendante d'être avertie d'une alerte imminente pour pouvoir la désactiver. Sans réaction de sa part, une alerte sera envoyée aux aidants.}}
+        {{Onglet de configuration des capteurs indiquant une activité de la personne dépendante.
+        Un premier niveau d'alerte permet de prévenir la personne dépendante d'une alerte imminente afin de la désactiver.
+        Sans réaction de sa part, une alerte sera envoyée aux aidants.}}
       </div>
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-heartbeat"></i> {{Capteurs d'activités}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces capteurs déclencheront une alerte
-            si aucun d'entre eux n'est activé pendant un certain délai}}"></i></sup>
+          <legend><i class="fas fa-heartbeat"></i> {{Capteurs d'activités}} <sup><i class="fas fa-question-circle tooltips" title="{{Capteurs déclenchant une alerte en cas d'inactivation pendant un certain délai}}"></i></sup>
             <a class="btn btn-success btn-sm addSensorLifeSign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un capteur}}</a>
           </legend>
 
           <div id="div_life_sign"></div>
 
-          <legend><i class="fas fa-stopwatch"></i> {{Délai avant avertissement d'inactivité}} <sup><i class="fas fa-question-circle tooltips" title="{{Délai au terme duquel une alerte se déclenchera si aucun des capteurs d'activités n'est activé. TODO - A paufiner selon jour/nuit, etc.}}"></i></sup>
+          <legend><i class="fas fa-stopwatch"></i> {{Délai avant avertissement d'inactivité}} <sup><i class="fas fa-question-circle tooltips" title="{{Délai au terme duquel une alerte se déclenchera si aucun capteur d'activités n'est activé. TODO - A paufiner selon jour/nuit, etc.}}"></i></sup>
           </legend>
 
           <div class="form-group">
@@ -168,13 +169,14 @@ $eqLogics = eqLogic::byType($plugin->getId());
         <div class="col-lg-6">
           <form class="form-horizontal">
             <fieldset>
-              <legend><i class="fas fa-user-clock"></i> {{Actions avertissement de détection d'inactivité - pour la personne dépendante}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées dès que le système ne détectera aucune activité depuis le délai consideré. La personne dépendante disposera d'un certain temps pour désactiver l'alerte avant qu'elle ne soit transmise aux aidants}}"></i></sup>
+              <legend><i class="fas fa-user-clock"></i> {{Actions avertissement de détection d'inactivité - pour la personne dépendante}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées sans détection d'activité depuis le délai consideré.
+              La personne dépendante dispose d'un certain temps pour désactiver l'alerte avant transmission aux aidants}}"></i></sup>
                 <a class="btn btn-success btn-sm addAction" data-type="action_warning_life_sign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
               </legend>
               <div id="div_action_warning_life_sign"></div>
 
 
-              <label class="col-lg-4 control-label">{{Délai avant de prévenir les aidants}} <sup><i class="fas fa-question-circle tooltips" title="{{Délai pendant laquelle la personne dépendante peut désactiver l'alerte (en activant n'importe quel capteur d'activité) avant qu'elle ne soit transmise aux aidants}}"></i></sup></label>
+              <label class="col-lg-4 control-label">{{Délai avant de prévenir les aidants}} <sup><i class="fas fa-question-circle tooltips" title="{{Délai pendant laquelle la personne dépendante peut désactiver l'alerte par activation d'un capteur d'activité avant signalement aux aidants}}"></i></sup></label>
               <div class="col-lg-2">
                 <input type="number" class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="warning_life_sign_timer" title="{{}}"/>
               </div>
@@ -185,7 +187,8 @@ $eqLogics = eqLogic::byType($plugin->getId());
         <div class="col-lg-6">
           <form class="form-horizontal">
             <fieldset>
-              <legend><i class="fas fa-user-slash"></i> {{Actions de désactivation des avertissements}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées lorsqu'un des capteurs d'activité est déclenché alors que les actions d'avertissement ont été précédemment activées. //TODO préciser dans la doc que ces actions ne sont pas activées lorsque l'on active les alertes, mais uniquement si signe de vie pendant la phase de warning}}"></i></sup>
+              <legend><i class="fas fa-user-slash"></i> {{Actions de désactivation des avertissements}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées lors du déclenchement d'un capteur d'activité alors que les actions d'avertissement ont été activées.
+              //TODO préciser dans la doc que ces actions ne sont pas activées lorsque l'on active les alertes, mais uniquement si signe de vie pendant la phase de warning}}"></i></sup>
                 <a class="btn btn-danger btn-sm addAction" data-type="action_desactivate_warning_life_sign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
               </legend>
               <div id="div_action_desactivate_warning_life_sign"></div>
@@ -201,7 +204,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
         <div class="col-lg-6">
           <form class="form-horizontal">
             <fieldset>
-              <legend><i class="fas fa-bell"></i> {{Actions alerte de détection d'inactivité - pour les aidants}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées à l'échéance du délai de désactivation de l'alerte par la personne dépendante.}}"></i></sup>
+              <legend><i class="fas fa-bell"></i> {{Actions alerte de détection d'inactivité - pour les aidants}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées à l'échéance du délai de désactivation de l'alerte par la personne dépendante.}}"></i></sup>
                 <a class="btn btn-success btn-sm addAction" data-type="action_alert_life_sign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
               </legend>
               <div id="div_action_alert_life_sign"></div>
@@ -213,7 +216,8 @@ $eqLogics = eqLogic::byType($plugin->getId());
         <div class="col-lg-6">
           <form class="form-horizontal">
             <fieldset>
-              <legend><i class="fas fa-bell-slash"></i> {{Actions de désactivation des alertes}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées lorsqu'un des capteurs d'activité est déclenché alors que les actions d'alerte vers les aidants ont été précédemment activées.}}"></i></sup>
+              <legend><i class="fas fa-bell-slash"></i> {{Actions de désactivation des alertes}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées lors du déclenchement d'un capteur d'activité alors que
+              les actions d'alerte vers les aidants ont été activées.}}"></i></sup>
                 <a class="btn btn-danger btn-sm addAction" data-type="action_desactivate_alert_life_sign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
               </legend>
               <div id="div_action_desactivate_alert_life_sign"></div>
@@ -229,12 +233,12 @@ $eqLogics = eqLogic::byType($plugin->getId());
     <div class="tab-pane" id="alertbttab">
       <br/>
       <div class="alert alert-info">
-        {{Cet onglet permet de configurer un ou plusieurs boutons d'alerte immédiate pour envoyer une alerte aux aidants.}}
+        {{Onglet de configuration de boutons d'alerte immédiate pour alerter les aidants.}}
       </div>
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-toggle-on"></i> {{Boutons d'alerte immédiate (quel actionneur va lancer une alerte ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Bouton à porter par la personne pour déclencher une alerte immédiate par un simple appui}}"></i></sup>
+          <legend><i class="fas fa-toggle-on"></i> {{Boutons d'alerte immédiate (quel actionneur va lancer une alerte ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Bouton à porter pour déclencher une alerte immédiate.}}"></i></sup>
             <a class="btn btn-success btn-sm addSensorBtAlert" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un bouton}}</a>
           </legend>
           <div id="div_alert_bt"></div>
@@ -245,7 +249,8 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-bomb"></i> {{Actions alerte immédiate vers les aidants (pour alerter, je dois ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées à l'activation d'un des boutons d'alerte par la personne dépendante. Pour les messages, vous pouvez utiliser le tag #nom_personne#.}}"></i></sup>
+          <legend><i class="fas fa-bomb"></i> {{Actions alerte immédiate vers les aidants (pour alerter, je dois ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées à l'activation d'un bouton d'alerte par la personne dépendante.
+          Tag utilisable : #senior_name#.}}"></i></sup>
             <a class="btn btn-success btn-sm addAction" data-type="action_alert_bt" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
           </legend>
           <div id="div_action_alert_bt"></div>
@@ -257,7 +262,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-toggle-off"></i> {{Boutons d'annulation d'alerte (quel actionneur pour couper l'alerte ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Bouton pour déactiver l'alerte}}"></i></sup>
+          <legend><i class="fas fa-toggle-off"></i> {{Boutons d'annulation d'alerte (quel actionneur pour couper l'alerte ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Bouton de déactivation d'alerte}}"></i></sup>
             <a class="btn btn-success btn-sm addSensorCancelBtAlert" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un bouton}}</a>
           </legend>
           <div id="div_cancel_alert_bt"></div>
@@ -268,7 +273,8 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-hand-paper"></i> {{Actions pour arrêter l'alerte vers les aidants (pour annuler l'alerte, je dois ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées à l'activation d'un des boutons d'annulation d'alerte. Pour les messages, vous pouvez utiliser le tag #nom_personne#.}}"></i></sup>
+          <legend><i class="fas fa-hand-paper"></i> {{Actions pour arrêter l'alerte vers les aidants (pour annuler l'alerte, je dois ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées sur activation d'un bouton d'annulation d'alerte.
+          Tag utilisable : #senior_name#.}}"></i></sup>
             <a class="btn btn-success btn-sm addAction" data-type="action_cancel_alert_bt" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
           </legend>
           <div id="div_action_cancel_alert_bt"></div>
@@ -282,12 +288,13 @@ $eqLogics = eqLogic::byType($plugin->getId());
     <div class="tab-pane" id="conforttab">
       <br/>
       <div class="alert alert-info">
-        {{Cet onglet permet de configurer les capteurs du confort du logement de la personne dépendante. Vous pouvez définir les actions à réaliser lors des dépassements de seuils définis.}}
+        {{Onglet de configuration des capteurs de confort du logement, de définition des seuils de confort et des actions à réaliser en cas de sortie de ces seuils.}}
       </div>
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-spa"></i> {{Capteurs confort}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces capteurs déclencheront une alerte si leur valeur sort des seuils définis. Des seuils vides permettent de suivre les courbes sans générer d'alertes.}}"></i></sup>
+          <legend><i class="fas fa-spa"></i> {{Capteurs confort}} <sup><i class="fas fa-question-circle tooltips" title="{{Capteurs de déclenchement d'alerte en cas de sortie des seuils définis.
+          Des seuils vides permettent un suivi sans génération d'alertes.}}"></i></sup>
             <a class="btn btn-success btn-sm addSensorConfort" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un capteur}}</a>
           </legend>
           <div id="div_confort"></div>
@@ -296,7 +303,10 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-bomb"></i> {{Actions avertissement (pour chaque capteur hors seuils, je dois ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées simultanément dés que le système détectera qu'un capteur de confort sort des seuils prédéfinis. Vous pouvez définir des actions pour la personne dépendante et/ou pour les aidants. Vous pouvez appeler un scenario pour des actions plus complexes. Pour les messages, vous pouvez utiliser les tag suivants : #nom_personne#, #nom_capteur#, #type_capteur#, #valeur#, #seuil_bas#, #seuil_haut# et #unite#. Voir la doc pour plus de détails.}}"></i></sup>
+          <legend><i class="fas fa-bomb"></i> {{Actions avertissement (pour chaque capteur hors seuils, je dois ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées dès la sortie des seuils d'un capteur de confort.
+          Actions à définir pour la personne dépendante et/ou pour les aidants.
+          Les actions complexes peuvent être créées par scenario.
+          Tags utilisables : #senior_name#, #sensor_name#, #sensor_type#, #value#, #low_threshold#, #high_threshold#, #unit#.}}"></i></sup>
             <a class="btn btn-success btn-sm addAction" data-type="action_warning_confort" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
           </legend>
           <div id="div_action_warning_confort"></div>
@@ -317,7 +327,8 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-hand-paper"></i> {{Actions arrêt l'avertissement - pour chaque capteur de retour dans les seuils, je dois ?}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées lorsqu'un capteur qui était hors seuils retrouve une valeur dans les seuils définis. Pour les messages, vous pouvez utiliser le tag #nom_personne#.}}"></i></sup>
+          <legend><i class="fas fa-hand-paper"></i> {{Actions arrêt d'avertissement - pour chaque capteur de retour dans les seuils, je dois ?}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées lorsqu'un capteur précédemment hors seuils retrouve ses limites.
+          Tag utilisable : #senior_name#.}}"></i></sup>
             <a class="btn btn-success btn-sm addAction" data-type="action_cancel_warning_confort" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
           </legend>
           <div id="div_action_cancel_warning_confort"></div>
@@ -327,7 +338,8 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-hand-peace"></i> {{Actions arrêt l'avertissement - lorsque tous les capteurs sont dans les seuils, je dois ?}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées lorsque tous les capteurs ont leur valeur dans les seuils définis. Pour les messages, vous pouvez utiliser le tag #nom_personne#.}}"></i></sup>
+          <legend><i class="fas fa-hand-peace"></i> {{Actions arrêt d'avertissement - lorsque tous les capteurs sont dans les seuils, je dois ?}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées lorsque tous les capteurs reviennent dans les seuils définis.
+          Tag utilisable : #senior_name#.}}"></i></sup>
             <a class="btn btn-success btn-sm addAction" data-type="action_cancel_all_warning_confort" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
           </legend>
           <div id="div_action_cancel_all_warning_confort"></div>
@@ -341,12 +353,12 @@ $eqLogics = eqLogic::byType($plugin->getId());
     <div class="tab-pane" id="securitytab">
       <br/>
       <div class="alert alert-info">
-        {{Cet onglet permet de configurer les capteurs de sécurité du logement de la personne dépendante ainsi que les actions à réaliser en cas de déclenchement}}
+        {{Onglet de configuration des capteurs de sécurité du logement ainsi que des actions à réaliser en cas de déclenchement}}
       </div>
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-exclamation-triangle"></i> {{Capteurs Sécurité}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces capteurs déclencheront une alerte de sécurité immédiate à chaque déclenchement}}"></i></sup>
+          <legend><i class="fas fa-exclamation-triangle"></i> {{Capteurs Sécurité}} <sup><i class="fas fa-question-circle tooltips" title="{{Capteurs déclenchant une alerte de sécurité immédiate sur chaque activation}}"></i></sup>
             <a class="btn btn-success btn-sm addSensorSecurity" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un capteur}}</a>
           </legend>
           <div id="div_security"></div>
@@ -357,7 +369,8 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-bomb"></i> {{Actions alerte immédiate}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées à l'activation d'un des capteur de sécurité. Pour les messages, vous pouvez utiliser le tag #nom_personne#.}}"></i></sup>
+          <legend><i class="fas fa-bomb"></i> {{Actions alerte immédiate}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées à l'activation d'un capteur de sécurité.
+          Tag utilisable : #senior_name#.}}"></i></sup>
             <a class="btn btn-success btn-sm addAction" data-type="action_security" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
           </legend>
           <div id="div_action_security"></div>
@@ -369,7 +382,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-toggle-off"></i> {{Boutons d'annulation d'alerte (quel actionneur pour couper l'alerte ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Bouton pour déactiver l'alerte}}"></i></sup>
+          <legend><i class="fas fa-toggle-off"></i> {{Boutons d'annulation d'alerte (quel actionneur pour couper l'alerte ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Bouton de déactivation de l'alerte}}"></i></sup>
             <a class="btn btn-success btn-sm addSensorCancelSecurity" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un bouton}}</a>
           </legend>
           <div id="div_cancel_security"></div>
@@ -380,7 +393,8 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-hand-paper"></i> {{Actions pour arrêter l'alerte (pour annuler l'alerte, je dois ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces actions seront réalisées à l'activation d'un des boutons d'annulation d'alerte. Pour les messages, vous pouvez utiliser le tag #nom_personne#.}}"></i></sup>
+          <legend><i class="fas fa-hand-paper"></i> {{Actions pour arrêter l'alerte (pour annuler l'alerte, je dois ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées sur activation d'un bouton d'annulation d'alerte.
+            Tag utilisable : #senior_name#.}}"></i></sup>
             <a class="btn btn-success btn-sm addAction" data-type="action_cancel_security" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
           </legend>
           <div id="div_action_cancel_security"></div>

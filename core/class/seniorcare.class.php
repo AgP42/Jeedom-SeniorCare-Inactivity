@@ -220,16 +220,16 @@ class seniorcare extends eqLogic {
 
       foreach ($this->getConfiguration($_config) as $action) { // on boucle pour executer toutes les actions définies
         try {
-          $options = array(); // va permettre d'appeller les options de configuration des actions, par exemple un scenario un message
+          $options = array(); // va permettre d'appeler les options de configuration des actions, par exemple un scenario un message
           if (isset($action['options'])) {
             $options = $action['options'];
             foreach ($options as $key => $value) { // ici on peut définir les "tag" de configuration qui seront à remplacer par des variables
               // str_replace ($search, $replace, $subject) retourne une chaîne ou un tableau, dont toutes les occurrences de search dans subject ont été remplacées par replace.
-              $value = str_replace('#nom_personne#', $this->getName(), $value);
-              $value = str_replace('#nom_capteur#', $_sensor_name, $value);
-              $value = str_replace('#type_capteur#', $_sensor_type, $value);
-              $value = str_replace('#valeur#', $_sensor_value, $value);
-              $value = str_replace('#seuil_bas#', $_seuilBas, $value);
+              $value = str_replace('#senior_name#', $this->getName(), $value);
+              $value = str_replace('#sensor_name#', $_sensor_name, $value);
+              $value = str_replace('#sensor_type#', $_sensor_type, $value);
+              $value = str_replace('#value#', $_sensor_value, $value);
+              $value = str_replace('#low_threshold#', $_seuilBas, $value);
               switch ($_sensor_type) {
                   case 'temperature':
                       $unit = '°C';
@@ -244,8 +244,8 @@ class seniorcare extends eqLogic {
                       $unit = '';
                       break;
               }
-              $value = str_replace('#unite#', $unit, $value);
-              $options[$key] = str_replace('#seuil_haut#', $_seuilHaut, $value);
+              $value = str_replace('#unit#', $unit, $value);
+              $options[$key] = str_replace('#high_threshold#', $_seuilHaut, $value);
             }
           }
           scenarioExpression::createAndExec('action', $action['cmd'], $options);
