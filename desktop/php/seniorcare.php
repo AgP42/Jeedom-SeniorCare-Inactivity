@@ -176,7 +176,8 @@ $eqLogics = eqLogic::byType($plugin->getId());
               <div id="div_action_warning_life_sign"></div>
 
 
-              <label class="col-lg-4 control-label">{{Délai avant de prévenir les aidants}} <sup><i class="fas fa-question-circle tooltips" title="{{Délai pendant laquelle la personne dépendante peut désactiver l'alerte par activation d'un capteur d'activité, avant signalement aux aidants}}"></i></sup></label>
+              <label class="col-lg-4 control-label">{{Délai avant de prévenir les aidants}} <sup><i class="fas fa-question-circle tooltips" title="{{Délai pendant lequel la personne dépendante peut désactiver l'alerte par activation
+              d'un capteur d'activité, avant signalement aux aidants}}"></i></sup></label>
               <div class="col-lg-2">
                 <input type="number" class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="warning_life_sign_timer" title="{{}}"/>
               </div>
@@ -307,7 +308,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
         <fieldset>
           <legend><i class="fas fa-bomb"></i> {{Actions avertissement (pour chaque capteur hors seuils, je dois ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées dès la sortie des seuils d'un capteur de confort.
           Actions à définir pour la personne dépendante et/ou pour les aidants.
-          Les actions complexes peuvent être créées par scenario.
+          Des actions complexes peuvent être créées par scenario.
           Tags utilisables : #senior_name#, #sensor_name#, #sensor_type#, #value#, #low_threshold#, #high_threshold#, #unit#.}}"></i></sup>
             <a class="btn btn-success btn-sm addAction" data-type="action_warning_confort" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
           </legend>
@@ -384,7 +385,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-toggle-off"></i> {{Boutons d'annulation d'alerte (quel actionneur pour couper l'alerte ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Bouton de déactivation de l'alerte}}"></i></sup>
+          <legend><i class="fas fa-toggle-off"></i> {{Boutons d'annulation d'alerte (quel actionneur pour couper l'alerte ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Bouton de désactivation de l'alerte}}"></i></sup>
             <a class="btn btn-success btn-sm addSensorCancelSecurity" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un bouton}}</a>
           </legend>
           <div id="div_cancel_security"></div>
