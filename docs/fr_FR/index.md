@@ -42,6 +42,17 @@ Beta 0.0.2 - 21 mars 2020
 * Capteurs conforts évalués par cron15 et non plus par listener
 * Mise à jour de la doc
 
+0.0.3 & 0.0.4 - 22 mars 2020
+---
+
+* debug erreur js sur la liste des actions lorsque tous les capteurs sont dans les seuils
+* debug 2 autres erreurs js de ce type
+* creation puis correction de l'erreur de suppression du "bouton d'alerte"
+* changement du tag #value# en #sensor_value# pour éviter les interferences avec le tag #value# du core
+* ajout des tag #sensor_name# et #sensor_type# pour les actions d'alerte de securité
+* debug sur les capteurs conforts !
+* Mise à jour de la doc
+
 
 Configuration du plugin
 ========================
