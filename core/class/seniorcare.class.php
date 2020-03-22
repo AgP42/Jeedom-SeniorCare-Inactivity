@@ -74,7 +74,7 @@ class seniorcare extends eqLogic {
 
       log::add('seniorcare', 'debug', 'Fct checkAndActionSeuilsSensorConfort, name : ' . $_name . ' - ' . $_type . ' - ' . $_cmd . ' - ' . $valeur . ' - ' . $_seuilBas . ' - ' . $_seuilHaut . ' - Rep warning : ' . $seniorcare->getConfiguration('repetition_warning'));
 
-      log::add('seniorcare', 'debug', 'Fct checkAndActionSeuilsSensorConfort, WarningConfortLauched : ' . $seniorcare->getCache('WarningConfortLauched' . $_name) . ' - timestamp last action lancé : ' . $seniorcare->getCache('actionWarningConfortStartTimestamp' . $_name) . ' - Il y a : ' . $tempsDepuisActionWarningConfort / 60);
+      log::add('seniorcare', 'debug', 'Fct checkAndActionSeuilsSensorConfort, WarningConfortLauched : ' . $warningConfortLauched . ' - last action lancé il y a (min) : ' . $tempsDepuisActionWarningConfort / 60);
 
 
       if (($valeur > $_seuilHaut || $valeur < $_seuilBas) && // si la valeur sort des seuils et selon le choix de repetition

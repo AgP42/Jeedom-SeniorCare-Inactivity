@@ -517,8 +517,8 @@ function printEqLogic(_eqLogic) {
         addAction(_eqLogic.configuration.action_cancel_warning_confort[i], 'action_cancel_warning_confort');
       }
     }
-    if (isset(_eqLogic.configuration.action_cancel_warning_confort)) {
-      for (var i in _eqLogic.configuration.action_cancel_warning_confort) {
+    if (isset(_eqLogic.configuration.action_cancel_all_warning_confort)) {
+      for (var i in _eqLogic.configuration.action_cancel_all_warning_confort) {
         addAction(_eqLogic.configuration.action_cancel_all_warning_confort[i], 'action_cancel_all_warning_confort');
       }
     }
