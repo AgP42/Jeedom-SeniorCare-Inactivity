@@ -106,7 +106,7 @@ Vous pouvez aussi suivre la température extérieure.
 
 * Définir les différents capteurs de confort du logement à suivre. Il peut s'agit de capteurs de température, d'humidité, de CO2 ou de tout autre type.
   * Vous devez donner un nom unique à chacun de vos capteurs. Attention : le changement de nom d'un capteur revient à le supprimer et a en recréer un nouveau, vous perdez donc l'historique associé
-  * Sélectionner la commande Jeedom du capteur associé
+  * Sélectionner la commande Jeedom du capteur associé. Attention, chaque capteur ne doit être utilisé qu'une seule fois. Si besoin d'utiliser 2 fois la même source, merci de le dupliquer avec un virtuel.
   * Définir son type
   * Définir les seuils haut et bas
 * Définir les actions exécutées pour chaque capteur lors du dépassement de seuil et la gestion voulue pour les répétitions (tant que le capteur est hors seuils)
@@ -123,8 +123,8 @@ Détails de fonctionnement :
 Si l'une de vos action est de type "message", vous pouvez utiliser les tags suivants :
   * #senior_name# : nom configuré dans l'onglet "Général"
   * #sensor_name# : nom du capteur ayant déclenché l'avertissement
-  * #sensor_type# : type de ce capteur
-  * #value# : valeur courante
+  * #sensor_type# : type de ce capteur - attention, le type sera donné en anglais
+  * #sensor_value# : valeur courante
   * #low_threshold# : seuil bas défini
   * #high_threshold# : seuil haut défini
   * #unit# : unité correspondant à la valeur
@@ -140,9 +140,10 @@ Cet onglet permet de regrouper les capteurs d'urgennce du logement de la personn
 * Définir un ou plusieurs capteurs de type "bouton" ou "interrupteur" servant à annuler l'alerte
 * Définir les actions réalisées à l'activation des capteurs d'annulation
 
-Si l'une de vos action est de type "message", vous pouvez utiliser le tag #senior_name# qui enverra le nom configuré dans l'onglet "Général".
-
-**A améliorer : ajouter les tags #sensor_name# et #sensor_type#**
+Si l'une de vos action est de type "message", vous pouvez utiliser les tags suivants :
+  * #senior_name# : nom configuré dans l'onglet "Général"
+  * #sensor_name# : nom du capteur ayant déclenché l'alerte (uniquement pour l'alerte et non pour l'annulation d'alerte)
+  * #sensor_type# : type de ce capteur - attention, le type sera donné en anglais
 
 ![](https://raw.githubusercontent.com/AgP42/seniorcare/dev/docs/assets/images/Onglet_securité.png)
 

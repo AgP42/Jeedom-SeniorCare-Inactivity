@@ -6,4 +6,4 @@
 
 * A améliorer : le delai de detection d'inactivité selon jour ou nuit
 
-* ajouter les autres tag possible pour les messages de l'onglet securité
+* Pour les boutons d'alerte et annulation d'alerte, le code ne teste pas si l'alerte a été déjà envoyé avant de la desactivée... ok comme ca ?

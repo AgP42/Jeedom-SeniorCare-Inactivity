@@ -16,6 +16,7 @@
  */
 
 // permet de reorganiser les elements de la div en les cliquant/deplacant
+/* // commenté pour debug, c'est insupportable sur un écran de smartphone...
 $("#div_life_sign").sortable({axis: "y", cursor: "move", items: ".life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_action_warning_life_sign").sortable({axis: "y", cursor: "move", items: ".action_warning_life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_action_desactivate_warning_life_sign").sortable({axis: "y", cursor: "move", items: ".action_desactivate_warning_life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
@@ -36,6 +37,8 @@ $("#div_security").sortable({axis: "y", cursor: "move", items: ".security", plac
 $("#div_action_security").sortable({axis: "y", cursor: "move", items: ".action_security", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_cancel_security").sortable({axis: "y", cursor: "move", items: ".cancel_security", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_action_cancel_security").sortable({axis: "y", cursor: "move", items: ".action_cancel_security", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
+//*/
+
 
 // le bouton "ajouter un capteur" de l'onglet détection d'inactivité
 $('.addSensorLifeSign').off('click').on('click', function () {
@@ -273,7 +276,7 @@ function addSensorConfort(_info) {
       div += '<div class="col-sm-1">';
         div += '<select class="expressionAttr eqLogicAttr form-control tooltips" data-l1key="sensor_confort_type">'; // dans la class : ['sensor_confort_type']
         div += '<option value="temperature">Température</option>';
-        div += '<option value="humidite">Humidité</option>';
+        div += '<option value="humidity">Humidité</option>';
         div += '<option value="co2">CO2</option>';
         div += '<option value="other">Autre</option>';
         div += '</select>';
@@ -321,7 +324,7 @@ function addSensorSecurity(_info) {
 
       div += '<label class="col-sm-1 control-label">{{Type de capteur }}</label>';
       div += '<div class="col-sm-1">';
-        div += '<select class="expressionAttr eqLogicAttr form-control tooltips" data-l1key="type_security">';
+        div += '<select class="expressionAttr eqLogicAttr form-control tooltips" data-l1key="sensor_security_type">';
           div += '<option value="CO2">CO2</option>';
           div += '<option value="smoke">Fumées</option>';
           div += '<option value="gaz">gaz</option>';
@@ -532,13 +535,13 @@ function printEqLogic(_eqLogic) {
         addAction(_eqLogic.configuration.action_security[i], 'action_security');
       }
     }
-    if (isset(_eqLogic.configuration.security)) {
-      for (var i in _eqLogic.configuration.security) {
+    if (isset(_eqLogic.configuration.cancel_security)) {
+      for (var i in _eqLogic.configuration.cancel_security) {
         addSensorCancelSecurity(_eqLogic.configuration.cancel_security[i]);
       }
     }
-    if (isset(_eqLogic.configuration.action_security)) {
-      for (var i in _eqLogic.configuration.action_security) {
+    if (isset(_eqLogic.configuration.action_cancel_security)) {
+      for (var i in _eqLogic.configuration.action_cancel_security) {
         addAction(_eqLogic.configuration.action_cancel_security[i], 'action_cancel_security');
       }
     }

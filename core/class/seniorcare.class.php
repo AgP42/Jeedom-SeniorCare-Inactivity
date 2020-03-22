@@ -47,8 +47,14 @@ class seniorcare extends eqLogic {
       log::add('seniorcare', 'debug', '################ Detection d\'un trigger de sécurité ############');
 
       $seniorcare = seniorcare::byId($_option['seniorcare_id']); // on cherche la personne correspondant au bouton d'alerte
-      $seniorcare->execActions('action_security'); // on appelle les actions definies pour cette personne
+      foreach ($seniorcare->getConfiguration('security') as $security) { // on boucle direct dans la conf
+        if ('#' . $_option['event_id'] . '#' == $security['cmd']) { // on cherche quel est l'event qui nous a déclenché pour pouvoir chopper son nom et type (utilisé pour les tags)
 
+          log::add('seniorcare', 'debug', 'boucle capteurs security, name : ' . $security['name'] . ' - cmd : ' . $security['cmd']  . ' - ' . $security['sensor_security_type']);
+          $seniorcare->execActions('action_security', $security['name'], $security['sensor_security_type']); // on appelle les actions definies pour cette personne
+
+        }
+      } // fin foreach tous les capteurs security de la conf
     }
 
     public static function sensorSecurityCancel($_option) { // fct appelée par le listener des boutons d'annulation de l'alerte de sécurité, n'importe quel capteur arrive ici
@@ -62,7 +68,6 @@ class seniorcare extends eqLogic {
     public static function checkAndActionSeuilsSensorConfort($seniorcare, $_name, $_cmd, $_seuilBas, $_seuilHaut, $_type) { // appelée soit par le cron15, soit par un listener (via la fct sensorConfort - desactivée), va regarder si on est dans les seuils définis et si non appliquer les actions voulues
 
     // TODO on pourrait ajouter une durée min pendant laquelle le capteur est hors seuils avant de déclencher l'alerte
-    // TODO on pourrait limiter l'alerte à 1 fois par heure (à parametrer ?) => ok ajouté à la demande du forum
     // TODO on pourrait ajouter la date de collecte de la valeur pour ne pas faire des alertes sur une vieille info, ou au contraire ajouter une alerte si pas de valeur fraiche pendant un certain temps. Mais ça peut etre aussi géré par le core dans les configuration de la cmd...
 
       $now = time();
@@ -76,32 +81,44 @@ class seniorcare extends eqLogic {
 
       log::add('seniorcare', 'debug', 'Fct checkAndActionSeuilsSensorConfort, WarningConfortLauched : ' . $warningConfortLauched . ' - last action lancé il y a (min) : ' . $tempsDepuisActionWarningConfort / 60);
 
+      if(!is_numeric($valeur)){
 
-      if (($valeur > $_seuilHaut || $valeur < $_seuilBas) && // si la valeur sort des seuils et selon le choix de repetition
-         ($rep_warning == '' || $rep_warning == '15min' || // si on a pas defini la repetition de warning ou si defini sur "15min" ou si
-         ($rep_warning == 'once' && !$warningConfortLauched) || // rep_warning est sur "1fois" et qu'on l'a pas encore lancé ou si
-         ($rep_warning == '1hour' && $tempsDepuisActionWarningConfort >= 60*59) || // rep_warning sur 1h et dernier lancement depuis plus de 59min (pour éviter de tomber 1s apres 1h et donc de louper le rappel...)
-         ($rep_warning == '6hours' && $tempsDepuisActionWarningConfort >= 60*59*6) // rep_warning sur 6h et dernier lancement depuis 6h-6min
-        )){
+        log::add('seniorcare', 'debug', 'Capteurs confort :' . $_name . ' la valeur est pas numerique, on fait rien !');
 
-        $seniorcare->setCache('WarningConfortLauched' . $_cmd, true); // on garde en cache qu'on a lancé nos actions au moins 1 fois
-        $seniorcare->setCache('actionWarningConfortStartTimestamp' . $_cmd, $now); // on memorise l'heure du lancement du warning
+      } else if (($valeur <= $_seuilHaut && $valeur >= $_seuilBas) && !$warningConfortLauched){ // on est dans les seuils et on a pas lancé notre warning : aucune action a lancer
 
-        $seniorcare->execActions('action_warning_confort', $_name, $_type, $valeur, $_seuilBas, $_seuilHaut); // on execute les actions pour chacun
+        log::add('seniorcare', 'debug', 'Capteurs confort :' . $_name . ' dans les seuils, on fait rien');
+        return 1; // on retourne que notre capteur est ok dans les seuils
 
-        return 0; // on a au moins 1 capteur hors seuil, ils doivent repondre tous true pour que le cron lance les actions "tous ok"
+      } else if (($valeur <= $_seuilHaut && $valeur >= $_seuilBas) && $warningConfortLauched){ // on est dans les seuils et on a précédemment lancé notre warning => actions de retour à la normal
 
-      } else if (($valeur >= $_seuilHaut || $valeur >= $_seuilBas) && $warningConfortLauched){ // on est dans les seuils et on a deja lancé notre warning au moins 1 fois, il faut lancer les actions de retour à la normal
         log::add('seniorcare', 'debug', 'Capteurs confort :' . $_name . ' retour à la normal !');
         $seniorcare->setCache('WarningConfortLauched' . $_cmd, false); // on remet dans le cache qu'on a pas lancé les actions
         $seniorcare->execActions('action_cancel_warning_confort', $_name, $_type, $valeur, $_seuilBas, $_seuilHaut); // appel de la boucle d'execution des actions avec les infos pour les tag des messages
         return 1;
-      } else if (($valeur >= $_seuilHaut || $valeur >= $_seuilBas) && !$warningConfortLauched){ // on est dans les seuils et on a pas lancé notre warning : rien a faire...
-        log::add('seniorcare', 'debug', 'Capteurs confort :' . $_name . ' dans les seuils, on fait rien');
-        return 1;
+
+      } else if (($valeur > $_seuilHaut || $valeur < $_seuilBas) && // si la valeur sort des seuils et selon le choix de repetition
+         ($rep_warning == '' ||
+         ($rep_warning == '15min' &&  $tempsDepuisActionWarningConfort >= 60*14) || // si on a pas defini la repetition de warning ou si defini sur "15min" ou si
+         ($rep_warning == 'once' && !$warningConfortLauched) || // rep_warning est sur "1fois" et qu'on ne l'a pas encore lancé ou si
+         ($rep_warning == '1hour' && $tempsDepuisActionWarningConfort >= 60*59) || // rep_warning sur 1h et dernier lancement depuis plus de 59min (pour éviter de tomber 1s apres 1h et donc de louper le rappel...)
+         ($rep_warning == '6hours' && $tempsDepuisActionWarningConfort >= 60*59*6) // rep_warning sur 6h et dernier lancement depuis 6h-6min
+        )){
+
+        log::add('seniorcare', 'debug', 'Capteurs confort :' . $_name . ' est hors seuils, tempsDepuisActionWarningConfort : ' . $tempsDepuisActionWarningConfort . ' warningConfortLauched : ' . $warningConfortLauched . ' rep_warning : ' . $rep_warning);
+
+        $seniorcare->setCache('WarningConfortLauched' . $_cmd, true); // on garde en cache qu'on a lancé nos actions au moins 1 fois pour cette commande
+        $seniorcare->setCache('actionWarningConfortStartTimestamp' . $_cmd, $now); // on memorise l'heure du lancement du warning
+
+        $seniorcare->execActions('action_warning_confort', $_name, $_type, $valeur, $_seuilBas, $_seuilHaut); // on execute toutes les actions
+
+        return 0; // on retourne qu'on a 1 capteur hors seuil (ils doivent tous répondre 1 pour que le cron lance les actions "tous ok")
+
       } else { // on est pas dans les seuils mais on a deja lancé les alertes selon la repetition voulu
-        log::add('seniorcare', 'debug', 'Capteurs confort :' . $_name . ' est hors seuils, mais il faut pas le dire...chutttt...');
-        return 0;
+
+        log::add('seniorcare', 'debug', 'Capteurs confort :' . $_name . ' est hors seuils, mais déjà lancé les actions de warning');
+        return 0; // on retourne qu'on a 1 capteur hors seuil
+
       } //*/
 
     }
@@ -213,49 +230,6 @@ class seniorcare extends eqLogic {
 
     } //fin cron
 
-
-    public function execActions($_config, $_sensor_name = NULL, $_sensor_type = NULL, $_sensor_value = NULL, $_seuilBas = NULL, $_seuilHaut = NULL) { // on donne le type d'action en argument et ca nous execute toute la liste. Les autres arguments sont pour les tag des messages si applicable
-
-      log::add('seniorcare', 'debug', '################ Execution des actions du type ' . $_config . ' pour ' . $this->getName() .  ' ############');
-
-      foreach ($this->getConfiguration($_config) as $action) { // on boucle pour executer toutes les actions définies
-        try {
-          $options = array(); // va permettre d'appeler les options de configuration des actions, par exemple un scenario un message
-          if (isset($action['options'])) {
-            $options = $action['options'];
-            foreach ($options as $key => $value) { // ici on peut définir les "tag" de configuration qui seront à remplacer par des variables
-              // str_replace ($search, $replace, $subject) retourne une chaîne ou un tableau, dont toutes les occurrences de search dans subject ont été remplacées par replace.
-              $value = str_replace('#senior_name#', $this->getName(), $value);
-              $value = str_replace('#sensor_name#', $_sensor_name, $value);
-              $value = str_replace('#sensor_type#', $_sensor_type, $value);
-              $value = str_replace('#value#', $_sensor_value, $value);
-              $value = str_replace('#low_threshold#', $_seuilBas, $value);
-              switch ($_sensor_type) {
-                  case 'temperature':
-                      $unit = '°C';
-                      break;
-                  case 'humidite':
-                      $unit = '%';
-                      break;
-                  case 'co2':
-                      $unit = 'ppm';
-                      break;
-                  default:
-                      $unit = '';
-                      break;
-              }
-              $value = str_replace('#unit#', $unit, $value);
-              $options[$key] = str_replace('#high_threshold#', $_seuilHaut, $value);
-            }
-          }
-          scenarioExpression::createAndExec('action', $action['cmd'], $options);
-        } catch (Exception $e) {
-          log::add('seniorcare', 'error', $this->getHumanName() . __(' : Erreur lors de l\'éxecution de ', __FILE__) . $action['cmd'] . __('. Détails : ', __FILE__) . $e->getMessage());
-        }
-      } //*/
-
-    }
-
     //*
     // * Fonction exécutée automatiquement toutes les 15 minutes par Jeedom
     // Sert ici pour les capteurs conforts
@@ -307,6 +281,49 @@ class seniorcare extends eqLogic {
      */
 
 
+
+
+    public function execActions($_config, $_sensor_name = NULL, $_sensor_type = NULL, $_sensor_value = NULL, $_seuilBas = NULL, $_seuilHaut = NULL) { // on donne le type d'action en argument et ca nous execute toute la liste. Les autres arguments sont pour les tag des messages si applicable
+
+      log::add('seniorcare', 'debug', '################ Execution des actions du type ' . $_config . ' pour ' . $this->getName() .  ' ############');
+
+      foreach ($this->getConfiguration($_config) as $action) { // on boucle pour executer toutes les actions définies
+        try {
+          $options = array(); // va permettre d'appeler les options de configuration des actions, par exemple un scenario un message
+          if (isset($action['options'])) {
+            $options = $action['options'];
+            foreach ($options as $key => $value) { // ici on peut définir les "tag" de configuration qui seront à remplacer par des variables
+              // str_replace ($search, $replace, $subject) retourne une chaîne ou un tableau, dont toutes les occurrences de search dans subject ont été remplacées par replace.
+              $value = str_replace('#senior_name#', $this->getName(), $value);
+              $value = str_replace('#sensor_name#', $_sensor_name, $value);
+              $value = str_replace('#sensor_type#', $_sensor_type, $value);
+              $value = str_replace('#sensor_value#', $_sensor_value, $value);
+              $value = str_replace('#low_threshold#', $_seuilBas, $value);
+              switch ($_sensor_type) {
+                  case 'temperature':
+                      $unit = '°C';
+                      break;
+                  case 'humidity':
+                      $unit = '%';
+                      break;
+                  case 'co2':
+                      $unit = 'ppm';
+                      break;
+                  default:
+                      $unit = '';
+                      break;
+              }
+              $value = str_replace('#unit#', $unit, $value);
+              $options[$key] = str_replace('#high_threshold#', $_seuilHaut, $value);
+            }
+          }
+          scenarioExpression::createAndExec('action', $action['cmd'], $options);
+        } catch (Exception $e) {
+          log::add('seniorcare', 'error', $this->getHumanName() . __(' : Erreur lors de l\'éxecution de ', __FILE__) . $action['cmd'] . __('. Détails : ', __FILE__) . $e->getMessage());
+        }
+      } //*/
+
+    }
 
     /*     * *********************Méthodes d'instance************************* */
 
@@ -401,7 +418,7 @@ class seniorcare extends eqLogic {
               $sensor = $jsSensor[$cmd->getName()];
               $cmd->setValue($sensor['cmd']);
 
-              if(isset($sensor['sensor_'.$key.'_type'])){ // ce sera vrai pour les types life-sign et confort
+              if(isset($sensor['sensor_'.$key.'_type'])){ // ce sera vrai pour les types life-sign, confort et security
                 $cmd->setGeneric_type($sensor['sensor_'.$key.'_type']);
               }
 
@@ -414,7 +431,7 @@ class seniorcare extends eqLogic {
                     case 'temperature':
                         $unit = '°C';
                         break;
-                    case 'humidite':
+                    case 'humidity':
                         $unit = '%';
                         break;
                     case 'co2':
@@ -466,7 +483,7 @@ class seniorcare extends eqLogic {
           $cmd->setIsHistorized(1);
           $cmd->setConfiguration('historizeMode', 'none');
 
-          if(isset($sensor['sensor_'.$key.'_type'])){ // ce sera vrai pour les types life-sign et confort
+          if(isset($sensor['sensor_'.$key.'_type'])){ // ce sera vrai pour les types life-sign, confort et security
             $cmd->setGeneric_type($sensor['sensor_'.$key.'_type']);
           }
 
@@ -480,7 +497,7 @@ class seniorcare extends eqLogic {
                 case 'temperature':
                     $unit = '°C';
                     break;
-                case 'humidite':
+                case 'humidity':
                     $unit = '%';
                     break;
                 case 'co2':

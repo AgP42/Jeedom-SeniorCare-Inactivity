@@ -320,7 +320,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
           <legend><i class="fas fa-bomb"></i> {{Actions avertissement (pour chaque capteur hors seuils, je dois ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées dès la sortie des seuils d'un capteur de confort.
           Actions à définir pour la personne dépendante et/ou pour les aidants.
           Des actions complexes peuvent être créées par scenario.
-          Tags utilisables : #senior_name#, #sensor_name#, #sensor_type#, #value#, #low_threshold#, #high_threshold#, #unit#.}}"></i></sup>
+          Tags utilisables : #senior_name#, #sensor_name#, #sensor_type#, #sensor_value#, #low_threshold#, #high_threshold#, #unit#.}}"></i></sup>
             <a class="btn btn-success btn-sm addAction" data-type="action_warning_confort" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
           </legend>
           <div id="div_action_warning_confort"></div>
@@ -384,7 +384,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
       <form class="form-horizontal">
         <fieldset>
           <legend><i class="fas fa-bomb"></i> {{Actions alerte immédiate}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées à l'activation d'un capteur de sécurité.
-          Tag utilisable : #senior_name#.}}"></i></sup>
+          Tag utilisable : #senior_name#, #sensor_name# ou #sensor_type#}}"></i></sup>
             <a class="btn btn-success btn-sm addAction" data-type="action_security" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
           </legend>
           <div id="div_action_security"></div>
