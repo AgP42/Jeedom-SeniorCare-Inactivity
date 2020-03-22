@@ -176,7 +176,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
               <div id="div_action_warning_life_sign"></div>
 
 
-              <label class="col-lg-4 control-label">{{Délai avant de prévenir les aidants}} <sup><i class="fas fa-question-circle tooltips" title="{{Délai pendant laquelle la personne dépendante peut désactiver l'alerte par activation d'un capteur d'activité avant signalement aux aidants}}"></i></sup></label>
+              <label class="col-lg-4 control-label">{{Délai avant de prévenir les aidants}} <sup><i class="fas fa-question-circle tooltips" title="{{Délai pendant laquelle la personne dépendante peut désactiver l'alerte par activation d'un capteur d'activité, avant signalement aux aidants}}"></i></sup></label>
               <div class="col-lg-2">
                 <input type="number" class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="warning_life_sign_timer" title="{{}}"/>
               </div>
@@ -187,8 +187,8 @@ $eqLogics = eqLogic::byType($plugin->getId());
         <div class="col-lg-6">
           <form class="form-horizontal">
             <fieldset>
-              <legend><i class="fas fa-user-slash"></i> {{Actions de désactivation des avertissements}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées lors du déclenchement d'un capteur d'activité alors que les actions d'avertissement ont été activées.
-              //TODO préciser dans la doc que ces actions ne sont pas activées lorsque l'on active les alertes, mais uniquement si signe de vie pendant la phase de warning}}"></i></sup>
+              <legend><i class="fas fa-user-slash"></i> {{Actions de désactivation des avertissements}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées lors du déclenchement d'un capteur d'activité alors
+              que les actions d'avertissement ont été activées.}}"></i></sup>
                 <a class="btn btn-danger btn-sm addAction" data-type="action_desactivate_warning_life_sign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
               </legend>
               <div id="div_action_desactivate_warning_life_sign"></div>
@@ -233,10 +233,11 @@ $eqLogics = eqLogic::byType($plugin->getId());
     <div class="tab-pane" id="alertbttab">
       <br/>
       <div class="alert alert-info">
-        {{Onglet de configuration de boutons d'alerte immédiate pour alerter les aidants.}}
+        {{Onglet de configuration de boutons d'alerte immédiate pour prévenir les aidants.}}
       </div>
 
-      <form class="form-horizontal">
+<!--
+        <form class="form-horizontal">
         <fieldset>
           <legend><i class="fas fa-toggle-on"></i> {{Boutons d'alerte immédiate (quel actionneur va lancer une alerte ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Bouton à porter pour déclencher une alerte immédiate.}}"></i></sup>
             <a class="btn btn-success btn-sm addSensorBtAlert" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un bouton}}</a>
@@ -246,6 +247,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
       </form>
 
       <br>
+-->
 
       <form class="form-horizontal">
         <fieldset>
@@ -327,7 +329,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-hand-paper"></i> {{Actions arrêt d'avertissement - pour chaque capteur de retour dans les seuils, je dois ?}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées lorsqu'un capteur précédemment hors seuils retrouve ses limites.
+          <legend><i class="fas fa-hand-paper"></i> {{Actions arrêt d'avertissement - pour chaque capteur de retour dans les seuils, je dois ?}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées lorsqu'un capteur précédemment hors seuils retourne dans ses bornes.
           Tag utilisable : #senior_name#.}}"></i></sup>
             <a class="btn btn-success btn-sm addAction" data-type="action_cancel_warning_confort" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
           </legend>
@@ -338,7 +340,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-hand-peace"></i> {{Actions arrêt d'avertissement - lorsque tous les capteurs sont dans les seuils, je dois ?}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées lorsque tous les capteurs reviennent dans les seuils définis.
+          <legend><i class="fas fa-hand-peace"></i> {{Actions arrêt d'avertissement - lorsque tous les capteurs sont dans les seuils, je dois ?}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées lorsque tous les capteurs sont à l'intérieur des seuils définis.
           Tag utilisable : #senior_name#.}}"></i></sup>
             <a class="btn btn-success btn-sm addAction" data-type="action_cancel_all_warning_confort" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
           </legend>
