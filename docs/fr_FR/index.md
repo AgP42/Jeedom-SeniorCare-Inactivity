@@ -172,8 +172,10 @@ Prévu à ce jour : faire une liste de cases à cocher selon les risques que l�
 
 Onglet **Avancé - Commandes Jeedom**
 ---
+
 Panneau desktop
 ================
+
 To Do - Il permettra de suivre les différents capteurs et visualiser les alertes
 
 Comportement au démarrage et après redémarrage Jeedom
