@@ -34,7 +34,7 @@ Beta 0.0.1 - 24 mars 2020
 Configuration du plugin
 ========================
 
-Ajouter les différentes personnes à suivre, puis pour chacune, configurer les différents onglets.
+Ajouter les différentes personnes à suivre puis, pour chacune, configurer les différents onglets.
 
 Onglet Général
 ---
