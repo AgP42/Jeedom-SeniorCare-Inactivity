@@ -1,7 +1,7 @@
 {
 	"id" : "seniorcareinactivity",
 	"name" : "Senior Care - Détection d'inactivité",
-	"description" : "Plugin pour l'assistance aux personnes âgées",
+	"description" : "Plugin pour l'assistance aux personnes âgées - Fonction de détection d'inactivité",
 	"licence" : "AGPL",
 	"author" : "Agp42",
 	"require" : "3.2",
