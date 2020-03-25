@@ -5,7 +5,7 @@ Ce plugin fait parti d'un ensemble de plugins pour Jeedom permettant l'aide au m
 
 La demande initiale vient de ce sujet sur le forum : [Développer un logiciel d’Analyse comportementale](https://community.jeedom.com/t/developper-un-logiciel-danalyse-comportementale/19111/2).
 
-Ce plugin a en charge :
+Ce plugin permet :
 
 * Détection d’inactivité
 
@@ -65,7 +65,7 @@ Trois étapes de fonctionnement :
     - définir la liste des actions à lancer pour l’avertissement
     - définir la durée maximum pendant laquelle la personne pourra réagir avant de déclencher l'alerte
     - définir les actions permettant d'annuler l’avertissement si la personne réagit (la réaction de la personne est détectée par n’importe quel capteur définis à l’étape 1)
-  * Si la personne ne réagit pas dans le délai imparti, le plugin passera a l'étape "Alerte". Dans ce cas, les actions pour "annuler l'avertissement" ne pourront plus être réalisées.
+  * Si la personne ne réagit pas dans le délai imparti, le plugin passera a l'étape "Alerte". Dans ce cas, les actions pour "annuler l'avertissement" ne seront pas réalisées.
 3. « Alerte » :
   * Définir la liste des actions à lancer afin d’alerter les aidants et informer la personne dépendante qu’une alerte est en cours
   * Définir la liste d’actions permettant de désactiver ces actions d’alerte. L'alerte est déactivée par n’importe quel capteur de l’étape 1. La personne dans son logement ou un aidant une fois sur place pourront donc le faire
