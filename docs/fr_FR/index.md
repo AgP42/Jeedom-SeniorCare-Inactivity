@@ -6,6 +6,7 @@ Ce plugin fait parti d'un ensemble de plugins pour Jeedom permettant l'aide au m
 La demande initiale vient de ce sujet sur le forum : [Développer un logiciel d’Analyse comportementale](https://community.jeedom.com/t/developper-un-logiciel-danalyse-comportementale/19111/2).
 
 Ce plugin permet :
+
 * Détection d’inactivité
 
 Lien vers le code source : [https://github.com/AgP42/seniorcareinactivity/](https://github.com/AgP42/seniorcareinactivity/)
@@ -33,7 +34,7 @@ Beta 0.0.1 - 24 mars 2020
 Configuration du plugin
 ========================
 
-Ajouter les différentes personnes à suivre, puis pour chacune configurer les différents onglets.
+Ajouter les différentes personnes à suivre puis, pour chacune, configurer les différents onglets.
 
 Onglet Général
 ---
@@ -57,7 +58,7 @@ Il s'agit ici de déclencher une alerte en cas d'absence d’activité de la per
 
 Trois étapes de fonctionnement :
 
-1. Définir les capteurs de détection d’activité (ouverture porte, fenêtre, interrupteur, mouvement, …) et un délai associé. Si aucun des capteurs d'activité n'a été activé à l’échéance du délai, le plugin déclenchera l’étape suivante « Avertissement ».
+1. Définir les capteurs de détection d’activité (ouverture, interrupteur, mouvement, …) et un délai associé. Si aucun des capteurs d'activité n'a été activé à l’échéance du délai, le plugin déclenchera l’étape suivante « Avertissement ».
 2. « Avertissement » :
   * L'objectif de cette étape est de prévenir la personne que le système a détecté une inactivité et lui permettre de réagir avant que l’alerte ne soit envoyée aux aidants extérieurs
   * Configuration à réaliser :
@@ -84,14 +85,14 @@ Comportement au démarrage et après redémarrage Jeedom
 
 Fonction de **Détection d'inactivité**
 ---
-* Après création et première sauvegarde, le déclenchement de l'un des capteur d'activité initialise le mécanisme. En cas de non-déclenchement de l'un de ces capteurs d'activité dans cette minute, les actions d' "avertissement" vont se lancer.
+* Après création et première sauvegarde, le déclenchement de l'un des capteur d'activité initialise le mécanisme. En cas de non-déclenchement de l'un de ces capteurs d'activité dans cette minute, les actions d'"avertissement" vont se lancer.
 * Après un redémarrage de Jeedom, le système aura perdu l'information de la date du dernier capteur d'activité et si des alarmes ont déjà été envoyées. Les actions warnings vont donc se déclencher. Aussi, en cas de redémarrage de Jeedom, vous devrez penser à activer un des capteurs d'activité dans la première minute.
 
 
 Remarques générales
 ===
 * Pour les capteurs de "détections d'inactivité", c'est le changement de valeur du capteur qui est détecté et déclenche les actions, la valeur en elle-même n'est pas prise en compte !
-* L'ensemble des capteurs définis dans le plugin doivent posséder un nom unique. Le changement de nom d'un capteur revient à le supprimer et à en créer un nouveau. De fait, la totalité de l'historique associé à ce capteur sera donc perdu.
+* L'ensemble des capteurs définis dans le plugin doivent posséder un nom unique. Le changement de nom d'un capteur revient à le supprimer et à en créer un nouveau. De fait, la totalité de l'historique associé à ce capteur sera donc perdue.
 
 Exemples d'usage et configuration associée
 ========================
