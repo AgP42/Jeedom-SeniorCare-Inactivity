@@ -51,16 +51,14 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
     <li role="presentation"><a href="#absencestab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-calendar-alt"></i> {{Gestion absences}}</a></li>
 
-    <li role="presentation"><a href="#lifesigntab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-heartbeat"></i> {{Détection d'inactivité}}</a></li>
+    <li role="presentation"><a href="#sensorlifesigntab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-heartbeat"></i> {{Capteurs d'activité}}</a></li>
 
-  <!--   <li role="presentation"><a href="#alertbttab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-toggle-on"></i> {{Bouton d'alerte}}</a></li>
+    <li role="presentation"><a href="#actionalertlifesigntab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-users"></i> {{Actions d'alerte}}</a></li>
 
-    <li role="presentation"><a href="#conforttab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-spa"></i> {{Confort}}</a></li>
+    <li role="presentation"><a href="#arlifesigntab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-check-square"></i> {{Accusé de réception}}</a></li>
 
-    <li role="presentation"><a href="#securitytab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-exclamation-triangle"></i> {{Sécurité}}</a></li>
+    <li role="presentation"><a href="#cancellifesigntab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-bell-slash"></i> {{Annulation d'alerte}}</a></li>
 
-    <li role="presentation"><a href="#alertesPerteAutonomietab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-brain"></i> {{Dérive comportementale}}</a></li>
- -->
     <li role="presentation"><a href="#commandtab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-list-alt"></i> {{Avancé - Commandes Jeedom}}</a></li>
 
   </ul>
@@ -72,11 +70,12 @@ $eqLogics = eqLogic::byType($plugin->getId());
       <br/>
       <form class="form-horizontal">
         <fieldset>
+          <legend><i class="fas fa-tachometer-alt"></i> {{Informations Jeedom}} </legend>
           <div class="form-group">
-            <label class="col-sm-3 control-label">{{Nom de la personne dépendante}}</label>
+            <label class="col-sm-3 control-label">{{Nom Jeedom}}</label>
             <div class="col-sm-3">
               <input type="text" class="eqLogicAttr form-control" data-l1key="id" style="display : none;" />
-              <input type="text" class="eqLogicAttr form-control" data-l1key="name" placeholder="{{Nom de la personne dépendante}}"/>
+              <input type="text" class="eqLogicAttr form-control" data-l1key="name" placeholder="{{Nom }}"/>
             </div>
           </div>
           <div class="form-group">
@@ -86,24 +85,13 @@ $eqLogics = eqLogic::byType($plugin->getId());
                 <option value="">{{Aucun}}</option>
                 <?php
                   foreach (jeeObject::all() as $object) {
-  	                echo '<option value="' . $object->getId() . '">' . $object->getName() . '</option>';
+                    echo '<option value="' . $object->getId() . '">' . $object->getName() . '</option>';
                   }
                 ?>
               </select>
             </div>
           </div>
-  	   <!--div class="form-group">
-                  <label class="col-sm-3 control-label">{{Catégorie}}</label>
-                  <div class="col-sm-9">
-                   <?php
-                    //  foreach (jeedom::getConfiguration('eqLogic:category') as $key => $value) {
-                    //  echo '<label class="checkbox-inline">';
-                    //  echo '<input type="checkbox" class="eqLogicAttr" data-l1key="category" data-l2key="' . $key . '" />' . $value['name'];
-                    //  echo '</label>';
-                    //  }
-                    ?>
-                 </div>
-             </div-->
+
         	<div class="form-group">
         		<label class="col-sm-3 control-label"></label>
         		<div class="col-sm-9">
@@ -111,14 +99,58 @@ $eqLogics = eqLogic::byType($plugin->getId());
         			<label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr" data-l1key="isVisible" checked/>{{Visible}}</label>
         		</div>
         	</div>
-         <!--div class="form-group">
-          <label class="col-sm-3 control-label">{{template param 1}}</label>
-          <div class="col-sm-3">
-              <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="city" placeholder="param1"/>
-          </div>
-      </div-->
+
         </fieldset>
       </form>
+
+      <form class="form-horizontal">
+        <fieldset>
+          <legend><i class="fas fa-user-edit"></i> {{Informations concernant la personne dépendante}} <sup><i class="fas fa-question-circle tooltips" title="{{Ces informations seront utilisées uniquement pour la saisie de tags dans les messages d'alertes, tous ces champs sont facultatifs.}}"></i></sup></legend>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label">{{Nom }}</label>
+            <div class="col-sm-3">
+              <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="senior_name" placeholder="{{Nom de la personne dépendante}}"/>
+            </div>
+            <div class="col-sm-3">{{tag <strong>#senior_name#</strong>}}</div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label">{{Téléphone }}</label>
+            <div class="col-sm-3">
+              <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="senior_phone" placeholder="{{Numéro de téléphone de la personne dépendante}}"/>
+            </div>
+            <div class="col-sm-3">{{tag <strong>#senior_phone#</strong>}}</div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label">{{Adresse ou n° logement }}</label>
+            <div class="col-sm-3">
+              <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="senior_address" placeholder="{{Adresse ou n° logement de la personne dépendante}}"/>
+            </div>
+            <div class="col-sm-3">{{tag <strong>#senior_address#</strong>}}</div>
+          </div>
+
+          <br>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label">{{Nom personne de référence }}</label>
+            <div class="col-sm-3">
+              <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="trusted_person_name" placeholder="{{Nom de la personne de référence}}"/>
+            </div>
+            <div class="col-sm-3">{{tag <strong>#trusted_person_name#</strong>}}</div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label">{{Téléphone personne de référence }}</label>
+            <div class="col-sm-3">
+              <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="trusted_person_phone" placeholder="{{Numéro de téléphone de la personne de référence}}"/>
+            </div>
+            <div class="col-sm-3">{{tag <strong>#trusted_person_phone#</strong>}}</div>
+          </div>
+        </fieldset>
+      </form>
+
     </div>
 
     <!-- TAB Capteurs absences -->
@@ -134,7 +166,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
     <!-- TODO : ajouter des actions pour que l'aidant puisse prévenir la personne dépendante de la bonne prise en compte de l'alerte ? Beaucoup plus simple a faire en externe du plugin... a voir !! -->
 
-    <div class="tab-pane" id="lifesigntab">
+    <div class="tab-pane" id="sensorlifesigntab">
       <br/>
       <div class="alert alert-info">
         {{Onglet de configuration des capteurs indiquant une activité de la personne dépendante.
@@ -165,7 +197,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <br>
 
-      <div class="row">
+      <!-- <div class="row">
         <div class="col-lg-6">
           <form class="form-horizontal">
             <fieldset>
@@ -226,13 +258,97 @@ $eqLogics = eqLogic::byType($plugin->getId());
             </fieldset>
           </form>
         </div>
+      </div> -->
+
+    </div>
+
+    <!-- TAB actions alerte -->
+    <div class="tab-pane" id="actionalertlifesigntab">
+
+      <br/>
+      <div class="alert alert-info">
+        {{Onglet de configuration des actions d'alerte pour prévenir les aidants. Vous pouvez choisir plusieurs actions et un délai d'attente pour chacune. Les actions en attente ne seront pas exécutées si un accusé de reception est reçu entre-temps, ou en cas d'annulation de l'alerte.}}
       </div>
+
+      <form class="form-horizontal">
+        <fieldset>
+          <legend><i class="fas fa-bomb"></i> {{Actions alerte vers les aidants (pour alerter, je dois ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées à l'activation d'un bouton d'alerte par la personne dépendante}}"></i></sup>
+            <a class="btn btn-success btn-sm addAction" data-type="action_alert_life_sign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
+          </legend>
+          <div id="div_action_alert_life_sign"></div>
+
+        </fieldset>
+      </form>
+
+      <br>
+
+    </div>
+
+    <!-- TAB AR alerte -->
+    <div class="tab-pane" id="arlifesigntab">
+      <br/>
+      <div class="alert alert-info">
+        {{Onglet de configuration des actions d'accusé de réception de l'alerte par un aidant extérieur}}
+      </div>
+
+      <form class="form-horizontal">
+        <fieldset>
+          <legend><i class="fas fa-check-square"></i> {{Commande à appeler depuis l'extérieur pour accuser réception de l'alerte}} <sup><i class="fas fa-question-circle tooltips" title="{{Réglages/Système/Configuration/Réseaux doit être correctement renseigné !}}"></i></sup>
+          </legend>
+          <div class="form-group">
+            <label class="col-sm-1 control-label">{{URL }}</label>
+            <div class="col-sm-6" id="div_cmd_api_AR">
+              <?php
+              if(init('id') != ''){
+                $eqLogic = eqLogic::byId(init('id'));
+                $cmd = $eqLogic->getCmd(null, 'life_sign_ar');
+                echo '<a href="' . $cmd->getDirectUrlAccess() . '" target="_blank"><i class="fas fa-external-link-alt"></i>  '. $cmd->getDirectUrlAccess() . '</a>';
+              } else {
+                echo 'Sauvegarder ou rafraichir la page pour afficher l\'URL';
+              }
+              ?>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+
+      <br>
+
+      <form class="form-horizontal">
+        <fieldset>
+          <legend><i class="fas fa-hands-helping"></i> {{Actions à la réception d'un accusé de réception}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions pour prévenir la personne qu'un aidant arrive, ou prévenir les autres aidants que l'alerte est prise en compte}}"></i></sup>
+            <a class="btn btn-success btn-sm addAction" data-type="action_ar_life_sign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
+          </legend>
+          <div id="div_action_ar_life_sign"></div>
+
+        </fieldset>
+      </form>
+
+    </div>
+
+    <!-- TAB Capteurs Bouton alerte -->
+    <div class="tab-pane" id="cancellifesigntab">
+      <br/>
+      <div class="alert alert-info">
+        {{Onglet de configuration des boutons et actions d'annulation d'alerte.}}
+      </div>
+
+      <form class="form-horizontal">
+        <fieldset>
+          <legend><i class="fas fa-hand-paper"></i> {{Actions pour arrêter l'alerte vers les aidants (pour annuler l'alerte, je dois ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées sur activation d'un bouton d'annulation d'alerte.
+          Tag utilisable : #senior_name#.}}"></i></sup>
+            <a class="btn btn-success btn-sm addAction" data-type="action_cancel_life_sign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
+          </legend>
+          <div id="div_action_cancel_life_sign"></div>
+
+        </fieldset>
+      </form>
 
     </div>
 
     <!-- TAB COMMANDES -->
     <div role="tabpanel" class="tab-pane" id="commandtab">
-      <a class="btn btn-success btn-sm cmdAction pull-right" data-action="add" style="margin-top:5px;"><i class="fa fa-plus-circle"></i> {{Commandes}}</a><br/><br/>
+      <!-- <a class="btn btn-success btn-sm cmdAction pull-right" data-action="add" style="margin-top:5px;"><i class="fa fa-plus-circle"></i> {{Commandes}}</a><br/><br/> -->
       <table id="table_cmd" class="table table-bordered table-condensed">
         <thead>
           <tr>

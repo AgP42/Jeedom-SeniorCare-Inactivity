@@ -17,10 +17,9 @@
 
 // permet de reorganiser les elements de la div en les cliquant/deplacant
 $("#div_life_sign").sortable({axis: "y", cursor: "move", items: ".life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
-$("#div_action_warning_life_sign").sortable({axis: "y", cursor: "move", items: ".action_warning_life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
-$("#div_action_desactivate_warning_life_sign").sortable({axis: "y", cursor: "move", items: ".action_desactivate_warning_life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_action_alert_life_sign").sortable({axis: "y", cursor: "move", items: ".action_alert_life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
-$("#div_action_desactivate_alert_life_sign").sortable({axis: "y", cursor: "move", items: ".action_desactivate_alert_life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
+$("#div_action_ar_life_sign").sortable({axis: "y", cursor: "move", items: ".action_ar_life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
+$("#div_action_cancel_life_sign").sortable({axis: "y", cursor: "move", items: ".action_cancel_life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 
 // le bouton "ajouter un capteur" de l'onglet détection d'inactivité
 $('.addSensorLifeSign').off('click').on('click', function () {
@@ -134,12 +133,30 @@ function addSensorLifeSign(_info) {
 //////////////// Les fonctions ACTIONS /////////////////////////////////
 
 // fonction générique pour ajouter chaque ligne d'action.
+// _type peut etre 'action_alert_life_sign', 'action_ar_life_sign', 'action_cancel_life_sign'
 function addAction(_action, _type) {
   var div = '<div class="' + _type + '">';
     div += '<div class="form-group ">';
 
+      if(_type == 'action_alert_life_sign'){ // pour les actions d'alertes,, on ajoute un label et un timer
+        div += '<label class="col-sm-1 control-label">{{Label}} <sup><i class="fas fa-question-circle tooltips" title="{{Renseigner un label si vous voulez lier des actions de désactivations à cette action}}"></i></sup></label>';
+        div += '<div class="col-sm-1">';
+          div += '<input type="text" class="expressionAttr form-control cmdInfo" data-l1key="action_label"/>';
+        div += '</div>';
+
+        div += '<label class="col-sm-1 control-label">{{Délai avant exécution (min)}} <sup><i class="fas fa-question-circle tooltips" title="{{Le délai doit être donné par rapport au déclenchement de l\'alerte initiale et non par rapport à l\'action précédente. Ne pas remplir ou 0 pour déclenchement immédiat}}"></i></sup></label>';
+        div += '<div class="col-sm-1">';
+          div += '<input type="number" class="expressionAttr form-control cmdInfo" data-l1key="action_timer"/>';
+        div += '</div>';
+      } else { // pour les actions à la reception d'1 AR ou d'annulation d'alerte, on ajoute le label de l'action d'alerte à lier
+        div += '<label class="col-sm-2 control-label">{{Label action de référence}} <sup><i class="fas fa-question-circle tooltips" title="{{Renseigner le label de l\'action de référence. Cette action ne sera exécutée que si l\'action de référence a été précédemment exécutée. }}"></i></sup></label>';
+        div += '<div class="col-sm-1">';
+          div += '<input type="text" class="expressionAttr form-control cmdInfo" data-l1key="action_label_liee"/>';
+        div += '</div>';
+      }
+
       div += '<label class="col-sm-1 control-label">Action</label>';
-      div += '<div class="col-sm-4">';
+      div += '<div class="col-sm-2">';
         div += '<div class="input-group">';
           div += '<span class="input-group-btn">';
             div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="' + _type + '"><i class="fas fa-minus-circle"></i></a>';
@@ -152,7 +169,7 @@ function addAction(_action, _type) {
         div += '</div>';
       div += '</div>';
 
-      div += '<div class="col-sm-7 actionOptions">';
+      div += '<div class="col-sm-5 actionOptions">';
         div += jeedom.cmd.displayActionOption(init(_action.cmd, ''), _action.options);
       div += '</div>';
 
@@ -169,10 +186,9 @@ function saveEqLogic(_eqLogic) {
     _eqLogic.configuration = {};
   }
   _eqLogic.configuration.life_sign = $('#div_life_sign .life_sign').getValues('.expressionAttr');
-  _eqLogic.configuration.action_warning_life_sign = $('#div_action_warning_life_sign .action_warning_life_sign').getValues('.expressionAttr');
-  _eqLogic.configuration.action_desactivate_warning_life_sign = $('#div_action_desactivate_warning_life_sign .action_desactivate_warning_life_sign').getValues('.expressionAttr');
   _eqLogic.configuration.action_alert_life_sign = $('#div_action_alert_life_sign .action_alert_life_sign').getValues('.expressionAttr');
-  _eqLogic.configuration.action_desactivate_alert_life_sign = $('#div_action_desactivate_alert_life_sign .action_desactivate_alert_life_sign').getValues('.expressionAttr');
+  _eqLogic.configuration.action_ar_life_sign = $('#div_action_ar_life_sign .action_ar_life_sign').getValues('.expressionAttr');
+  _eqLogic.configuration.action_cancel_life_sign = $('#div_action_cancel_life_sign .action_cancel_life_sign').getValues('.expressionAttr');
 
   return _eqLogic;
 }
@@ -181,10 +197,9 @@ function saveEqLogic(_eqLogic) {
 function printEqLogic(_eqLogic) {
 
   $('#div_life_sign').empty();
-  $('#div_action_warning_life_sign').empty();
-  $('#div_action_desactivate_warning_life_sign').empty();
   $('#div_action_alert_life_sign').empty();
-  $('#div_action_desactivate_alert_life_sign').empty();
+  $('#div_action_ar_life_sign').empty();
+  $('#div_action_cancel_life_sign').empty();
 
   if (isset(_eqLogic.configuration)) {
     if (isset(_eqLogic.configuration.life_sign)) {
@@ -192,24 +207,19 @@ function printEqLogic(_eqLogic) {
         addSensorLifeSign(_eqLogic.configuration.life_sign[i]);
       }
     }
-    if (isset(_eqLogic.configuration.action_warning_life_sign)) {
-      for (var i in _eqLogic.configuration.action_warning_life_sign) {
-        addAction(_eqLogic.configuration.action_warning_life_sign[i], 'action_warning_life_sign');
-      }
-    }
-    if (isset(_eqLogic.configuration.action_desactivate_warning_life_sign)) {
-      for (var i in _eqLogic.configuration.action_desactivate_warning_life_sign) {
-        addAction(_eqLogic.configuration.action_desactivate_warning_life_sign[i], 'action_desactivate_warning_life_sign');
-      }
-    }
     if (isset(_eqLogic.configuration.action_alert_life_sign)) {
       for (var i in _eqLogic.configuration.action_alert_life_sign) {
         addAction(_eqLogic.configuration.action_alert_life_sign[i], 'action_alert_life_sign');
       }
     }
-    if (isset(_eqLogic.configuration.action_desactivate_alert_life_sign)) {
-      for (var i in _eqLogic.configuration.action_desactivate_alert_life_sign) {
-        addAction(_eqLogic.configuration.action_desactivate_alert_life_sign[i], 'action_desactivate_alert_life_sign');
+    if (isset(_eqLogic.configuration.action_ar_life_sign)) {
+      for (var i in _eqLogic.configuration.action_ar_life_sign) {
+        addAction(_eqLogic.configuration.action_ar_life_sign[i], 'action_ar_life_sign');
+      }
+    }
+    if (isset(_eqLogic.configuration.action_cancel_life_sign)) {
+      for (var i in _eqLogic.configuration.action_cancel_life_sign) {
+        addAction(_eqLogic.configuration.action_cancel_life_sign[i], 'action_cancel_life_sign');
       }
     }
   }

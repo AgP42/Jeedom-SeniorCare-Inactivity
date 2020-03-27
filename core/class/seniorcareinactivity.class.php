@@ -26,30 +26,38 @@ class seniorcareinactivity extends eqLogic {
 
     /*     * ***********************Methode static*************************** */
 
+    public static function lifeSignActionDelayed($_options) { // fonction appelée par les cron qui servent a reporter l'execution des actions d'alerte. Dans les options on trouve le eqLogic_id et 'action' qui lui meme contient tout ce qu'il faut pour executer l'action reportée, incluant le titre et message pour les messages
+
+      log::add('seniorcareinactivity', 'debug', 'Fct alertBtActionDelayed Appellée par le CRON - eqLogic_id : ' . $_options['eqLogic_id'] . ' - cmd : ' . $_options['action']['cmd'] . ' - action_label : ' . $_options['action']['action_label']);
+
+      $seniorcareinactivity = seniorcareinactivity::byId($_options['eqLogic_id']); // on prend l'eqLogic du cron qui nous a appelé
+      $seniorcareinactivity->execAction($_options['action']);
+
+    }
+
     public static function sensorLifeSign($_option) { // fct appelée par le listener des capteurs d'activité, n'importe quel capteur arrive ici
       log::add('seniorcareinactivity', 'debug', '################ Detection d\'un capteur d\'activité ############');
 
+      $seniorcareinactivity = seniorcareinactivity::byId($_option['seniorcareinactivity_id']); // on prend l'eqLogic du trigger qui nous a appelé
 
-      $seniorcareinactivity = seniorcareinactivity::byId($_option['seniorcareinactivity_id']);
-      $seniorcareinactivity->setCache('lastLifeSignTimestamp', time()); // on met en cache le timestamp à l'heure du dernier event. C'est le cron qui regardera toutes les min si on est hors timer
+      //TODO : a gerer par capteur !
+      $lifeSignDetectionDelay = $seniorcareinactivity->getConfiguration('life_sign_timer') * 60; // on va lire la durée du timers dans la conf et on le met en secondes
+      $seniorcareinactivity->setCache('nextLifeSignAlertTimestamp', time() + $lifeSignDetectionDelay); // on met en cache le timestamp auquel il faudra déclencher l'alerte. C'est le cron qui regardera toutes les min si on est au dela
 
-      // on recupere l'état des des warning et alertes
-      $actionWarningLifeSignLaunched = $seniorcareinactivity->getCache('actionWarningLifeSignLaunched');
-      $actionAlertLifeSignLaunched = $seniorcareinactivity->getCache('actionAlertLifeSignLaunched');
+      // on recupere l'état actuel de l'alerte
+      $alertLifeSignState = $seniorcareinactivity->getCache('alertLifeSignState');
 
-      log::add('seniorcareinactivity', 'debug', 'Fct sensorLifeSign appelé par le listener, seniorcareinactivity_id : ' . $_option['seniorcareinactivity_id'] . ' - value : ' . $_option['value'] . ' - event_id : ' . $_option['event_id'] . ' - timestamp mis en cache : ' . time() . ' cache lu : ' . $actionWarningLifeSignLaunched . ' - '. $actionAlertLifeSignLaunched);
+      log::add('seniorcareinactivity', 'debug', 'Fct sensorLifeSign appelée par le listener, seniorcareinactivity_id : ' . $_option['seniorcareinactivity_id'] . ' - value : ' . $_option['value'] . ' - event_id : ' . $_option['event_id'] . ' - timestamp mis en cache : ' . $seniorcareinactivity->getCache('nextLifeSignAlertTimestamp') . ' état alerte lu : ' . $alertLifeSignState);
 
-      if ($actionWarningLifeSignLaunched){ // si on était en phase d'avertissement, on lance les actions d'arret warning
-        $seniorcareinactivity->execActions('action_desactivate_warning_life_sign');
+      if ($alertLifeSignState){ // si on était en phase d'alerte, on lance les actions d'annulation
+
+        log::add('seniorcareinactivity', 'debug', 'Actions Alerte Annulation Inactivité à lancer. ');
+        $seniorcareinactivity->execCancelActions();
+
       }
 
-      if ($actionAlertLifeSignLaunched){ // si on était en phase d'alerte, on lance les actions d'arret alerte
-        $seniorcareinactivity->execActions('action_desactivate_alert_life_sign');
-      }
-
-      // dans tous les cas on declare qu'on est pas en phase de warning ni d'alerte, puisqu'on vient de recevoir un signe de vie
-      $seniorcareinactivity->setCache('actionWarningLifeSignLaunched', false);
-      $seniorcareinactivity->setCache('actionAlertLifeSignLaunched', false);
+      // dans tous les cas on declare qu'on est pas en phase d'alerte, puisqu'on vient de recevoir un signe de vie
+      $seniorcareinactivity->setCache('alertLifeSignState', 0);
 
     }
 
@@ -58,49 +66,30 @@ class seniorcareinactivity extends eqLogic {
 
       log::add('seniorcareinactivity', 'debug', '#################### CRON ###################');
 
-      //pour chaque equipement (personne) declaré par l'utilisateur
+      //pour chaque équipement (personne) déclaré par l'utilisateur
       foreach (self::byType('seniorcareinactivity',true) as $seniorcareinactivity) {
 
         if (is_object($seniorcareinactivity) && $seniorcareinactivity->getIsEnable() == 1) { // si notre eq existe et est actif
           //TODO : c'est ici qu'il faudra gerer l'absence de la personne de son logement
 
-          /********* Gestion de l'onglet "détection d'inactivité" ********/
-
-          $lifeSignDetectionDelay = $seniorcareinactivity->getConfiguration('life_sign_timer') * 60; // on va lire la durée des timers dans la conf et on le met en secondes
-          $lifeSignWarningDelay = $seniorcareinactivity->getConfiguration('warning_life_sign_timer') * 60;
-
-          $lastLifeSignTimestamp = $seniorcareinactivity->getCache('lastLifeSignTimestamp'); // on va lire le timestamp du dernier trigger, en secondes
-          $actionWarningLifeSignTimestamp = $seniorcareinactivity->getCache('actionWarningLifeSignTimestamp'); // on va lire le timestamp du lancement du warning, en secondes
-
           $now = time(); // timestamp courant, en s
-          $secSinceLastLifeSign = $now - $lastLifeSignTimestamp; // le nb de secondes écoulées depuis le dernier event
-          $secSinceWarningLifeSign = $now - $actionWarningLifeSignTimestamp; // le nb de secondes écoulées depuis le lancement des actions de warning
+          $nextLifeSignAlertTimestamp = $seniorcareinactivity->getCache('nextLifeSignAlertTimestamp'); // le timestamp enregistré auquel il faut déclencher l'alerte
 
-          $actionWarningLifeSignLaunched = $seniorcareinactivity->getCache('actionWarningLifeSignLaunched'); // on recupere l'état des des warning et alertes
-          $actionAlertLifeSignLaunched = $seniorcareinactivity->getCache('actionAlertLifeSignLaunched');
+          // on recupere l'état de l'alerte
+          $alertLifeSignState = $seniorcareinactivity->getCache('alertLifeSignState');
 
-          log::add('seniorcareinactivity', 'debug', 'Cache lu : ' . $actionWarningLifeSignLaunched . ' - ' . $actionAlertLifeSignLaunched);
+          log::add('seniorcareinactivity', 'debug', 'Etat alerte : ' . $alertLifeSignState . ' - Alerte à lancer dans : ' . $nextLifeSignAlertTimestamp-$now);
 
-          if ($secSinceLastLifeSign > $lifeSignDetectionDelay && !$actionWarningLifeSignLaunched && !$actionAlertLifeSignLaunched){
-          //= le premier timer est échu mais aucune action ni warning si alerte n'est en cours --> on va lancer les actions warning
-            log::add('seniorcareinactivity', 'debug', 'Actions Warning Life Sign A lancer. Timer lu : ' . $lifeSignDetectionDelay . ', sec depuis last event : ' . $secSinceLastLifeSign);
+          if ($now >= $nextLifeSignAlertTimestamp && !$alertLifeSignState){
+          //= on est au dela du delai et alerte pas encore en cours --> on va lancer les actions alerte
+            log::add('seniorcareinactivity', 'debug', 'Actions Alerte Inactivité à lancer. ');
 
-            $seniorcareinactivity->execActions('action_warning_life_sign');
+            // boucler dans les actions, les lancer ou set cron si timer défini
+            $seniorcareinactivity->execAlerteActions();
 
-            $seniorcareinactivity->setCache('actionWarningLifeSignLaunched', true); // on memorise qu'on a lancé les actions pour ne pas repeter toutes les min
-            $seniorcareinactivity->setCache('actionWarningLifeSignTimestamp', $now); // on memorise l'heure du lancement du warning
+            $seniorcareinactivity->setCache('alertLifeSignState', 1); // on memorise qu'on a lancé les actions pour ne pas repeter toutes les min
 
-          } else if ($secSinceLastLifeSign > $lifeSignDetectionDelay // 1er timer toujours échu
-            && $actionWarningLifeSignLaunched && $secSinceWarningLifeSign > $lifeSignWarningDelay // on a deja lancé les actions warning et le timer de warning est échu aussi
-            && !$actionAlertLifeSignLaunched){ // mais on a pas encore lancé d'alerte --> c'est le moment de le faire !
-            log::add('seniorcareinactivity', 'debug', 'Actions Alerte Life Sign à lancer, temps depuis last event : ' . $secSinceLastLifeSign . ', sec depuis le lancement du warning : ' . $secSinceWarningLifeSign);
-
-            // lance les actions alertes
-            $seniorcareinactivity->execActions('action_alert_life_sign');
-
-            $seniorcareinactivity->setCache('actionAlertLifeSignLaunched', true); // on memorise qu'on a lancé les actions d'alertes
-            //TODO : gerer la repetition d'alerte toutes les 5min par exemple ?
-          }
+          } // sinon : on fait juste rien...
 
         } // fin if eq actif
 
@@ -122,32 +111,187 @@ class seniorcareinactivity extends eqLogic {
       }
      */
 
-    public function execActions($_config, $_sensor_name = NULL, $_sensor_type = NULL, $_sensor_value = NULL) { // on donne le type d'action en argument et ca nous execute toute la liste. Les autres arguments sont pour les tag des messages si applicable
 
-      log::add('seniorcareinactivity', 'debug', '################ Execution des actions du type ' . $_config . ' pour ' . $this->getName() .  ' ############');
 
-      foreach ($this->getConfiguration($_config) as $action) { // on boucle pour executer toutes les actions définies
-        try {
-          $options = array(); // va permettre d'appeler les options de configuration des actions, par exemple un scenario un message
-          if (isset($action['options'])) {
-            $options = $action['options'];
-            foreach ($options as $key => $value) { // ici on peut définir les "tag" de configuration qui seront à remplacer par des variables
-              // str_replace ($search, $replace, $subject) retourne une chaîne ou un tableau, dont toutes les occurrences de search dans subject ont été remplacées par replace.
-              $value = str_replace('#senior_name#', $this->getName(), $value);
-              $value = str_replace('#sensor_name#', $_sensor_name, $value);
-              $value = str_replace('#sensor_type#', $_sensor_type, $value);
-              $options[$key] = str_replace('#sensor_value#', $_sensor_value, $value);
-            }
+    /*     * *********************Méthodes d'instance************************* */
+
+    public function execAlerteActions($action) { // appelée par le cron (celui de jeedom toutes les min) si besoin
+
+      foreach ($this->getConfiguration('action_alert_life_sign') as $action) { // pour toutes les actions définies
+
+        log::add('seniorcareinactivity', 'debug', 'Config Action LifeSign Alert - action_label : ' . $action['action_label'] . ' - action_timer : ' . $action['action_timer']);
+
+        if(is_numeric($action['action_timer']) && $action['action_timer'] > 0){ // si on a un timer bien defini et > 0 min, on va lancer un cron pour l'execution retardée de l'action
+          // si le CRON existe deja, on ne l'update pas
+
+          $cron = cron::byClassAndFunction('seniorcareinactivity', 'lifeSignActionDelayed', array('eqLogic_id' => intval($this->getId()), 'action' => $action)); // cherche le cron qui correspond exactement à "ce plugin, cette fonction et ces options (personne, action (qui contient cmd, option (les titres et messages notamment) et label))" Si on change le label ou le message, c'est plus le meme "action" et donc cette fonction ne le trouve pas et un nouveau cron sera crée !
+          // lors d'une sauvegarde ou suppression de l'eqLogic, si des crons sont existants, ils seront supprimés avec un message d'alerte
+
+          if (!is_object($cron)) { // pas de cron trouvé, on le cree
+
+              $cron = new cron();
+              $cron->setClass('seniorcareinactivity');
+              $cron->setFunction('lifeSignActionDelayed');
+
+              $options['eqLogic_id'] = intval($this->getId());
+              $options['action'] = $action; //inclu tout le detail de l'action : sa cmd, ses options pour les messages, son label, ...
+              $cron->setOption($options);
+
+              log::add('seniorcareinactivity', 'debug', 'Set CRON : ' . $options['eqLogic_id'] . ' - ' . $options['action']['cmd'] . ' - ' . $options['action']['action_label']);
+
+              $cron->setEnable(1);
+              $cron->setTimeout(5); //minutes
+
+              $delai = strtotime(date('Y-m-d H:i:s', strtotime('+'.$action['action_timer'].' min ' . date('Y-m-d H:i:s')))); // on lui dit de se déclencher dans 'action_timer' min
+              $cron->setSchedule(cron::convertDateToCron($delai));
+
+              $cron->setOnce(1); //permet qu'il s'auto supprime une fois executé
+              $cron->save();
+
+          } else {
+
+            log::add('seniorcareinactivity', 'debug', 'CRON existe deja pour : ' . $cron->getOption()['eqLogic_id'] . ' - ' . $cron->getOption()['action']['cmd'] . ' - ' . $cron->getOption()['action']['action_label'] . ' => on ne fait rien !');
           }
-          scenarioExpression::createAndExec('action', $action['cmd'], $options);
-        } catch (Exception $e) {
-          log::add('seniorcareinactivity', 'error', $this->getHumanName() . __(' : Erreur lors de l\'éxecution de ', __FILE__) . $action['cmd'] . __('. Détails : ', __FILE__) . $e->getMessage());
+
+        }else{ // pas de timer valide defini, on execute l'action immédiatement
+
+          log::add('seniorcareinactivity', 'debug', 'Pas de timer liée, on execute ' . $action['cmd']);
+
+          $this->execAction($action);
         }
-      } //*/
+
+      } // fin foreach toutes les actions
 
     }
 
-    /*     * *********************Méthodes d'instance************************* */
+    public function execCancelActions() { // appelée par un trigger de signe de vie si l'alerte était active
+
+      foreach ($this->getConfiguration('action_cancel_life_sign') as $action) { // pour toutes les actions définies
+
+        $execActionLiee = $this->getCache('execAction_'.$action['action_label_liee']); // on va lire le cache d'execution de l'action liée, savoir si deja lancé ou non...
+
+        log::add('seniorcareinactivity', 'debug', 'Config Action Annulation Alerte inactivité, action : '. $action['cmd'] .', label action liée : ' . $action['action_label_liee'] . ' - action liée deja executée : ' . $execActionLiee);
+
+        if($action['action_label_liee'] == ''){ // si pas d'action liée, on execute direct
+
+          log::add('seniorcareinactivity', 'debug', 'Pas d\'action liée, on execute ' . $action['cmd']);
+
+          $this->execAction($action);
+
+        }else if(isset($action['action_label_liee']) && $action['action_label_liee'] != '' && $execActionLiee == 1){ // si on a une action liée définie et qu'elle a été executée => on execute notre action et on remet le cache de l'action liée à 0 (fait uniquement pour annulation et non à la réception de l'AR, donc l'aidant ayant recu une alerte pourra recevoir l'info qu'il y a eu une AR (mais on sait pas par qui... TODO...) puis que l'alerte est résolue)
+
+          log::add('seniorcareinactivity', 'debug', 'Action liée ('.$action['action_label_liee'].') executée précédemment, donc on execute ' . $action['cmd'] . ' et remise à 0 du cache d\'exec de l\'action origine');
+
+          $this->execAction($action);
+
+          $this->setCache('execAction_'.$action['action_label_liee'], 0);
+
+        }else{ // sinon, on log qu'on n'execute pas l'action et la raison
+          log::add('seniorcareinactivity', 'debug', 'Action liée ('.$action['action_label_liee'].') non executée précédemment, donc on execute pas ' . $action['cmd']);
+        }
+
+      } // fin foreach toutes les actions
+
+      //coupe les CRON des actions d'alertes non encore appelés
+      $this->cleanAllCron();
+
+    }
+
+
+
+    public function lifeSignAR() { // fct appelée par la cmd action appelée par l'extérieur pour AR de l'alerte en cours
+
+      log::add('seniorcareinactivity', 'debug', '################ Detection d\'un appel d\'Accusé de Réception ############');
+
+      foreach ($this->getConfiguration('action_ar_life_sign') as $action) { // pour toutes les actions définies pour les AR
+
+        $execActionLiee = $this->getCache('execAction_'.$action['action_label_liee']);
+
+        log::add('seniorcareinactivity', 'debug', 'Config Action Accusé Réception bouton d\'alerte, action : '. $action['cmd'] .', label action liée : ' . $action['action_label_liee'] . ' - action liée deja executée : ' . $execActionLiee);
+
+        if($action['action_label_liee'] == ''){ // si pas d'action liée, on execute direct
+
+          log::add('seniorcareinactivity', 'debug', 'Pas d\'action liée, on execute ' . $action['cmd']);
+
+          $this->execAction($action);
+
+        }else if(isset($action['action_label_liee']) && $action['action_label_liee'] != '' && $execActionLiee == 1){ // si on a une action liée définie et qu'elle a été executée => on execute notre action
+
+          log::add('seniorcareinactivity', 'debug', 'Action liée ('.$action['action_label_liee'].') executée précédemment, donc on execute ' . $action['cmd']);
+
+          $this->execAction($action);
+
+        }else{ // sinon, on log qu'on ne l'execute pas
+          log::add('seniorcareinactivity', 'debug', 'Action liée ('.$action['action_label_liee'].') non executée précédemment, donc on execute pas ' . $action['cmd']);
+        }
+
+      } // fin foreach toutes les actions
+
+      //coupe les CRON des actions d'alertes non encore appelés
+      $this->cleanAllCron();
+
+    }
+
+    public function execAction($action) { // execution d'une seule action, avec son label si c'est une alerte
+    // $this doit rester l'eqLogic et non la commande elle meme, pour chopper les tags
+
+      log::add('seniorcareinactivity', 'debug', '################ Execution de l\' actions ' . $_config . ' pour ' . $this->getName() .  ' ############');
+
+      try {
+        $options = array(); // va permettre d'appeler les options de configuration des actions, par exemple un scenario ou les textes pour un message
+        if (isset($action['options'])) {
+          $options = $action['options'];
+          foreach ($options as $key => $value) { // ici on peut définir les "tag" de configuration qui seront à remplacer par des variables
+            // str_replace ($search, $replace, $subject) retourne une chaîne ou un tableau, dont toutes les occurrences de search dans subject ont été remplacées par replace.
+            $value = str_replace('#senior_name#', $this->getConfiguration('senior_name'), $value);
+            $value = str_replace('#senior_phone#', $this->getConfiguration('senior_phone'), $value);
+            $value = str_replace('#senior_address#', $this->getConfiguration('senior_address'), $value);
+
+            $value = str_replace('#trusted_person_name#', $this->getConfiguration('trusted_person_name'), $value);
+            $value = str_replace('#trusted_person_phone#', $this->getConfiguration('trusted_person_phone'), $value);
+
+      //      $value = str_replace('#url_ar#', $this->getConfiguration('url_ar'), $value); // marche pas malheureusement, probablement une histoire de formatage... TODO...
+
+      //      $value = str_replace('#sensor_name#', $_sensor_name, $value);
+      //      $value = str_replace('#sensor_type#', $_sensor_type, $value);
+            $options[$key] = str_replace('#sensor_value#', $_sensor_value, $value);
+          }
+        }
+        scenarioExpression::createAndExec('action', $action['cmd'], $options);
+
+        if(isset($action['action_label'])){ // si on avait un label (donc c'est une action d'alerte), on memorise qu'on a lancé l'action
+          $this->setCache('execAction_'.$action['action_label'], 1);
+          log::add('seniorcareinactivity', 'debug', 'setCache TRUE pour label : ' . $action['action_label']);
+        }
+
+      } catch (Exception $e) {
+        log::add('seniorcareinactivity', 'error', $this->getHumanName() . __(' : Erreur lors de l\'éxecution de ', __FILE__) . $action['cmd'] . __('. Détails : ', __FILE__) . $e->getMessage());
+
+      }
+
+    }
+
+    public function cleanAllCron($displayWarningMessage = false) {
+
+      log::add('seniorcareinactivity', 'debug', 'Fct cleanAllCron pour : ' . $this->getName());
+
+      $cron = cron::byClassAndFunction('seniorcareinactivity', 'lifeSignActionDelayed'); //on cherche le 1er cron pour ce plugin et cette action (il n'existe pas de fonction core renvoyant un array avec tous les cron de la class, comme pour les listeners... dommage...)
+
+      while (is_object($cron) && $cron->getOption()['eqLogic_id'] == $this->getId()) { // s'il existe et que l'id correspond, on le vire puis on cherche le suivant et tant qu'il y a un suivant on boucle
+
+        log::add('seniorcareinactivity', 'debug', 'Cron trouvé à supprimer pour eqLogic_id : ' . $cron->getOption()['eqLogic_id'] . ' - cmd : ' . ' - ' . $cron->getOption()['action']['cmd'] . ' - action_label : ' . $cron->getOption()['action']['action_label']);
+
+        if($displayWarningMessage){
+
+          log::add('seniorcareinactivity', 'error', 'Attention, des actions d\'alerte avec un délai avant exécution sont en cours et vont être supprimées, merci de vous assurer que la personne associée n\'a pas besoin d\'assistance ! Il s\'agit de ' . $this->getConfiguration('senior_name') . ' - pour l\'eqLogic ' . $this->getName() . ', action supprimée : ' . $cron->getOption()['action']['cmd'] . ' - action_label : ' . $cron->getOption()['action']['action_label']);
+        }
+
+        $cron->remove();
+        $cron = cron::byClassAndFunction('seniorcareinactivity', 'lifeSignActionDelayed');
+      }
+
+
+    }
 
     public function cleanAllListener() {
 
@@ -171,6 +315,21 @@ class seniorcareinactivity extends eqLogic {
 
     public function postInsert() {
 
+      // on va créer la commande pour l'AR
+      $cmd = $this->getCmd(null, 'life_sign_ar');
+      if (!is_object($cmd)) {
+        $cmd = new seniorcareinactivityCmd();
+        $cmd->setName(__('Accuser Réception Alerte', __FILE__));
+      }
+      $cmd->setLogicalId('life_sign_ar');
+      $cmd->setEqLogic_id($this->getId());
+      $cmd->setType('action');
+      $cmd->setSubType('other');
+      $cmd->setIsVisible(0);
+      $cmd->setIsHistorized(1);
+      $cmd->setConfiguration('historizeMode', 'none'); //on garde en mémoire tous les AR recu.
+      //TODO : voir comment on pourrait avoir l'info de "qui" a accusé réception...
+      $cmd->save();
     }
 
     public function preSave() {
@@ -285,6 +444,8 @@ class seniorcareinactivity extends eqLogic {
           // on assigne la fonction selon le type de capteur
           if ($cmd->getLogicalId() == 'sensor_life_sign') {
             $listenerFunction = 'sensorLifeSign';
+          } else {
+            continue; // sinon c'est que c'est pas un truc auquel on veut assigner un listener, on passe notre tour
           }
 
           // on set le listener associée
@@ -311,9 +472,8 @@ class seniorcareinactivity extends eqLogic {
 
       //########## 5 - initialisation du cache #########//
 
-      // on declare qu'on est pas en phase de warning ni d'alerte
-  //    $this->setCache('actionWarningLifeSignLaunched', false);
-  //    $this->setCache('actionAlertLifeSignLaunched', false);
+      // on declare qu'on est pas en phase d'alerte
+  //    $this->setCache('alertLifeSignState', 0);
 
 
     } // fin fct postSave
@@ -330,11 +490,11 @@ class seniorcareinactivity extends eqLogic {
         if (is_array($this->getConfiguration($type))) {
           foreach ($this->getConfiguration($type) as $sensor) { // pour tous les capteurs de tous les types, on veut un nom et une cmd
             if ($sensor['name'] == '') {
-              throw new Exception(__('Le champs Nom pour les capteurs ('.$type.') ne peut être vide',__FILE__));
+              throw new Exception(__('Le champs Nom pour les capteurs d\'activité ne peut être vide',__FILE__));
             }
 
             if ($sensor['cmd'] == '') { // TODO on pourrait aussi ici vérifier que notre commande existe pour pas avoir de problemes apres...
-              throw new Exception(__('Le champs Capteur ('.$type.') ne peut être vide',__FILE__));
+              throw new Exception(__('Le champs Capteur d\'activité ne peut être vide',__FILE__));
             }
           }
         }
@@ -349,6 +509,10 @@ class seniorcareinactivity extends eqLogic {
 
       // quand on supprime notre eqLogic, on vire nos listeners associés
       $this->cleanAllListener();
+
+      //supprime les CRON des actions d'alertes non encore appelés, affiche une alerte s'il y en avait
+      //sert à ne pas laisser trainer des CRONs en cours si on change le message ou le label puis en enregistre. Mais ne devrait arriver qu'exceptionnellement
+      $this->cleanAllCron(true);
 
     }
 
@@ -396,9 +560,18 @@ class seniorcareinactivityCmd extends cmd {
 
     public function execute($_options = array()) {
 
-      log::add('seniorcareinactivity', 'debug', 'Fct execute pour : ' . $this->getLogicalId() . $this->getHumanName() . '- valeur renvoyée : ' . jeedom::evaluateExpression($this->getValue()));
+      if ($this->getLogicalId() == 'life_sign_ar') {
+       // log::add('seniorcareinactivity', 'debug', 'Appel de l AR via API');
+        $eqLogic = $this->getEqLogic();
+        $eqLogic->lifeSignAR();
 
-      return jeedom::evaluateExpression($this->getValue());
+      } else { // sinon c'est un sensor et on veut juste sa valeur
+
+        log::add('seniorcareinactivity', 'debug', 'Fct execute pour : ' . $this->getLogicalId() . $this->getHumanName() . '- valeur renvoyée : ' . jeedom::evaluateExpression($this->getValue()));
+
+        return jeedom::evaluateExpression($this->getValue());
+
+      }
 
     }
 
