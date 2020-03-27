@@ -112,7 +112,12 @@ function addSensorLifeSign(_info) {
         div += '</div>';
       div += '</div>';
 
-      div += '<label class="col-sm-1 control-label">{{Type de capteur }}</label>';
+      div += '<label class="col-sm-2 control-label">{{Délai avant alerte (min)}} <sup><i class="fas fa-question-circle tooltips" title="{{Saisir le délai d\'inactivité acceptable après déclenchement de ce capteur. A l\'issue de ce délai, si aucun autre capteur n\'a été déclenché, l\'alerte sera lancée}}"></i></sup></label>';
+      div += '<div class="col-sm-1">';
+        div += '<input type="number" class="expressionAttr form-control cmdInfo" data-l1key="life_sign_timer"/>';
+      div += '</div>';
+
+/*      div += '<label class="col-sm-1 control-label">{{Type de capteur }}</label>';
       div += '<div class="col-sm-1">';
         div += '<select class="expressionAttr eqLogicAttr form-control tooltips" data-l1key="sensor_life_sign_type">';
         div += '<option value="other">Divers</option>';
@@ -122,7 +127,7 @@ function addSensorLifeSign(_info) {
         div += '<option value="interrupteur">Interrupteur</option>';
         div += '<option value="detecteur_mvt">Détecteur de mouvement</option>';
         div += '</select>';
-      div += '</div>';
+      div += '</div>';*/
 
     div += '</div>';
   div += '</div>';
