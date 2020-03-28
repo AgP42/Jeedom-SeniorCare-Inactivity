@@ -48,12 +48,12 @@ try {
       }
       $return = array();
 
-      $seniorcareinactivity_cmd = $seniorcareinactivity->getCmd(null, 'life_sign_presence');
+/*      $seniorcareinactivity_cmd = $seniorcareinactivity->getCmd(null, 'life_sign_presence');
       if (is_object($seniorcareinactivity_cmd)) {
         foreach (calendar_event::searchByCmd($seniorcareinactivity_cmd->getId()) as $event) {
           $return[$event->getId()] = $event;
         }
-      }
+      }*/
 
       $seniorcareinactivity_cmd = $seniorcareinactivity->getCmd(null, 'life_sign_absence');
       if (is_object($seniorcareinactivity_cmd)) {

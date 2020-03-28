@@ -157,7 +157,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
     <div class="tab-pane" id="absencestab">
       <br/>
       <div class="alert alert-info">
-        {{TODO : gérer la liaison avec le plugin Agenda pour saisir les absences prévues, et ajouter les boutons ou capteurs du logement à utiliser pour détecter la présence/absence de la personne de son logement}}
+        {{Onglet de configuration d'absence du logement. Vous pouvez utiliser le plugin Agenda, des boutons, des scenarios ou appels via l'API pour déclarer une absence. La présence sera automatiquement réactivée par la détection d'un capteur d'activités.}}
       </div>
 
       <?php
@@ -166,7 +166,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
         if (is_object($plugin)) {
           ?>
 
-          <legend><i class="fas fa-clock"></i> {{Utiliser le plugin Agenda pour la gestion des absences}}<sup><i class="fas fa-question-circle tooltips" title="{{Les plages d'absences sont à configurer directement avec le plugin Agenda. La programmation réalisée s'affichera ici}}"></i></sup></legend>
+          <legend><i class="fas fa-clock"></i> {{Utiliser le plugin Agenda pour la gestion des absences}}<sup><i class="fas fa-question-circle tooltips" title="{{Le début des plages d'absences sont à configurer directement avec le plugin Agenda. La programmation réalisée s'affichera ici. Tout capteur d'activité détecté dans le logement relancera la surveillance.}}"></i></sup></legend>
           <form class="form-horizontal">
             <fieldset>
               <div id="div_schedule"></div>
@@ -180,19 +180,47 @@ $eqLogics = eqLogic::byType($plugin->getId());
       }
       ?>
 
+      <form class="form-horizontal">
+        <fieldset>
+          <legend><i class="fas fa-toggle-off"></i> {{Utiliser un bouton pour déclarer l'absence}}<sup><i class="fas fa-question-circle tooltips" title="{{Le plugin déclarera le début de l'absence à l'issu du délai configuré. Permet ainsi de quitter le domicile sans que les derniers mouvements (détecteurs de mouvements qui revient à 0 ou fermeture de porte) ne soient considérés comme une arrivée dans le logement. A l'issu de ce délai, tout capteur d'activité activé relancera la surveillance. Un délai de 5 à 10 min est recommandé.}}"></i></sup>
+            <a class="btn btn-success btn-sm addSensorAbsence" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un bouton}}</a>
+          </legend>
+
+          <div id="div_absence"></div>
+
+          <br>
+
+          <div class="form-group">
+            <label class="col-sm-2 control-label"><i class="fas fa-stopwatch"></i> {{Délai avant absence effective (min)}} <sup><i class="fas fa-question-circle tooltips" title="{{Délai pendant lequel vos capteurs d'activité peuvent être actifs sans qu'ils ne relancent la surveillance.}}"></i></sup></label>
+            <div class="col-sm-1">
+              <input type="number" min="0" class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="absence_timer" />
+            </div>
+          </div>
+
+        </fieldset>
+      </form>
+
+      <legend><i class="fas fa-external-link-alt"></i> {{Via un scenario, un autre plugin ou un appel extérieur}}<sup><i class="fas fa-question-circle tooltips" title="{{Réglages/Système/Configuration/Réseaux doit être correctement renseigné !}}"></i></sup></legend>
+
+      <div class="col-sm-6">
+        <?php
+        if(init('id') != ''){
+          $eqLogic = eqLogic::byId(init('id'));
+          $cmd = $eqLogic->getCmd(null, 'life_sign_absence');
+          echo '<p>N\'importe où dans Jeedom, appelez cette commande : <i class="fas fa-code-branch"></i><b>  '. $cmd->getHumanName() . '</b><br>Où via l\'extérieur : <a href="' . $cmd->getDirectUrlAccess() . '" target="_blank"><i class="fas fa-external-link-alt"></i>  '. $cmd->getDirectUrlAccess() . '</a></p>';
+        } else {
+          echo 'Sauvegarder ou rafraichir la page pour afficher les infos';
+        }
+        ?>
+      </div>
 
     </div>
 
     <!-- TAB Capteurs Détection d'inactivité (qui s'appellera life_sign dans le code !) -->
-
-    <!-- TODO : ajouter des actions pour que l'aidant puisse prévenir la personne dépendante de la bonne prise en compte de l'alerte ? Beaucoup plus simple a faire en externe du plugin... a voir !! -->
-
     <div class="tab-pane" id="sensorlifesigntab">
       <br/>
       <div class="alert alert-info">
-        {{Onglet de configuration des capteurs indiquant une activité de la personne dépendante.
-        Un premier niveau d'alerte permet de prévenir la personne dépendante d'une alerte imminente afin de la désactiver.
-        Sans réaction de sa part, une alerte sera envoyée aux aidants.}}
+        {{Onglet de configuration des capteurs indiquant une activité dans le logement}}
       </div>
 
       <form class="form-horizontal">
@@ -253,7 +281,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
           </legend>
           <div class="form-group">
             <label class="col-sm-1 control-label">{{URL }}</label>
-            <div class="col-sm-6" id="div_cmd_api_AR">
+            <div class="col-sm-6">
               <?php
               if(init('id') != ''){
                 $eqLogic = eqLogic::byId(init('id'));

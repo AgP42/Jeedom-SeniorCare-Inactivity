@@ -16,10 +16,16 @@
  */
 
 // permet de reorganiser les elements de la div en les cliquant/deplacant
+$("#div_absence").sortable({axis: "y", cursor: "move", items: ".absence", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_life_sign").sortable({axis: "y", cursor: "move", items: ".life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_action_alert_life_sign").sortable({axis: "y", cursor: "move", items: ".action_alert_life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_action_ar_life_sign").sortable({axis: "y", cursor: "move", items: ".action_ar_life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_action_cancel_life_sign").sortable({axis: "y", cursor: "move", items: ".action_cancel_life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
+
+// le bouton "ajouter un capteur" de l'onglet gestion absence
+$('.addSensorAbsence').off('click').on('click', function () {
+  addSensorAbsence({});
+});
 
 // le bouton "ajouter un capteur" de l'onglet détection d'inactivité
 $('.addSensorLifeSign').off('click').on('click', function () {
@@ -86,6 +92,42 @@ $('body').off('focusout','.cmdAction.expressionAttr[data-l1key=cmd]').on('focuso
 });
 
 //////////////// Les fonctions CAPTEURS /////////////////////////////////
+
+// ajoute chaque ligne de CAPTEUR de détection d'absence, à la demande
+function addSensorAbsence(_info) {
+  var div = '<div class="absence">';
+    div += '<div class="form-group ">';
+
+      div += '<label class="col-sm-1 control-label">{{Nom}}</label>';
+      div += '<div class="col-sm-2">';
+        div += '<div class="input-group">';
+          div += '<span class="input-group-btn">';
+          div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="absence" title="{{Supprimer le capteur}}""><i class="fas fa-minus-circle"></i></a>';
+          div += '</span>';
+          div += '<input class="expressionAttr form-control cmdInfo" data-l1key="name" title="{{Le nom doit être unique}}"/>'; // dans la class ['name']
+        div += '</div>';
+      div += '</div>';
+
+      div += '<label class="col-sm-1 control-label">Capteur</label>';
+      div += '<div class="col-sm-2">';
+        div += '<div class="input-group">';
+          div += '<input class="expressionAttr roundedLeft form-control cmdInfo" data-l1key="cmd" />'; // dans la class on retrouvera le resultat avec un ['cmd'] sous forme #10# qui represente l'id de la cmd referencé
+          div += '<span class="input-group-btn">';
+          div += '<a class="btn btn-default listCmdInfoWindow roundedRight" title="{{Selectionner le capteur}}"><i class="fas fa-list-alt"></i></a>';
+          div += '</span>';
+        div += '</div>';
+      div += '</div>';
+
+/*      div += '<label class="col-sm-2 control-label">{{Délai avant absence effective (min)}} <sup><i class="fas fa-question-circle tooltips" title="{{Délai pendant lequel vos capteurs d\'activité peuvent être actifs sans qu\'ils ne relancent la surveillance. }}"></i></sup></label>';
+      div += '<div class="col-sm-1">';
+        div += '<input type="number" class="expressionAttr form-control cmdInfo" data-l1key="absence_timer"/>';
+      div += '</div>';*/
+
+    div += '</div>';
+  div += '</div>';
+  $('#div_absence').append(div);
+  $('#div_absence .absence').last().setValues(_info, '.expressionAttr');
+}
 
 // ajoute chaque ligne de CAPTEUR de détection d'inactivité, à la demande
 function addSensorLifeSign(_info) {
@@ -190,6 +232,7 @@ function saveEqLogic(_eqLogic) {
   if (!isset(_eqLogic.configuration)) {
     _eqLogic.configuration = {};
   }
+  _eqLogic.configuration.absence = $('#div_absence .absence').getValues('.expressionAttr');
   _eqLogic.configuration.life_sign = $('#div_life_sign .life_sign').getValues('.expressionAttr');
   _eqLogic.configuration.action_alert_life_sign = $('#div_action_alert_life_sign .action_alert_life_sign').getValues('.expressionAttr');
   _eqLogic.configuration.action_ar_life_sign = $('#div_action_ar_life_sign .action_ar_life_sign').getValues('.expressionAttr');
@@ -201,6 +244,7 @@ function saveEqLogic(_eqLogic) {
 // fct core permettant de restituer les cmd declarées
 function printEqLogic(_eqLogic) {
 
+  $('#div_absence').empty();
   $('#div_life_sign').empty();
   $('#div_action_alert_life_sign').empty();
   $('#div_action_ar_life_sign').empty();
@@ -209,6 +253,11 @@ function printEqLogic(_eqLogic) {
   printScheduling(_eqLogic); // va chercher les infos du plugin agenda pour les afficher dans l'onglet presence/absence
 
   if (isset(_eqLogic.configuration)) {
+    if (isset(_eqLogic.configuration.absence)) {
+      for (var i in _eqLogic.configuration.absence) {
+        addSensorAbsence(_eqLogic.configuration.absence[i]);
+      }
+    }
     if (isset(_eqLogic.configuration.life_sign)) {
       for (var i in _eqLogic.configuration.life_sign) {
         addSensorLifeSign(_eqLogic.configuration.life_sign[i]);
