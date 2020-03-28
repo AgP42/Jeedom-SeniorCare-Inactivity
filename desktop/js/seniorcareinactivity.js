@@ -251,9 +251,9 @@ function printScheduling(_eqLogic){
       }
       $('#div_schedule').empty();
       if(data.result.length == 0){
-        $('#div_schedule').append("<center><span style='color:#767676;font-size:1.2em;font-weight: bold;'>{{Vous n'avez encore aucune programmation. Veuillez cliquer <a href='index.php?v=d&m=calendar&p=calendar'>ici</a> pour programmer votre thermostat à l'aide du plugin agenda}}</span></center>");
+        $('#div_schedule').append("<center><span style='color:#767676;font-size:1.2em;font-weight: bold;'>{{Vous n'avez encore aucune programmation. Veuillez cliquer <a href='index.php?v=d&m=calendar&p=calendar'>ici</a> pour programmer vos absences à l'aide du plugin agenda}}</span></center>");
       }else{
-        var html = '<legend>{{Liste des programmations du plugin Agenda liées au Thermostat}}</legend>';
+        var html = '<p>{{Liste des programmations liées}}</p>';
         for (var i in data.result) {
           var color = init(data.result[i].cmd_param.color, '#2980b9');
           if(data.result[i].cmd_param.transparent == 1){

@@ -169,7 +169,6 @@ $eqLogics = eqLogic::byType($plugin->getId());
           <legend><i class="fas fa-clock"></i> {{Utiliser le plugin Agenda pour la gestion des absences}}<sup><i class="fas fa-question-circle tooltips" title="{{Les plages d'absences sont à configurer directement avec le plugin Agenda. La programmation réalisée s'affichera ici}}"></i></sup></legend>
           <form class="form-horizontal">
             <fieldset>
-              <br/>
               <div id="div_schedule"></div>
             </fieldset>
           </form>
