@@ -160,6 +160,28 @@ $eqLogics = eqLogic::byType($plugin->getId());
         {{TODO : gérer la liaison avec le plugin Agenda pour saisir les absences prévues, et ajouter les boutons ou capteurs du logement à utiliser pour détecter la présence/absence de la personne de son logement}}
       </div>
 
+      <?php
+      try {
+        $plugin = plugin::byId('calendar');
+        if (is_object($plugin)) {
+          ?>
+
+          <legend><i class="fas fa-clock"></i> {{Utiliser le plugin Agenda pour la gestion des absences}}<sup><i class="fas fa-question-circle tooltips" title="{{Les plages d'absences sont à configurer directement avec le plugin Agenda. La programmation réalisée s'affichera ici}}"></i></sup></legend>
+          <form class="form-horizontal">
+            <fieldset>
+              <br/>
+              <div id="div_schedule"></div>
+            </fieldset>
+          </form>
+
+          <?php
+        }
+      } catch (Exception $e) {
+
+      }
+      ?>
+
+
     </div>
 
     <!-- TAB Capteurs Détection d'inactivité (qui s'appellera life_sign dans le code !) -->

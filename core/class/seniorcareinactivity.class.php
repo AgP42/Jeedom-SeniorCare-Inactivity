@@ -40,10 +40,10 @@ class seniorcareinactivity extends eqLogic {
 
       $seniorcareinactivity = seniorcareinactivity::byId($_option['seniorcareinactivity_id']); // on prend l'eqLogic du trigger qui nous a appelé
 
-      //TODO : a gerer par capteur !
-  //    $lifeSignDetectionDelay = $seniorcareinactivity->getConfiguration('life_sign_timer') * 60; // on va lire la durée du timers par defaut dans la conf et on le met en secondes
+      $seniorcareinactivity->setConfiguration('presence', 1); //on declare la personne présente
+      //TODO : attention ici aux triggers qui arriveront apres le depart, genre les detecteurs de mouvements qui repassent a 0 ou autre truc qui se declenche tout seul...
 
-      // on va chercher quel capteur nous a declenché pour aller chercher son timer...
+      // on va chercher quel capteur nous a declenché pour aller chercher son timer
       foreach ($seniorcareinactivity->getConfiguration('life_sign') as $sensor) { // on boucle direct dans la conf
         if ('#' . $_option['event_id'] . '#' == $sensor['cmd']) { // on cherche quel est l'event qui nous a déclenché pour pouvoir chopper son timer
 
@@ -82,8 +82,7 @@ class seniorcareinactivity extends eqLogic {
       //pour chaque équipement (personne) déclaré par l'utilisateur
       foreach (self::byType('seniorcareinactivity',true) as $seniorcareinactivity) {
 
-        if (is_object($seniorcareinactivity) && $seniorcareinactivity->getIsEnable() == 1) { // si notre eq existe et est actif
-          //TODO : c'est ici qu'il faudra gerer l'absence de la personne de son logement
+        if (is_object($seniorcareinactivity) && $seniorcareinactivity->getIsEnable() == 1 && $seniorcareinactivity->getConfiguration('presence')) { // si notre eq existe et est actif et que la personne est présente !
 
           $now = time(); // timestamp courant, en s
           $nextLifeSignAlertTimestamp = $seniorcareinactivity->getCache('nextLifeSignAlertTimestamp'); // le timestamp enregistré auquel il faut déclencher l'alerte
@@ -235,6 +234,13 @@ class seniorcareinactivity extends eqLogic {
 
     }
 
+    public function presence($_etat){
+
+      $this->setConfiguration('presence', $_etat); //on garde en configuration l'état presence ou absence. //TODO : pourquoi pas en cache ? voir les effets si reboot
+      log::add('seniorcareinactivity', 'debug', 'Fonction presence, état configuration : ' . $this->getConfiguration('presence'));
+
+    }
+
     public function execAction($action) { // execution d'une seule action, avec son label si c'est une alerte
     // $this doit rester l'eqLogic et non la commande elle meme, pour chopper les tags
 
@@ -333,6 +339,38 @@ class seniorcareinactivity extends eqLogic {
       $cmd->setConfiguration('historizeMode', 'none'); //on garde en mémoire tous les AR recu.
       //TODO : voir comment on pourrait avoir l'info de "qui" a accusé réception...
       $cmd->save();
+
+      // et les commandes pour absence/presence
+      $cmd = $this->getCmd(null, 'life_sign_presence');
+      if (!is_object($cmd)) {
+        $cmd = new seniorcareinactivityCmd();
+        $cmd->setName(__('Déclarer présence', __FILE__));
+      }
+      $cmd->setLogicalId('life_sign_presence');
+      $cmd->setEqLogic_id($this->getId());
+      $cmd->setType('action');
+      $cmd->setSubType('other');
+      $cmd->setIsVisible(1);
+      $cmd->setIsHistorized(1);
+      $cmd->setConfiguration('historizeMode', 'none'); //on garde en mémoire tous les AR recu.
+      $cmd->save();
+
+      $cmd = $this->getCmd(null, 'life_sign_absence');
+      if (!is_object($cmd)) {
+        $cmd = new seniorcareinactivityCmd();
+        $cmd->setName(__('Déclarer absence', __FILE__));
+      }
+      $cmd->setLogicalId('life_sign_absence');
+      $cmd->setEqLogic_id($this->getId());
+      $cmd->setType('action');
+      $cmd->setSubType('other');
+      $cmd->setIsVisible(1);
+      $cmd->setIsHistorized(1);
+      $cmd->setConfiguration('historizeMode', 'none'); //on garde en mémoire tous les AR recu.
+      $cmd->save();
+
+      $this->setConfiguration('presence', 1); //A la creation de l'équipement, on declare la personne présente. C'est juste histoire d'initialiser le truc
+
     }
 
     public function preSave() {
@@ -561,12 +599,24 @@ class seniorcareinactivityCmd extends cmd {
       }
      */
 
+
+
     public function execute($_options = array()) {
 
       if ($this->getLogicalId() == 'life_sign_ar') {
        // log::add('seniorcareinactivity', 'debug', 'Appel de l AR via API');
         $eqLogic = $this->getEqLogic();
         $eqLogic->lifeSignAR();
+
+      } else if ($this->getLogicalId() == 'life_sign_presence') {
+        log::add('seniorcareinactivity', 'debug', 'Appel de l\'action déclarer presence');
+        $eqLogic = $this->getEqLogic();
+        $eqLogic->presence(1);
+
+      } else if ($this->getLogicalId() == 'life_sign_absence') {
+        log::add('seniorcareinactivity', 'debug', 'Appel de l\'action déclarer absence');
+        $eqLogic = $this->getEqLogic();
+        $eqLogic->presence(0);
 
       } else { // sinon c'est un sensor et on veut juste sa valeur
 

@@ -23,10 +23,47 @@ try {
     if (!isConnect('admin')) {
         throw new Exception(__('401 - Accès non autorisé', __FILE__));
     }
-    
+
     ajax::init();
 
 
+    if (init('action') == 'getLinkCalendar') {
+      if (!isConnect('admin')) {
+        throw new Exception(__('401 - Accès non autorisé', __FILE__));
+      }
+      $seniorcareinactivity = seniorcareinactivity::byId(init('id'));
+      if (!is_object($seniorcareinactivity)) {
+        throw new Exception(__('Seniorcare inactivity non trouvé : ', __FILE__) . init('id'));
+      }
+      try {
+        $plugin = plugin::byId('calendar');
+        if (!is_object($plugin) || $plugin->isActive() != 1) {
+          ajax::success(array());
+        }
+      } catch (Exception $e) {
+        ajax::success(array());
+      }
+      if (!class_exists('calendar_event')) {
+        ajax::success(array());
+      }
+      $return = array();
+
+      $seniorcareinactivity_cmd = $seniorcareinactivity->getCmd(null, 'life_sign_presence');
+      if (is_object($seniorcareinactivity_cmd)) {
+        foreach (calendar_event::searchByCmd($seniorcareinactivity_cmd->getId()) as $event) {
+          $return[$event->getId()] = $event;
+        }
+      }
+
+      $seniorcareinactivity_cmd = $seniorcareinactivity->getCmd(null, 'life_sign_absence');
+      if (is_object($seniorcareinactivity_cmd)) {
+        foreach (calendar_event::searchByCmd($seniorcareinactivity_cmd->getId()) as $event) {
+          $return[$event->getId()] = $event;
+        }
+      }
+
+      ajax::success(utils::o2a($return));
+    }
 
     throw new Exception(__('Aucune méthode correspondante à : ', __FILE__) . init('action'));
     /*     * *********Catch exeption*************** */
