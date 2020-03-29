@@ -16,6 +16,19 @@
  * along with Jeedom. If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+/*
+Logique de fonctionnement du plugin :
+
+Capteur activité => appel fct "sensorLifeSign". Si on était en phase d'alerte, lancera les actions d'annulation via la fct "execCancelActions". Sinon gere les timers et laisse le cron jeedom faire.
+Capteur absence => appel fct "sensorAbsence". Si délai configuré => set cron qui appellera la fct "lifeSignAbsenceDelayed"
+
+Reception d'un AR => appel fct "lifeSignAR" qui va appeler ses actions d'AR et couper la chaine d'alerte (supprimer les cron)
+Réception appel cmd "déclarer absence" => set le cache à "absence"
+
+Toutes les minutes (cron jeedom) => on évalue si on est present et si les timers d'alerte sont depassés, si oui on lance les actions immédiates et on set les cron pour les actions différees
+*/
+
 /* * ***************************Includes********************************* */
 require_once __DIR__  . '/../../../../core/php/core.inc.php';
 
@@ -50,6 +63,8 @@ class seniorcareinactivity extends eqLogic {
       $seniorcareinactivity = seniorcareinactivity::byId($_option['seniorcareinactivity_id']); // on prend l'eqLogic du trigger qui nous a appelé
 
       $lifeSignAbsenceDelay = $seniorcareinactivity->getConfiguration('absence_timer'); // on récupere le timer d'absence configuré, direct en min
+
+      log::add('seniorcareinactivity', 'info', 'Détection d\'un capteur d\'absence pour : ' . $seniorcareinactivity->getHumanName() . ', l\'absence sera effective dans ' . $lifeSignAbsenceDelay . ' minutes');
 
       if(is_numeric($lifeSignAbsenceDelay) && $lifeSignAbsenceDelay > 0){
 
@@ -91,6 +106,7 @@ class seniorcareinactivity extends eqLogic {
       $seniorcareinactivity = seniorcareinactivity::byId($_option['seniorcareinactivity_id']); // on prend l'eqLogic du trigger qui nous a appelé
 
       $seniorcareinactivity->setCache('presence', 1); //on declare la personne présente
+
       log::add('seniorcareinactivity', 'debug', '$seniorcareinactivity : ' . $seniorcareinactivity->getHumanName() . ' - Conf presence : ' . $seniorcareinactivity->getCache('presence'));
 
       //TODO : attention ici aux triggers qui arriveront apres le depart, genre les detecteurs de mouvements qui repassent a 0 ou autre truc qui se declenche tout seul...
@@ -101,6 +117,8 @@ class seniorcareinactivity extends eqLogic {
 
           $lifeSignDetectionDelay = $sensor['life_sign_timer'] * 60;
           log::add('seniorcareinactivity', 'debug', 'Conf de notre trigger : timer :' . $sensor['life_sign_timer'] . ' - cmd : ' . $sensor['cmd']);
+
+          log::add('seniorcareinactivity', 'info', 'Détection d\'un capteur d\'activité pour : ' . $seniorcareinactivity->getHumanName() . ', la commande de ce capteur est ' . $sensor['cmd'] . ', son nom : ' . $sensor['name'] . ', son timer : ' . $sensor['life_sign_timer'] . 'min');
 
         }
       } // fin foreach tous les capteurs de la conf

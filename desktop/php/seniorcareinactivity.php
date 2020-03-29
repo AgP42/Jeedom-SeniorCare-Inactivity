@@ -251,12 +251,12 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <br/>
       <div class="alert alert-info">
-        {{Onglet de configuration des actions d'alerte pour prévenir les aidants. Vous pouvez choisir plusieurs actions et un délai d'attente pour chacune. Les actions en attente ne seront pas exécutées si un accusé de reception est reçu entre-temps, ou en cas d'annulation de l'alerte.}}
+        {{Onglet de configuration des actions d'alerte pour avertir la personne puis prévenir les aidants. Vous pouvez choisir plusieurs actions et un délai d'attente pour chacune. Les actions en attente ne seront pas exécutées si un accusé de reception est reçu entre-temps, ou en cas d'annulation de l'alerte.}}
       </div>
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-bomb"></i> {{Actions alerte vers les aidants (pour alerter, je dois ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées à l'activation d'un bouton d'alerte par la personne dépendante}}"></i></sup>
+          <legend><i class="fas fa-child"></i> {{Actions alerte (pour alerter, je dois ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées à l'échéance des délai de détection d'activité}}"></i></sup>
             <a class="btn btn-success btn-sm addAction" data-type="action_alert_life_sign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
           </legend>
           <div id="div_action_alert_life_sign"></div>
@@ -310,17 +310,16 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
     </div>
 
-    <!-- TAB Capteurs Bouton alerte -->
+    <!-- TAB Action annulation -->
     <div class="tab-pane" id="cancellifesigntab">
       <br/>
       <div class="alert alert-info">
-        {{Onglet de configuration des boutons et actions d'annulation d'alerte.}}
+        {{Onglet de configuration des actions d'annulation d'alerte.}}
       </div>
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-hand-paper"></i> {{Actions pour arrêter l'alerte vers les aidants (pour annuler l'alerte, je dois ?)}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées sur activation d'un bouton d'annulation d'alerte.
-          Tag utilisable : #senior_name#.}}"></i></sup>
+          <legend><i class="fas fa-hand-paper"></i> {{Actions pour arrêter l'alerte en cours}} <sup><i class="fas fa-question-circle tooltips" title="{{Actions réalisées si un capteur d'activité est activé alors qu'une alerte était en cours.}}"></i></sup>
             <a class="btn btn-success btn-sm addAction" data-type="action_cancel_life_sign" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
           </legend>
           <div id="div_action_cancel_life_sign"></div>
