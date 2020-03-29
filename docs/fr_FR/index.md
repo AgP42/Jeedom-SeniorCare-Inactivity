@@ -109,7 +109,7 @@ Pour vous aider à configurer vos capteurs, vous pouvez activer les logs en mode
 ![](https://raw.githubusercontent.com/AgP42/seniorcareinactivity/dev/docs/assets/images/logInfo.png)
 
 > Il est important de noter que la performance du plugin dépendra beaucoup du choix des capteurs et de leur installation pertinente dans le logement.
-> Plus le nombre de capteurs sera élevé, meilleurs sera la performance.
+> Plus le nombre de capteurs sera élevé, meilleure sera la performance.
 > Il est nécessaire de faire des essais de capteurs et des délais associés et de réaliser une période de test sans générer d'alerte pour la personne âgée.
 
 **A améliorer : le délai de détection d'inactivité selon jour ou nuit ?**
