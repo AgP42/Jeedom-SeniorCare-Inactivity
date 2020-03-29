@@ -72,7 +72,7 @@ Une gestion d'absence est disponible pour ne pas déclencher d'alerte alors que 
 
 ![](https://raw.githubusercontent.com/AgP42/seniorcareinactivity/master/docs/assets/images/OngletAbsence.png)
 
-###Avec le plugin **agenda**
+### Avec le plugin **agenda**
    * **Note** : si vous ne disposez pas du plugin agenda sur votre jeedom, cette zone ne s'affichera pas
    * Vous devez configurer l'absence directement dans le plugin agenda qui doit lancer en action de début la commande "Déclarer absence"
    * Les actions d'absences programmées dans le plugin agenda seront affichées dans cet onglet avec un lien
@@ -80,14 +80,14 @@ Une gestion d'absence est disponible pour ne pas déclencher d'alerte alors que 
    * Si vous voulez forcer le mode "absence" avec le plugin agenda, vous pouvez définir une répétition du message d'absence toutes les 5 min pendant une période donnée :
    ![](https://raw.githubusercontent.com/AgP42/seniorcareinactivity/master/docs/assets/images/agenda.png)
 
-###Avec un bouton et un délai
+### Avec un bouton et un délai
    * Vous pouvez configurer directement dans le plugin une liste de bouton qui déclareront l'absence à l'échéance du délai configuré.
    * Ce délai permet de sortir du logement sans que les dernières actions soient détectées comme un retour. Notamment le capteur de fermeture de porte ou le capteur de mouvement qui reviendrait à son état initial
 
-###Avec n'importe quel autre plugin jeedom, dont le plugin **Mode** par exemple ou avec un scenario
+### Avec n'importe quel autre plugin jeedom, dont le plugin **Mode** par exemple ou avec un scenario
    * Définissez comme action la commande "Déclarer absence" pour appeler la fonction d'absence
 
-###Via un appel extérieur
+### Via un appel extérieur
    * Utiliser le lien donné pour appeler cette fonction via un smartphone, IFTTT ou n'importe quel autre équipement.
    * Vous pouvez tester le lien donné en cliquant directement dessus
    * "Réglages/Système/Configuration/Réseaux" doit être correctement renseigné pour que l'adresse affichée ici soit fonctionnelle.
