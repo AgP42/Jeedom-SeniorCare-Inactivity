@@ -97,7 +97,7 @@ Onglet **Capteur d'activité**
 
 Il s'agit ici de déclarer les capteurs concernant l’activité de la personne (ouverture, interrupteur, mouvement, …) et un délai associé pour chacun. Si aucun des capteurs d'activité n'a été activé à l’échéance du délai, le plugin déclenchera l’étape suivante « Actions d'alertes ».
 
-![](https://raw.githubusercontent.com/AgP42/seniorcareinactivity/dev/docs/assets/images/OngletCapteur.png)
+![](https://raw.githubusercontent.com/AgP42/seniorcareinactivity/dev/docs/assets/images/OngletCapteurs.png)
 
 Pour chaque capteur, saisir :
 * **Nom** : champs obligatoire
