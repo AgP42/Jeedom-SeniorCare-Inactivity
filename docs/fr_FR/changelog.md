@@ -16,3 +16,8 @@
 * Ajout 1 timer de détection d'activité par capteur
 * Tests et debugs
 * Mise à jour documentation
+
+0.0.3 - 31 mars
+---
+
+* Debug : prise en compte des capteurs uniquement si la valeur du capteur change (pour filtrer les capteurs qui renvoies periodiquement leur état hors changement)
