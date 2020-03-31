@@ -157,7 +157,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
     <div class="tab-pane" id="absencestab">
       <br/>
       <div class="alert alert-info">
-        {{Onglet de configuration d'absence du logement. Définisabble via plugin Agenda, boutons, scénarios ou appels via l'API pour déclarer une absence. La présence sera automatiquement réactivée par la détection d'un capteur d'activités.}}
+        {{Onglet de configuration d'absence du logement. Absence initiée via plugin Agenda, boutons, scénarios ou appels via API. Présence automatiquement réactivée sur déclenchement d'un capteur d'activités.}}
       </div>
 
       <?php
@@ -166,7 +166,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
         if (is_object($plugin)) {
           ?>
 
-          <legend><i class="fas fa-clock"></i> {{Utiliser le plugin Agenda pour la gestion des absences}}<sup><i class="fas fa-question-circle tooltips" title="{{Configuration de début des plages d'absences directement via le plugin Agenda. Affichage directe de la programmation. Tout capteur d'activité détecté relancera la surveillance.}}"></i></sup></legend>
+          <legend><i class="fas fa-clock"></i> {{Utiliser le plugin Agenda pour la gestion des absences}}<sup><i class="fas fa-question-circle tooltips" title="{{Le début des plages d'absences est à configurer dans le plugin Agenda. Visualisation de la programmation. Tout capteur d'activité détecté relancera la surveillance.}}"></i></sup></legend>
           <form class="form-horizontal">
             <fieldset>
               <div id="div_schedule"></div>
@@ -182,7 +182,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-toggle-off"></i> {{Utiliser un bouton pour déclarer l'absence}}<sup><i class="fas fa-question-circle tooltips" title="{{Déclaration de début de l'absence à l'issue du délai configuré, ceci afin de quitter le domicile sans prise en compte des dernières détections. Une fois ce délai passé, tout capteur d'activité déclenché relancera la surveillance (délai de 5 à 10 min recommandé).}}"></i></sup>
+          <legend><i class="fas fa-toggle-off"></i> {{Utiliser un bouton pour déclarer l'absence}}<sup><i class="fas fa-question-circle tooltips" title="{{Bouton de déclaration de début de l'absence à l'issue du délai configuré.}}"></i></sup>
             <a class="btn btn-success btn-sm addSensorAbsence" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un bouton}}</a>
           </legend>
 
@@ -191,7 +191,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
           <br>
 
           <div class="form-group">
-            <label class="col-sm-2 control-label"><i class="fas fa-stopwatch"></i> {{Délai avant absence effective (min)}} <sup><i class="fas fa-question-circle tooltips" title="{{Délai pendant lequel les capteurs d'activité peuvent être déclenchés sans activer la surveillance.}}"></i></sup></label>
+            <label class="col-sm-2 control-label"><i class="fas fa-stopwatch"></i> {{Délai avant absence effective (min)}} <sup><i class="fas fa-question-circle tooltips" title="{Délai pendant lequel les capteurs d'activité peuvent être déclenchés sans réactiver la surveillance (délai recommandé 5 à 10 mn).}}"></i></sup></label>
             <div class="col-sm-1">
               <input type="number" min="0" class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="absence_timer" />
             </div>
