@@ -21,3 +21,9 @@
 ---
 
 * Debug : prise en compte des capteurs uniquement si la valeur du capteur change (pour filtrer les capteurs qui renvoies periodiquement leur état hors changement)
+
+0.0.4 - 1er avril
+---
+
+* prise en compte des reformulations de mich0111
+* update des logs infos pour ajouter le declenchement des actions
