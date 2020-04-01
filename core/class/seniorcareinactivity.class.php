@@ -126,7 +126,7 @@ class seniorcareinactivity extends eqLogic {
 
             if ($alertLifeSignState){ // si on était en phase d'alerte, on lance les actions d'annulation
 
-              log::add('seniorcareinactivity', 'debug', 'Actions Alerte Annulation Inactivité à lancer. ');
+              log::add('seniorcareinactivity', 'info', 'Actions Alerte Annulation Inactivité à lancer. ');
               $seniorcareinactivity->execCancelActions();
 
             }
@@ -163,7 +163,7 @@ class seniorcareinactivity extends eqLogic {
 
           if ($now >= $nextLifeSignAlertTimestamp && !$alertLifeSignState){
           //= on est au dela du delai et alerte pas encore en cours --> on va lancer les actions alerte
-            log::add('seniorcareinactivity', 'debug', 'Actions Alerte Inactivité à lancer. ');
+            log::add('seniorcareinactivity', 'info', 'Actions Alerte Inactivité à lancer.');
 
             // boucler dans les actions, les lancer ou set cron si timer défini
             $seniorcareinactivity->execAlerteActions();
@@ -200,7 +200,7 @@ class seniorcareinactivity extends eqLogic {
 
       foreach ($this->getConfiguration('action_alert_life_sign') as $action) { // pour toutes les actions définies
 
-        log::add('seniorcareinactivity', 'debug', 'Config Action LifeSign Alert - action_label : ' . $action['action_label'] . ' - action_timer : ' . $action['action_timer']);
+        log::add('seniorcareinactivity', 'debug', 'Action LifeSign Alert - action_label : ' . $action['action_label'] . ' - action_timer : ' . $action['action_timer']);
 
         if(is_numeric($action['action_timer']) && $action['action_timer'] > 0){ // si on a un timer bien defini et > 0 min, on va lancer un cron pour l'execution retardée de l'action
           // si le CRON existe deja, on ne l'update pas
@@ -678,6 +678,8 @@ class seniorcareinactivityCmd extends cmd {
       if ($this->getLogicalId() == 'life_sign_ar') {
        // log::add('seniorcareinactivity', 'debug', 'Appel de l AR via API');
         $eqLogic = $this->getEqLogic();
+
+        log::add('seniorcareinactivity', 'info', 'Actions Alerte Accusé de réception Inactivité à lancer.');
         $eqLogic->lifeSignAR();
 
 /*      } else if ($this->getLogicalId() == 'life_sign_presence') {
