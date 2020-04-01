@@ -135,42 +135,49 @@ class seniorcareinactivity extends eqLogic {
 
           if ($seniorcareinactivity->getCache('sensor_' . $_option['event_id']) != $_option['value']){ // si notre valeur a changé, donc a prendre en compte
 
-            log::add('seniorcareinactivity', 'info', $seniorcareinactivity->getHumanName() . ' - Détection d\'un capteur d\'ACTIVITÉ, commande : ' . $sensor['cmd'] . ', nom : ' . $sensor['name'] . ', timer : ' . $sensor['life_sign_timer'] . 'min, valeur : ' . $_option['value']);
+            log::add('seniorcareinactivity', 'debug', $seniorcareinactivity->getHumanName() . ' - Détection d\'un capteur d\'ACTIVITÉ, commande : ' . $sensor['cmd'] . ', nom : ' . $sensor['name'] . ', timer état haut : ' . $sensor['life_sign_timer_high'] . 'min, timer état bas : ' . $sensor['life_sign_timer_low'] . 'min, valeur : ' . $_option['value']);
 
             if(!$seniorcareinactivity->getCache('presence')) { // on log uniquement si la presence est nouvelle
               log::add('seniorcareinactivity', 'info', $seniorcareinactivity->getHumanName() . ' - PRESENCE (par activation d\' un capteur d\'activité)');
             }
 
-            $seniorcareinactivity->setCache('presence', 1); //on declare la personne présente
-            log::add('seniorcareinactivity', 'debug', $seniorcareinactivity->getHumanName() . ' - cache *presence* : ' . $seniorcareinactivity->getCache('presence'));
+            $lifeSignDetectionDelay = $_option['value'] ? $sensor['life_sign_timer_high'] * 60 : $sensor['life_sign_timer_low'] * 60; //choppe le timer selon état haut ou bas
 
-            $lifeSignDetectionDelay = $sensor['life_sign_timer'] * 60; //choppe le timer
-            $seniorcareinactivity->setCache('nextLifeSignAlertTimestamp', time() + $lifeSignDetectionDelay); // on met en cache le timestamp auquel il faudra déclencher l'alerte. C'est le cron qui regardera toutes les min si on est hors delais
-            log::add('seniorcareinactivity', 'debug', $seniorcareinactivity->getHumanName() . ' - cache *nextLifeSignAlertTimestamp* : ' . $seniorcareinactivity->getCache('nextLifeSignAlertTimestamp'));
+        //    $lifeSignDetectionDelay = $sensor['life_sign_timer_high'] * 60; //choppe le timer
 
-            $alertLifeSignState = $seniorcareinactivity->getCache('alertLifeSignState'); // on recupere l'état actuel de l'alerte
+            if(is_numeric($lifeSignDetectionDelay) && $lifeSignDetectionDelay > 0){ // si on a un timer bien defini et > 0 min, le trigger est donc valable, on le prend en compte (sinon : on fait rien)
 
-      //      log::add('seniorcareinactivity', 'debug', 'Fct sensorLifeSign appelée par le listener, seniorcareinactivity_id : ' . $_option['seniorcareinactivity_id'] . ' - value : ' . $_option['value'] . ' - event_id : ' . $_option['event_id'] . ' - timestamp mis en cache : ' . $seniorcareinactivity->getCache('nextLifeSignAlertTimestamp') . ' état alerte lu : ' . $alertLifeSignState);
+              log::add('seniorcareinactivity', 'info', $seniorcareinactivity->getHumanName() . ' - Détection d\'un capteur d\'ACTIVITÉ, commande : ' . $sensor['cmd'] . ', nom : ' . $sensor['name'] . ', timer état haut : ' . $sensor['life_sign_timer_high'] . 'min, timer état bas : ' . $sensor['life_sign_timer_low'] . 'min, valeur : ' . $_option['value']);
 
-            if ($alertLifeSignState){ // si on était en phase d'alerte, on lance les actions d'annulation
+              $seniorcareinactivity->setCache('presence', 1); //on declare la personne présente
+              $seniorcareinactivity->setCache('nextLifeSignAlertTimestamp', time() + $lifeSignDetectionDelay); // on met en cache le timestamp auquel il faudra déclencher l'alerte. C'est le cron qui regardera toutes les min si on est hors delais
 
-              $seniorcareinactivity->execCancelActions();
+              log::add('seniorcareinactivity', 'debug', $seniorcareinactivity->getHumanName() . ' - cache *nextLifeSignAlertTimestamp* : ' . $seniorcareinactivity->getCache('nextLifeSignAlertTimestamp') . ' - cache *presence* : ' . $seniorcareinactivity->getCache('presence'));
 
-            }
+              $alertLifeSignState = $seniorcareinactivity->getCache('alertLifeSignState'); // on recupere l'état actuel de l'alerte
 
-            $seniorcareinactivity->setCache('alertLifeSignState', 0); // on declare qu'on est pas ou plus en phase d'alerte, puisqu'on vient de recevoir un signe de vie
-            log::add('seniorcareinactivity', 'debug', $seniorcareinactivity->getHumanName() . ' - cache *alertLifeSignState* : ' . $seniorcareinactivity->getCache('alertLifeSignState'));
+        //      log::add('seniorcareinactivity', 'debug', 'Fct sensorLifeSign appelée par le listener, seniorcareinactivity_id : ' . $_option['seniorcareinactivity_id'] . ' - value : ' . $_option['value'] . ' - event_id : ' . $_option['event_id'] . ' - timestamp mis en cache : ' . $seniorcareinactivity->getCache('nextLifeSignAlertTimestamp') . ' état alerte lu : ' . $alertLifeSignState);
 
-          }
+              if ($alertLifeSignState){ // si on était en phase d'alerte, on lance les actions d'annulation
 
-        }
+                $seniorcareinactivity->execCancelActions();
+
+              }
+
+              $seniorcareinactivity->setCache('alertLifeSignState', 0); // on declare qu'on est pas ou plus en phase d'alerte, puisqu'on vient de recevoir un signe de vie valide
+              log::add('seniorcareinactivity', 'debug', $seniorcareinactivity->getHumanName() . ' - cache *alertLifeSignState* : ' . $seniorcareinactivity->getCache('alertLifeSignState'));
+
+            } // fin condition on a un timer >0 pour le cas actuel
+
+          } // fin notre valeur est nouvelle (pas une repetition de 0 ou de 1)
+
+          $seniorcareinactivity->setCache('sensor_' . $_option['event_id'], $_option['value']); //on garde en cache la valeur actuelle du capteur
+          log::add('seniorcareinactivity', 'debug', $seniorcareinactivity->getHumanName() . ' - cache *sensor_' . $_option['event_id'] . '* : ' . $seniorcareinactivity->getCache('sensor_' . $_option['event_id']));
+
+        } // fin if on est sur le capteur qui nous a déclenché
       } // fin foreach tous les capteurs de la conf
-      //TODO : gerer le cas ou on a pas trouvé ou si le timer est pas bien defini, ...
 
-      $seniorcareinactivity->setCache('sensor_' . $_option['event_id'], $_option['value']); //on garde en cache la valeur actuelle du capteur
-      log::add('seniorcareinactivity', 'debug', $seniorcareinactivity->getHumanName() . ' - cache *sensor_' . $_option['event_id'] . '* : ' . $seniorcareinactivity->getCache('sensor_' . $_option['event_id']));
-
-    }
+    } // fin de la fonction appellée par le listener
 
 
     public static function cron() { //executée toutes les min par Jeedom

@@ -132,32 +132,81 @@ function addSensorAbsence(_info) {
 // ajoute chaque ligne de CAPTEUR de détection d'inactivité, à la demande
 function addSensorLifeSign(_info) {
   var div = '<div class="life_sign">';
-    div += '<div class="form-group ">';
+    div += '<div class="form-group">';
 
-      div += '<label class="col-sm-1 control-label">{{Nom}}</label>';
-      div += '<div class="col-sm-2">';
-        div += '<div class="input-group">';
-          div += '<span class="input-group-btn">';
-          div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="life_sign" title="{{Supprimer le capteur}}""><i class="fas fa-minus-circle"></i></a>';
-          div += '</span>';
-          div += '<input class="expressionAttr form-control cmdInfo" data-l1key="name" title="{{Le nom doit être unique}}"/>'; // dans la class ['name']
-        div += '</div>';
-      div += '</div>';
+    div += '<table class="table table-bordered table-condensed"><thead><tr><th>{{Nom}}</th><th>{{Capteur}}</th><th>{{Délais}} <sup><i class="fas fa-question-circle tooltips" title="{{Délais d\'inactivité acceptable (en minutes) après déclenchement de ce capteur.}}"></i></sup></th></tr></thead>';
+      div += '<tbody>';
 
-      div += '<label class="col-sm-1 control-label">Capteur</label>';
-      div += '<div class="col-sm-2">';
-        div += '<div class="input-group">';
-          div += '<input class="expressionAttr roundedLeft form-control cmdInfo" data-l1key="cmd" />'; // dans la class on retrouvera le resultat avec un ['cmd'] sous forme #10# qui represente l'id de la cmd referencé
-          div += '<span class="input-group-btn">';
-          div += '<a class="btn btn-default listCmdInfoWindow roundedRight" title="{{Selectionner le capteur}}"><i class="fas fa-list-alt"></i></a>';
-          div += '</span>';
-        div += '</div>';
-      div += '</div>';
+        div += '<tr>';
+          div += '<td class="col-sm-3">';
 
-      div += '<label class="col-sm-2 control-label">{{Délai avant alerte (min)}} <sup><i class="fas fa-question-circle tooltips" title="{{Saisir le délai d\'inactivité acceptable après déclenchement de ce capteur. A l\'issue de ce délai, si aucun autre capteur n\'a été déclenché, l\'alerte sera lancée}}"></i></sup></label>';
+            div += '<br><br>';
+            div += '<div class="input-group">';
+              div += '<span class="input-group-btn">';
+              div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="life_sign" title="{{Supprimer le capteur}}""><i class="fas fa-minus-circle"></i></a>';
+              div += '</span>';
+              div += '<input class="expressionAttr form-control cmdInfo" data-l1key="name" title="{{Le nom doit être unique}}"/>'; // dans la class ['name']
+            div += '</div>';
+
+          div += '</td>';
+          div += '<td class="col-sm-3">';
+
+            div += '<br><br>';
+            div += '<div class="input-group">';
+              div += '<input class="expressionAttr roundedLeft form-control cmdInfo" data-l1key="cmd" />'; // dans la class on retrouvera le resultat avec un ['cmd'] sous forme #10# qui represente l'id de la cmd referencé
+              div += '<span class="input-group-btn">';
+              div += '<a class="btn btn-default listCmdInfoWindow roundedRight" title="{{Selectionner le capteur}}"><i class="fas fa-list-alt"></i></a>';
+              div += '</span>';
+            div += '</div>';
+
+          div += '</td>';
+          div += '<td class="col-sm-3">';
+
+            div += '<table class="table table-bordered table-condensed"><thead><tr><th>{{Front}}<sup><i class="fas fa-question-circle tooltips" title="{{Montant : 0->1, Descendant : 1->0}}"></i></sup></th><th>{{Jour}}<sup><i class="fas fa-question-circle tooltips" title="{{Les périodes jour/nuit sont à définir dans l\'onglet Général, via le plugin Agenda}}"></i></sup></th><th>{{Nuit}}</th></tr></thead>';
+              div += '<tbody>';
+
+                div += '<tr>';
+                  div += '<td>';
+                    div += '<label class="control-label">{{Montant }}<i class="fas fa-level-up-alt"></label>';
+                  div += '</td>';
+                  div += '<td>';
+                    div += '<input type="number" class="expressionAttr form-control cmdInfo" data-l1key="life_sign_timer_high_day"/>';
+                  div += '</td>';
+                  div += '<td>';
+                    div += '<input type="number" class="expressionAttr form-control cmdInfo" data-l1key="life_sign_timer_high_night"/>';
+                  div += '</td>';
+                div += '</tr>';
+
+                div += '<tr>';
+                  div += '<td>';
+                    div += '<label class="control-label">{{Descendant }}<i class="fas fa-level-down-alt"></i></sup></label>';
+                  div += '</td>';
+                  div += '<td>';
+                    div += '<input type="number" class="expressionAttr form-control cmdInfo" data-l1key="life_sign_timer_low_day"/>';
+                  div += '</td>';
+                  div += '<td>';
+                    div += '<input type="number" class="expressionAttr form-control cmdInfo" data-l1key="life_sign_timer_low_night"/>';
+                  div += '</td>';
+                div += '</tr>';
+
+              div += '</tbody>';
+            div += '</table>';
+
+          div += '</td>';
+        div += '</tr>';
+
+      div += '</tbody>';
+    div += '</table>';
+
+/*      div += '<label class="col-sm-1 control-label" placeholder="{{minutes}}">{{Délai sur }}<i class="fas fa-level-up-alt"></i> <sup><i class="fas fa-question-circle tooltips" title="{{Délai d\'inactivité acceptable (en minutes) après déclenchement de ce capteur dans le sens 0->1. A l\'issue de ce délai, si aucun autre capteur n\'a été déclenché, l\'alerte sera lancée}}"></i></sup></label>';
       div += '<div class="col-sm-1">';
-        div += '<input type="number" class="expressionAttr form-control cmdInfo" data-l1key="life_sign_timer"/>';
+        div += '<input type="number" class="expressionAttr form-control cmdInfo" data-l1key="life_sign_timer_high"/>';
       div += '</div>';
+
+      div += '<label class="col-sm-1 control-label" placeholder="{{minutes}}">{{Délai sur }}<i class="fas fa-level-down-alt"></i> <sup><i class="fas fa-question-circle tooltips" title="{{Délai d\'inactivité acceptable (en minutes) après déclenchement de ce capteur dans le sens 1->0. A l\'issue de ce délai, si aucun autre capteur n\'a été déclenché, l\'alerte sera lancée}}"></i></sup></label>';
+      div += '<div class="col-sm-1">';
+        div += '<input type="number" class="expressionAttr form-control cmdInfo" data-l1key="life_sign_timer_low"/>';
+      div += '</div>';*/
 
 /*      div += '<label class="col-sm-1 control-label">{{Type de capteur }}</label>';
       div += '<div class="col-sm-1">';

@@ -30,3 +30,8 @@
 * La réception de l'état "absence" appelle maintenant les actions d'annulation d'alerte, au cas où une alerte était en cours
 * Tests et debugs
 * Mise à jour documentation
+
+0.0.5 - 1er avril
+---
+
+* Ajout timer selon état du capteur (0->1 ou 1->0) et période jour/nuit

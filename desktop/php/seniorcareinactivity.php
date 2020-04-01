@@ -220,7 +220,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
     <div class="tab-pane" id="sensorlifesigntab">
       <br/>
       <div class="alert alert-info">
-        {{Onglet de configuration des capteurs indiquant une activité dans le logement}}
+        {{Onglet de configuration des capteurs indiquant une activité dans le logement. A l'issue du délai applicable (selon état du capteur et période de la journée), si aucun autre capteur n'a été déclenché, l'alerte sera lancée}}
       </div>
 
       <form class="form-horizontal">
@@ -230,16 +230,6 @@ $eqLogics = eqLogic::byType($plugin->getId());
           </legend>
 
           <div id="div_life_sign"></div>
-
-<!--           <legend><i class="fas fa-stopwatch"></i> {{Délai par défaut avant avertissement d'inactivité}} <sup><i class="fas fa-question-circle tooltips" title="{{Délai au terme duquel une alerte se déclenchera si aucun capteur d'activités n'est activé. Cette valeur sera utilisée si vous ne définissez pas de valeur spécifique pour certains capteurs}}"></i></sup>
-          </legend>
-
-          <div class="form-group">
-            <label class="col-sm-2 control-label">{{Délai en minutes}}</label>
-            <div class="col-sm-1">
-              <input type="number" min="0" class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="life_sign_timer" />
-            </div>
-          </div> -->
 
         </fieldset>
       </form>
@@ -272,7 +262,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
     <div class="tab-pane" id="arlifesigntab">
       <br/>
       <div class="alert alert-info">
-        {{Onglet de configuration des actions d'accusé de réception de l'alerte par un aidant extérieur}}
+        {{Onglet de configuration des actions d'accusé de réception de l'alerte par un aidant extérieur.}}
       </div>
 
       <form class="form-horizontal">
