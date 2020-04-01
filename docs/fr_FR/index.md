@@ -69,6 +69,8 @@ Onglet **Gestion absences**
 
 Une gestion d'absence est disponible pour ne pas déclencher d'alerte alors que la personne est absente de son logement. Il est possible de déclarer une absence avec le plugin agenda, via des scenarios Jeedom, via n'importe quel plugin Jeedom, via un appel extérieur via l'API ou via des boutons dans le logement.
 
+Dans le cas où une alerte était en cours, elle sera annulée (actions d'annulation d'alerte) à la déclaration de l'absence.
+
 ![](https://raw.githubusercontent.com/AgP42/seniorcareinactivity/master/docs/assets/images/OngletAbsence.png)
 
 ### Avec le plugin **agenda**
@@ -82,6 +84,7 @@ Une gestion d'absence est disponible pour ne pas déclencher d'alerte alors que 
 ### Avec un bouton et un délai
    * Vous pouvez configurer directement dans le plugin une liste de bouton qui déclareront l'absence à l'échéance du délai configuré.
    * Ce délai permet de sortir du logement sans que les dernières actions soient détectées comme un retour. Notamment le capteur de fermeture de porte ou le capteur de mouvement qui reviendrait à son état initial
+   * Le délai n'est pas pris en compte en minutes pleines, mais en début de minute. Par exemple si vous demandez un délai de 1min, le capteur est déclenché à 12h05m54s, alors l'absence sera déclarée en début de la minute à 12h06 (selon la charge de votre jeedom). Si le capteur est déclenché à 12h10m03, alors l'absence sera déclarée en début de min à 12h11. Ainsi un timer d'1min peut correspondre à un délai réel de quelques secondes, à maximum 60s.
 
 ### Avec n'importe quel autre plugin Jeedom, dont le plugin **Mode** par exemple ou avec un scenario
    * Définissez comme action la commande "Déclarer absence" pour appeler la fonction d'absence

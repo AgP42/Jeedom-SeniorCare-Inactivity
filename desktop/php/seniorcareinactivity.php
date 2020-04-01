@@ -191,7 +191,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
           <br>
 
           <div class="form-group">
-            <label class="col-sm-2 control-label"><i class="fas fa-stopwatch"></i> {{Délai avant absence effective (min)}} <!-- <sup><i class="fas fa-question-circle tooltips" title="{Délai pendant lequel les capteurs d'activité peuvent être déclenchés sans réactiver la surveillance.}}"></i></sup> --></label>
+            <label class="col-sm-2 control-label"><i class="fas fa-stopwatch"></i> {{Délai avant absence effective (min)}} <sup><i class="fas fa-question-circle tooltips" title="{{Délai maximum avant déclaration de l'absence. Les absences sont déclarés en début de minute.}}"></i></sup></label>
             <div class="col-sm-1">
               <input type="number" min="0" class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="absence_timer" />
             </div>

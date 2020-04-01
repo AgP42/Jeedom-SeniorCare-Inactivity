@@ -25,5 +25,8 @@
 0.0.4 - 1er avril
 ---
 
-* prise en compte des reformulations de mich0111
-* update des logs infos pour ajouter le declenchement des actions
+* Prise en compte des reformulations de mich0111 pour la configuration et la doc
+* Mise à jour des logs infos pour ajouter le declenchement des actions
+* La réception de l'état "absence" appelle maintenant les actions d'annulation d'alerte, au cas où une alerte était en cours
+* Tests et debugs
+* Mise à jour documentation
