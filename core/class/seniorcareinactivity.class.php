@@ -30,7 +30,7 @@ Toutes les minutes (cron jeedom) => on évalue si on est present et si les timer
 */
 
 /*
-Les infos en cache (pas effacées lors de la sauvegarde, mais effacées au reboot !) :
+Les infos en cache (effacées ni lors de la sauvegarde, ni au reboot, ni update jeedom, mais mal lues au 1er cron après reboot...) :
 
 * $eqLogic->getCache('presence')); => savoir si la personne est présente ou absente. Sera a nouveau déclarée présente au 1ere capteur d'activité déclenché
 * $eqLogic->getCache('sensor_' . $_option['event_id']) => la valeur précédente de chaque capteur d'activité, pour ne déclencher que sur un changement d'état et non une répétition. Donc au reboot on sait plus, on déclenche : OK
@@ -58,7 +58,9 @@ class seniorcareinactivity extends eqLogic {
       $seniorcareinactivity->setCache('presence', 0); //on declare l'absence dans le cache. C'est le cron1 de jeedom qui gere le reste
       log::add('seniorcareinactivity', 'debug', $seniorcareinactivity->getHumanName() . ' - cache *presence* : ' . $seniorcareinactivity->getCache('presence'));
 
-      $seniorcareinactivity->execCancelActions();
+    //sleep(10);
+
+      $seniorcareinactivity->execCancelActions(); // truc bizarre ici, parfois cet appel ne marche pas et donc le cron passe en erreur. Avec un sleep ca repart... a surveiller... TODO
 
     }
 
@@ -80,6 +82,8 @@ class seniorcareinactivity extends eqLogic {
       log::add('seniorcareinactivity', 'info', $seniorcareinactivity->getHumanName() . ' - Détection d\'un capteur d\'ABSENCE, l\'absence sera effective d\'ici ' . $lifeSignAbsenceDelay . ' minutes');
 
       if(is_numeric($lifeSignAbsenceDelay) && $lifeSignAbsenceDelay > 0){
+
+        $seniorcareinactivity->setCache('presence', 0); //on declare dés maintenant l'absence dans le cache. Elle sera repetée par le cron qu'on met en place ci-dessous. Permet d'éviter de lancer une alerte entre le moment où on a lancé le bouton d'absence et l'absence effective (ne devrait pas arriver vu qu'on bouge de toute facon, mais bon...)
 
         $cron = cron::byClassAndFunction('seniorcareinactivity', 'lifeSignAbsenceDelayed', array('eqLogic_id' => intval($seniorcareinactivity->getId()))); // cherche le cron qui correspond exactement à "ce plugin, cette fonction et cette personne (on ne veut)
         // lors d'une sauvegarde ou suppression de l'eqLogic, si des crons sont existants, ils seront supprimés
@@ -173,10 +177,15 @@ class seniorcareinactivity extends eqLogic {
 
       log::add('seniorcareinactivity', 'debug', '#################### CRON ###################');
 
+
       //pour chaque équipement (personne) déclaré par l'utilisateur
       foreach (self::byType('seniorcareinactivity',true) as $seniorcareinactivity) {
 
+    //    log::add('seniorcareinactivity', 'debug', 'Lecture des caches - presence : ' . $seniorcareinactivity->getCache('presence') . ' - sensor 665 : ' . $seniorcareinactivity->getCache('sensor_665') . ' - nextLifeSignAlertTimestamp : ' . $seniorcareinactivity->getCache('nextLifeSignAlertTimestamp') . ' - alertLifeSignState : ' . $seniorcareinactivity->getCache('alertLifeSignState') . ' - execAction_lampe : ' . $seniorcareinactivity->getCache('execAction_lampe') );
+
+
         log::add('seniorcareinactivity', 'debug', $seniorcareinactivity->getHumanName() . ' - cache presence lu : ' . $seniorcareinactivity->getCache('presence'));
+        // on constate ici qu'après un reboot de jeedom, le cache n'est pas lu, donc le plugin se comporte comme s'il y avait absence, c'est très bien comme ca. Au pire on loupe 1 min avant de lancer une alerte mais on a pas de comportement bizarre après un reboot
 
         if (is_object($seniorcareinactivity) && $seniorcareinactivity->getIsEnable() == 1 && $seniorcareinactivity->getCache('presence')) { // si notre eq existe et est actif et que la personne est présente !
 

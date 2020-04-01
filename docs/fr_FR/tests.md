@@ -1,5 +1,5 @@
 Infos/constatations :
-* les valeurs en cache ne sont pas effacées lors de la sauvegarde (mais effacées au reboot), donc on garde les timestamps du dernier trigger d'activité et l'état des warning et alertes
+* les valeurs en cache ne sont pas effacées lors de la sauvegarde ni au reboot (mais non lisible au 1ere cron apres reboot !)), donc on garde les timestamps du dernier trigger d'activité et l'état des warning et alertes
 * si on ne remplit pas la conf pour les champs de durée, le code lit 0. Dans ce cas le warning est appelé au prochain CRON et le alerte au CRON suivant (ils ne passent pas tous les 2 dans le meme CRON)
 
 Tests sur v0.0.2 du 19 au 21 mars 2020
