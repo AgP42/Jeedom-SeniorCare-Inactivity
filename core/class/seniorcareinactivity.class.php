@@ -25,6 +25,8 @@ Capteur absence => appel fct "sensorAbsence". Si délai configuré => set cron q
 
 Reception d'un AR => appel fct "lifeSignAR" qui va appeler ses actions d'AR et couper la chaine d'alerte (supprimer les cron)
 Réception appel cmd "déclarer absence" => set le cache à "absence" et lance les actions d'annulation via la fct "execCancelActions"
+Réception appel cmd "déclarer jour" ou "déclarer nuit" => set le cache à "jour" à 0 ou 1 et c'est tout (on ne change pas le timer courant, on attend le prochain trigger)
+
 
 Toutes les minutes (cron jeedom) => on évalue si on est present et si les timers d'alerte sont depassés, si oui on lance les actions immédiates et on set les cron pour les actions différees
 */
@@ -37,7 +39,7 @@ Les infos en cache (effacées ni lors de la sauvegarde, ni au reboot, ni update 
 * $eqLogic->setCache('nextLifeSignAlertTimestamp', time() + $lifeSignDetectionDelay); => le timestamp auquel il faut déclencher l'alerte
 * $eqLogic->getCache('alertLifeSignState'); => l'état actuel de l'alerte (déjà déclenchée ou non)
 * $eqLogic->setCache('execAction_'.$action['action_label'], 1); => l'état d'execution de chacune des actions d'alertes ayant un label (celles sans label sont mémorisées aussi mais s'écrasent entre elles et elles ne sont jamais lues, donc on s'en fout), pour conditionner l'exécution des actions d'AR et d'annulation
-
+* $eqLogic->setCache('jour', 0); => savoir si on est en jour ou en nuit
 */
 
 /* * ***************************Includes********************************* */
@@ -58,10 +60,9 @@ class seniorcareinactivity extends eqLogic {
       $seniorcareinactivity->setCache('presence', 0); //on declare l'absence dans le cache. C'est le cron1 de jeedom qui gere le reste
       log::add('seniorcareinactivity', 'debug', $seniorcareinactivity->getHumanName() . ' - cache *presence* : ' . $seniorcareinactivity->getCache('presence'));
 
-    //sleep(10);
-
-      $seniorcareinactivity->execCancelActions(); // truc bizarre ici, parfois cet appel ne marche pas et donc le cron passe en erreur. Avec un sleep ca repart... a surveiller... TODO
-
+      if ($seniorcareinactivity->getCache('alertLifeSignState')){ // si on était en phase d'alerte, on lance les actions d'annulation
+        $seniorcareinactivity->execCancelActions();
+      }
     }
 
     public static function lifeSignActionDelayed($_options) { // fonction appelée par les cron qui servent a reporter l'execution des actions d'alerte. Dans les options on trouve le eqLogic_id et 'action' qui lui meme contient tout ce qu'il faut pour executer l'action reportée, incluant le titre et message pour les messages
@@ -116,7 +117,9 @@ class seniorcareinactivity extends eqLogic {
         $seniorcareinactivity->setCache('presence', 0); //on declare l'absence dans le cache. C'est le cron1 de jeedom qui gere le reste
         log::add('seniorcareinactivity', 'debug', $seniorcareinactivity->getHumanName() . ' - cache *presence* : ' . $seniorcareinactivity->getCache('presence'));
 
-        $seniorcareinactivity->execCancelActions();
+        if ($seniorcareinactivity->getCache('alertLifeSignState')){ // si on était en phase d'alerte, on lance les actions d'annulation
+          $seniorcareinactivity->execCancelActions();
+        }
 
       }
 
@@ -127,7 +130,7 @@ class seniorcareinactivity extends eqLogic {
 
       $seniorcareinactivity = seniorcareinactivity::byId($_option['seniorcareinactivity_id']); // on prend l'eqLogic du trigger qui nous a appelé
 
-      log::add('seniorcareinactivity', 'debug', '################ Detection d\'un capteur d\'activité ############ pour : ' . $seniorcareinactivity->getHumanName() . ' - Presence : ' . $seniorcareinactivity->getCache('presence'));
+      log::add('seniorcareinactivity', 'debug', '################ Detection d\'un capteur d\'activité ############ pour : ' . $seniorcareinactivity->getHumanName() . ' - Presence : ' . $seniorcareinactivity->getCache('presence') . ' - Jour : ' . $seniorcareinactivity->getCache('jour'));
 
       // on va chercher quel capteur nous a declenché pour aller chercher son timer et sa valeur
       foreach ($seniorcareinactivity->getConfiguration('life_sign') as $sensor) { // on boucle direct dans la conf
@@ -135,33 +138,29 @@ class seniorcareinactivity extends eqLogic {
 
           if ($seniorcareinactivity->getCache('sensor_' . $_option['event_id']) != $_option['value']){ // si notre valeur a changé, donc a prendre en compte
 
-            log::add('seniorcareinactivity', 'debug', $seniorcareinactivity->getHumanName() . ' - Détection d\'un capteur d\'ACTIVITÉ, commande : ' . $sensor['cmd'] . ', nom : ' . $sensor['name'] . ', timer état haut : ' . $sensor['life_sign_timer_high'] . 'min, timer état bas : ' . $sensor['life_sign_timer_low'] . 'min, valeur : ' . $_option['value']);
+            log::add('seniorcareinactivity', 'debug', $seniorcareinactivity->getHumanName() . ' - Détection d\'un capteur d\'ACTIVITÉ, commande : ' . $sensor['cmd'] . ', nom : ' . $sensor['name'] . ', timer état haut jour : ' . $sensor['life_sign_timer_high_day'] . 'min, timer état bas jour : ' . $sensor['life_sign_timer_low_day'] . 'min, timer état haut nuit : ' . $sensor['life_sign_timer_high_night'] . 'min, timer état bas nuit : ' . $sensor['life_sign_timer_low_night'] . 'min, valeur : ' . $_option['value']);
 
             if(!$seniorcareinactivity->getCache('presence')) { // on log uniquement si la presence est nouvelle
               log::add('seniorcareinactivity', 'info', $seniorcareinactivity->getHumanName() . ' - PRESENCE (par activation d\' un capteur d\'activité)');
             }
 
-            $lifeSignDetectionDelay = $_option['value'] ? $sensor['life_sign_timer_high'] * 60 : $sensor['life_sign_timer_low'] * 60; //choppe le timer selon état haut ou bas
-
-        //    $lifeSignDetectionDelay = $sensor['life_sign_timer_high'] * 60; //choppe le timer
+            if(!$seniorcareinactivity->getCache('jour')){ // si on est pas sur d'etre en nuit, par defaut on prendra jour
+              $lifeSignDetectionDelay = $_option['value'] ? $sensor['life_sign_timer_high_night'] * 60 : $sensor['life_sign_timer_low_night'] * 60; //choppe le timer selon état haut ou bas
+            } else {
+              $lifeSignDetectionDelay = $_option['value'] ? $sensor['life_sign_timer_high_day'] * 60 : $sensor['life_sign_timer_low_day'] * 60; //choppe le timer selon état haut ou bas
+            }
 
             if(is_numeric($lifeSignDetectionDelay) && $lifeSignDetectionDelay > 0){ // si on a un timer bien defini et > 0 min, le trigger est donc valable, on le prend en compte (sinon : on fait rien)
 
-              log::add('seniorcareinactivity', 'info', $seniorcareinactivity->getHumanName() . ' - Détection d\'un capteur d\'ACTIVITÉ, commande : ' . $sensor['cmd'] . ', nom : ' . $sensor['name'] . ', timer état haut : ' . $sensor['life_sign_timer_high'] . 'min, timer état bas : ' . $sensor['life_sign_timer_low'] . 'min, valeur : ' . $_option['value']);
+              log::add('seniorcareinactivity', 'info', $seniorcareinactivity->getHumanName() . ' - Détection d\'un capteur d\'ACTIVITÉ, commande : ' . $sensor['cmd'] . ', nom : ' . $sensor['name'] . ', valeur timer à utiliser : ' . $lifeSignDetectionDelay/60 . 'min, valeur : ' . $_option['value']);
 
               $seniorcareinactivity->setCache('presence', 1); //on declare la personne présente
               $seniorcareinactivity->setCache('nextLifeSignAlertTimestamp', time() + $lifeSignDetectionDelay); // on met en cache le timestamp auquel il faudra déclencher l'alerte. C'est le cron qui regardera toutes les min si on est hors delais
 
               log::add('seniorcareinactivity', 'debug', $seniorcareinactivity->getHumanName() . ' - cache *nextLifeSignAlertTimestamp* : ' . $seniorcareinactivity->getCache('nextLifeSignAlertTimestamp') . ' - cache *presence* : ' . $seniorcareinactivity->getCache('presence'));
 
-              $alertLifeSignState = $seniorcareinactivity->getCache('alertLifeSignState'); // on recupere l'état actuel de l'alerte
-
-        //      log::add('seniorcareinactivity', 'debug', 'Fct sensorLifeSign appelée par le listener, seniorcareinactivity_id : ' . $_option['seniorcareinactivity_id'] . ' - value : ' . $_option['value'] . ' - event_id : ' . $_option['event_id'] . ' - timestamp mis en cache : ' . $seniorcareinactivity->getCache('nextLifeSignAlertTimestamp') . ' état alerte lu : ' . $alertLifeSignState);
-
-              if ($alertLifeSignState){ // si on était en phase d'alerte, on lance les actions d'annulation
-
+              if ($seniorcareinactivity->getCache('alertLifeSignState')){ // si on était en phase d'alerte, on lance les actions d'annulation
                 $seniorcareinactivity->execCancelActions();
-
               }
 
               $seniorcareinactivity->setCache('alertLifeSignState', 0); // on declare qu'on est pas ou plus en phase d'alerte, puisqu'on vient de recevoir un signe de vie valide
@@ -290,7 +289,7 @@ class seniorcareinactivity extends eqLogic {
 
     }
 
-    public function execCancelActions() { // appelée par un trigger de signe de vie si l'alerte était active
+    public function execCancelActions() { // appelée par un trigger de signe de vie ou passage en mode "absence", si l'alerte était active
 
       log::add('seniorcareinactivity', 'info', $this->getHumanName() . ' - Actions Annulation Alerte Inactivité à lancer. ');
 
@@ -769,22 +768,26 @@ class seniorcareinactivityCmd extends cmd {
 
         log::add('seniorcareinactivity', 'info', $this->getHumanName() . ' - JOUR (par appel extérieur)');
 
-        $this->setCache('jour', 1);
-        log::add('seniorcareinactivity', 'debug', $this->getHumanName() . ' - cache *jour* : ' . $this->getCache('jour'));
+        $eqLogic->setCache('jour', 1);
+        log::add('seniorcareinactivity', 'debug', $this->getHumanName() . ' - cache *jour* : ' . $eqLogic->getCache('jour'));
 
       } else if ($this->getLogicalId() == 'life_sign_nuit') { // appel de la commande action "declarer nuit"
 
         log::add('seniorcareinactivity', 'info', $this->getHumanName() . ' - NUIT (par appel extérieur)');
 
-        $this->setCache('jour', 0);
-        log::add('seniorcareinactivity', 'debug', $this->getHumanName() . ' - cache *jour* : ' . $this->getCache('jour'));
+        $eqLogic->setCache('jour', 0);
+        log::add('seniorcareinactivity', 'debug', $this->getHumanName() . ' - cache *jour* : ' . $eqLogic->getCache('jour'));
 
       } else if ($this->getLogicalId() == 'life_sign_absence') { //appel (via API ou extérieur) de l'absence
 
         log::add('seniorcareinactivity', 'info', $eqLogic->getHumanName() . ' - ABSENCE (par appel extérieur)');
 
         $eqLogic->setCache('presence', 0); //on declare l'absence dans le cache. On reviendra present a n'importe quel detecteur de presence declenché
-        $eqLogic->execCancelActions();
+        log::add('seniorcareinactivity', 'debug', $this->getHumanName() . ' - cache *presence* : ' . $eqLogic->getCache('presence'));
+
+        if ($eqLogic->getCache('alertLifeSignState')){ // si on était en phase d'alerte, on lance les actions d'annulation
+          $eqLogic->execCancelActions();
+        }
 
       } else { // sinon c'est un sensor et on veut juste sa valeur
 
