@@ -35,7 +35,7 @@ Toutes les minutes (cron jeedom) => on évalue si on est present et si les timer
 Les infos en cache (effacées ni lors de la sauvegarde, ni au reboot, ni update jeedom, mais mal lues au 1er cron après reboot...) :
 
 * $eqLogic->getCache('presence')); => savoir si la personne est présente ou absente. Sera a nouveau déclarée présente au 1ere capteur d'activité déclenché
-* $eqLogic->getCache('sensor_' . $_option['event_id']) => la valeur précédente de chaque capteur d'activité, pour ne déclencher que sur un changement d'état et non une répétition. Donc au reboot on sait plus, on déclenche : OK
+* $eqLogic->getCache('sensor_' . $_option['event_id']) => la valeur précédente de chaque capteur d'activité, pour ne déclencher que sur un changement d'état et non une répétition.
 * $eqLogic->setCache('nextLifeSignAlertTimestamp', time() + $lifeSignDetectionDelay); => le timestamp auquel il faut déclencher l'alerte
 * $eqLogic->getCache('alertLifeSignState'); => l'état actuel de l'alerte (déjà déclenchée ou non)
 * $eqLogic->setCache('execAction_'.$action['action_label'], 1); => l'état d'execution de chacune des actions d'alertes ayant un label (celles sans label sont mémorisées aussi mais s'écrasent entre elles et elles ne sont jamais lues, donc on s'en fout), pour conditionner l'exécution des actions d'AR et d'annulation
@@ -56,8 +56,8 @@ class seniorcareinactivity extends eqLogic {
 
       $seniorcareinactivity = seniorcareinactivity::byId($_options['eqLogic_id']); // on prend l'eqLogic du cron qui nous a appelé
 
-      log::add('seniorcareinactivity', 'info', $seniorcareinactivity->getHumanName() . ' - ABSENCE (par activation d\' un capteur AVEC timer)');
       $seniorcareinactivity->setCache('presence', 0); //on declare l'absence dans le cache. C'est le cron1 de jeedom qui gere le reste
+      log::add('seniorcareinactivity', 'info', $seniorcareinactivity->getHumanName() . ' - ABSENCE (par activation d\' un capteur AVEC timer)');
       log::add('seniorcareinactivity', 'debug', $seniorcareinactivity->getHumanName() . ' - cache *presence* : ' . $seniorcareinactivity->getCache('presence'));
 
       if ($seniorcareinactivity->getCache('alertLifeSignState')){ // si on était en phase d'alerte, on lance les actions d'annulation
@@ -73,7 +73,6 @@ class seniorcareinactivity extends eqLogic {
       log::add('seniorcareinactivity', 'info', $seniorcareinactivity->getHumanName() . ' - Exécution (différée) de l\'action d\'alerte : ' . $_options['action']['cmd'] . ' - Label : ' . $_options['action']['action_label']);
     }
 
-
     public static function sensorAbsence($_option) { // fct appelée par le listener des boutons d'absence, n'importe quel bouton arrive ici
 
       $seniorcareinactivity = seniorcareinactivity::byId($_option['seniorcareinactivity_id']); // on prend l'eqLogic du trigger qui nous a appelé
@@ -87,30 +86,30 @@ class seniorcareinactivity extends eqLogic {
         $seniorcareinactivity->setCache('presence', 0); //on declare dés maintenant l'absence dans le cache. Elle sera repetée par le cron qu'on met en place ci-dessous. Permet d'éviter de lancer une alerte entre le moment où on a lancé le bouton d'absence et l'absence effective (ne devrait pas arriver vu qu'on bouge de toute facon, mais bon...)
 
         $cron = cron::byClassAndFunction('seniorcareinactivity', 'lifeSignAbsenceDelayed', array('eqLogic_id' => intval($seniorcareinactivity->getId()))); // cherche le cron qui correspond exactement à "ce plugin, cette fonction et cette personne (on ne veut)
-        // lors d'une sauvegarde ou suppression de l'eqLogic, si des crons sont existants, ils seront supprimés
+        // lors de la suppression de l'eqLogic, si un cron est existant, il sera supprimé
 
-        //TODO : si on reappui sur le bouton, ca decalle pas le cron... comportement voulu ou il faudrait le remove et re-set ?
-
-        if (!is_object($cron)) { // pas de cron trouvé, on le cree
-
-            $cron = new cron();
-            $cron->setClass('seniorcareinactivity');
-            $cron->setFunction('lifeSignAbsenceDelayed');
-
-            $options['eqLogic_id'] = intval($seniorcareinactivity->getId());
-            $cron->setOption($options);
-
-            $cron->setEnable(1);
-            $cron->setTimeout(5); //minutes
-
-            $delai = strtotime(date('Y-m-d H:i:s', strtotime('+'.$lifeSignAbsenceDelay.' min ' . date('Y-m-d H:i:s')))); // on lui dit de se déclencher dans 'lifeSignAbsenceDelay' min
-            $cron->setSchedule(cron::convertDateToCron($delai));
-
-            $cron->setOnce(1); //permet qu'il s'auto supprime une fois executé
-            $cron->save();
-
-            log::add('seniorcareinactivity', 'debug', 'Set CRON absence différée pour eqLogic: ' . $options['eqLogic_id']);
+        if (is_object($cron)) { // s'il existe, on le supprime et on le reset à la nouvelle heure. C'est pour gerer les appui multiples ou si on a plusieurs capteurs : on décale le CRON à chaque fois pour que seul le dernier soit pris en compte
+          $cron->remove();
         }
+
+        $cron = new cron();
+        $cron->setClass('seniorcareinactivity');
+        $cron->setFunction('lifeSignAbsenceDelayed');
+
+        $options['eqLogic_id'] = intval($seniorcareinactivity->getId());
+        $cron->setOption($options);
+
+        $cron->setEnable(1);
+        $cron->setTimeout(5); //minutes
+
+        $delai = strtotime(date('Y-m-d H:i:s', strtotime('+'.$lifeSignAbsenceDelay.' min ' . date('Y-m-d H:i:s')))); // on lui dit de se déclencher dans 'lifeSignAbsenceDelay' min
+        $cron->setSchedule(cron::convertDateToCron($delai));
+
+        $cron->setOnce(1); //permet qu'il s'auto supprime une fois executé
+        $cron->save();
+
+        log::add('seniorcareinactivity', 'debug', 'Set CRON absence différée pour eqLogic: ' . $options['eqLogic_id']);
+
       } else { // immédiat
 
         log::add('seniorcareinactivity', 'info', $seniorcareinactivity->getHumanName() . ' - ABSENCE (par activation d\' un capteur SANS timer)');
@@ -138,7 +137,7 @@ class seniorcareinactivity extends eqLogic {
 
           if ($seniorcareinactivity->getCache('sensor_' . $_option['event_id']) != $_option['value']){ // si notre valeur a changé, donc a prendre en compte
 
-            log::add('seniorcareinactivity', 'debug', $seniorcareinactivity->getHumanName() . ' - Détection d\'un capteur d\'ACTIVITÉ, commande : ' . $sensor['cmd'] . ', nom : ' . $sensor['name'] . ', timer état haut jour : ' . $sensor['life_sign_timer_high_day'] . 'min, timer état bas jour : ' . $sensor['life_sign_timer_low_day'] . 'min, timer état haut nuit : ' . $sensor['life_sign_timer_high_night'] . 'min, timer état bas nuit : ' . $sensor['life_sign_timer_low_night'] . 'min, valeur : ' . $_option['value']);
+            log::add('seniorcareinactivity', 'debug', $seniorcareinactivity->getHumanName() . ' - Détection d\'un capteur d\'ACTIVITÉ, commande : ' . $sensor['cmd'] . ', nom : ' . $sensor['name'] . ', timer état haut jour : ' . $sensor['life_sign_timer_high_day'] . 'min, timer état bas jour : ' . $sensor['life_sign_timer_low_day'] . 'min, timer état haut nuit : ' . $sensor['life_sign_timer_high_night'] . 'min, timer état bas nuit : ' . $sensor['life_sign_timer_low_night'] . 'min, nouvel état capteur : ' . $_option['value']);
 
             if(!$seniorcareinactivity->getCache('presence')) { // on log uniquement si la presence est nouvelle
               log::add('seniorcareinactivity', 'info', $seniorcareinactivity->getHumanName() . ' - PRESENCE (par activation d\' un capteur d\'activité)');
@@ -152,7 +151,7 @@ class seniorcareinactivity extends eqLogic {
 
             if(is_numeric($lifeSignDetectionDelay) && $lifeSignDetectionDelay > 0){ // si on a un timer bien defini et > 0 min, le trigger est donc valable, on le prend en compte (sinon : on fait rien)
 
-              log::add('seniorcareinactivity', 'info', $seniorcareinactivity->getHumanName() . ' - Détection d\'un capteur d\'ACTIVITÉ, commande : ' . $sensor['cmd'] . ', nom : ' . $sensor['name'] . ', valeur timer à utiliser : ' . $lifeSignDetectionDelay/60 . 'min, valeur : ' . $_option['value']);
+              log::add('seniorcareinactivity', 'info', $seniorcareinactivity->getHumanName() . ' - Détection d\'un capteur d\'ACTIVITÉ, commande : ' . $sensor['cmd'] . ', nom : ' . $sensor['name'] . ', valeur timer à utiliser : ' . $lifeSignDetectionDelay/60 . 'min, nouvel état capteur : ' . $_option['value']);
 
               $seniorcareinactivity->setCache('presence', 1); //on declare la personne présente
               $seniorcareinactivity->setCache('nextLifeSignAlertTimestamp', time() + $lifeSignDetectionDelay); // on met en cache le timestamp auquel il faudra déclencher l'alerte. C'est le cron qui regardera toutes les min si on est hors delais
@@ -240,7 +239,7 @@ class seniorcareinactivity extends eqLogic {
 
     /*     * *********************Méthodes d'instance************************* */
 
-    public function execAlerteActions($action) { // appelée par le cron (celui de jeedom toutes les min) si besoin
+    public function execAlerteActions($action) { // appelée par le cron (celui de jeedom toutes les min), si besoin
 
       foreach ($this->getConfiguration('action_alert_life_sign') as $action) { // pour toutes les actions définies
 
@@ -392,7 +391,7 @@ class seniorcareinactivity extends eqLogic {
 
     }
 
-    public function cleanAllCron($displayWarningMessage = false) { // en fait c'est pas tous, mais tous les cron des ACTIONS différées. Le cron pour l'absence différé n'est pas annulé ici
+    public function cleanAllCron($displayWarningMessage = false) { // en fait c'est pas tous, mais tous les cron des ACTIONS différées. Le cron pour l'absence différé n'est pas annulé ici, Il n'est annulé que dans la fonction preRemove (suppression de l'eqLogic)
 
       log::add('seniorcareinactivity', 'debug', 'Fct cleanAllCron pour : ' . $this->getName());
 
@@ -676,7 +675,7 @@ class seniorcareinactivity extends eqLogic {
               throw new Exception(__('Le champs Nom pour les capteurs d\'activité ne peut être vide',__FILE__));
             }
 
-            if ($sensor['cmd'] == '') { // TODO on pourrait aussi ici vérifier que notre commande existe pour pas avoir de problemes apres...
+            if ($sensor['cmd'] == '') { // tests réalisés avec une cmd qui n'existe pas ('verrtgtr'), aucune erreur particuliere ni aucun log systeme, donc pas besoin de vérifier que c'est une cmd correcte et existante
               throw new Exception(__('Le champs Capteur d\'activité ne peut être vide',__FILE__));
             }
           }

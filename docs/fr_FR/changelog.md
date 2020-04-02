@@ -31,7 +31,11 @@
 * Tests et debugs
 * Mise à jour documentation
 
-0.0.5 - 1er avril
+0.0.5 - 2 avril
 ---
 
 * Ajout timer selon état du capteur (0->1 ou 1->0) et période jour/nuit
+* Ajout des commandes pour déclarer état "jour" ou "nuit" et liaison avec le plugin agenda
+* (debug) La réception de l'état "absence" appelle les actions d'annulation d'alerte => uniquement si l'alerte était active
+* Tests, relecture et debugs
+* Mise à jour documentation
