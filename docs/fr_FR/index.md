@@ -257,7 +257,7 @@ Pourquoi ? Pour les curieux, voilà le détail : les informations suivantes sont
    * l'état courant de chaque capteur d'activité (pour ne déclencher que sur un changement d'état et non une répétition) => il est donc recommandé d'activer au moins 1 fois chaque capteur dans le logement. Si ça n'est pas fait, le 1er état sera nouveau et donc ça devrait fonctionner quand même.
    * le timestamp auquel il faudra déclencher la prochaine alerte => le déclenchement de n'importe quel capteur (avec une temporisation >0) initialisera ce timestamp. S'il n'est pas initialisé dans la 1ere minute après la création de l'équipement, les actions d'alerte vont se lancer (il suffit alors de les annuler avec le déclenchement d'un capteur).
    * l'état actuel de l'alerte (déjà déclenchée ou non) => le déclenchement de n'importe quel capteur (avec une temporisation >0) initialisera cette valeur à "pas d'alerte en cours"
-   * l'état d'exécution de chacune des actions d'alertes ayant un label (celles sans label sont mémorisées aussi mais s'écrasent entre elles et elles ne sont jamais lues, donc sans impact fonctionnel), pour conditionner l'exécution des actions d'AR et d'annulation. => laisser toutes les actions d'alerte déclencher au moins 1 fois puis les annuler
+   * l'état d'exécution de chacune des actions d'alertes ayant un label (celles sans label sont mémorisées aussi mais s'écrasent entre elles et elles ne sont jamais lues, donc sans impact fonctionnel), pour conditionner l'exécution des actions d'AR et d'annulation. => laisser toutes les actions d'alerte se déclencher au moins 1 fois puis les annuler
 
 
 Comportement après redémarrage Jeedom
