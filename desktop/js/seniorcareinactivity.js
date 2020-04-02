@@ -349,7 +349,7 @@ function printScheduling(_eqLogic, _type){
       }
       $('#div_schedule_'+_type).empty();
       if(data.result.length == 0){
-        $('#div_schedule_'+_type).append("<center><span style='color:#767676;font-size:1.2em;font-weight: bold;'>{{Vous n'avez encore aucune programmation. Veuillez cliquer <a href='index.php?v=d&m=calendar&p=calendar'>ici</a> pour programmer vos absences à l'aide du plugin agenda}}</span></center>");
+        $('#div_schedule_'+_type).append("<center><span style='color:#767676;font-size:1.2em;font-weight: bold;'>{{Vous n'avez encore aucune programmation. Veuillez cliquer <a href='index.php?v=d&m=calendar&p=calendar'>ici</a> pour accéder au plugin agenda}}</span></center>");
       }else{
         var html = '<p>{{Liste des programmations liées}}</p>';
         for (var i in data.result) {

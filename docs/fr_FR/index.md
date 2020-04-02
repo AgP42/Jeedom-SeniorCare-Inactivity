@@ -41,11 +41,16 @@ Principe de fonctionnement
 
 Le principe est le suivant :
 * Le logement de la personne âgée est équipé d'une multitude de capteurs. Au déclenchement de l'un d'entre eux, une temporisation correspondant à ce capteur est lancée. Ceci permet une temporisation plus courte dans la salle de bain que le salon par exemple. Chaque détection dans le logement relancera la temporisation. Si la temporisation arrive à échéance, le mécanisme d'alerte est enclenché.
+
 * Vous pouvez alors définir des actions à réaliser dans le logement (changement de couleur d'une lampe, alerte sonore, ...) ainsi que des actions vers un ou plusieurs aidants extérieurs. Ces actions peuvent être des notifications sur leur téléphone, un sms, un email, ... Ces différentes actions peuvent être à exécution immédiate ou différée. Celà permet de définir plusieurs personnes à prévenir successivement tant que l'alerte n'a pas été prise en compte par l'une d'entre elles. Il est aussi possible de définir la 1ère alerte dans le logement de la personne afin de lui laisser le temps de réagir (en activant n'importe lequel des capteurs du logement) avant que l'alerte ne soit lancée vers les aidants. Il est fortement conseillé de faire en sorte que cette alerte ne soit pas anxiogène pour la personne dépendante.
+
 * Les aidants peuvent accuser réception de l'alerte. Cela aura pour effet de déclencher des actions spécifiques (changer la couleur de la lampe dans le logement de la personne pour l'informer de la prise en compte par exemple). A la réception d'un AR, les actions d'alerte programmées n'ayant pas encore été exécutées sont annulées. Ceci permet de couper la chaîne d'alerte. Il est possible de définir des actions à ne réaliser que si une action d'alerte précédente a été exécutée, Ceci afin de prévenir les autres personnes ayant reçu l'alerte que quelqu'un en a déjà accusé réception par exemple.
+
 * Une fois l’aidant sur place ou si la personne a réagit entre-temps, des actions d'annulation sont définies et la chaîne d'alerte est coupée. L'activation de n'importe quel capteur permet d'interrompre l'alerte.
+
 * Une gestion d'absence est disponible afin de ne pas déclencher d'alerte alors que la personne n'est pas présente dans son logement. Ces absences peuvent être déclarées de différentes façons (plugin agenda, scénarios ou plugins Jeedom, appel extérieur via l'API, des boutons dans le logement, ...).
-* Il est possible de définir jusqu'à 4 valeurs de temporisation par capteur, pour prendre en compte l'état du capteur (0 ou 1) ainsi que la période de la journée (jour/nuit)
+
+* Il est possible de définir jusqu'à 4 valeurs de temporisation par capteur, pour prendre en compte l'état du capteur (0 ou 1) ainsi que la période de la journée (jour/nuit).
 
 Configuration du plugin
 ========================
@@ -141,7 +146,7 @@ Pour vous aider à configurer vos capteurs, vous pouvez activer les logs en mode
 > Plus le nombre de capteurs sera élevé, meilleure sera la performance.
 > Il est nécessaire de faire des essais de capteurs et des délais associés et de réaliser une période de test sans générer d'alerte pour la personne âgée.
 
-###Exemple
+### Exemple
 
 Dans la copie d'écran ci-dessus, 3 capteurs sont configurés, voici le comportement correspondant :
 * Capteur **Porte** :
