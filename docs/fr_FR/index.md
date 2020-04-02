@@ -251,29 +251,20 @@ Lors de la création et initialisation du mécanisme
    * Activer chaque capteur (et vérifier sa bonne prise en compte dans les logs "info", ce qui est uniquement visible dans une des conditions où il a un timer valide défini)
    * Déclencher une alerte, laisser toutes les actions s'exécuter puis annuler l'alerte (= déclencher un capteur)
 
-*Pourquoi ? Pour les curieux, voilà le détail : les informations suivantes sont stockées dans le cache de jeedom, il est recommandé de les initialiser lors de la 1ère installation (le cache de Jeedom n'est perdu ni lors d'une sauvegarde, ni lors d'un redémarrage, ni lors d'une mise à jour du core ou du plugin. Il n'est perdu que lorsque vous décidez de le vider manuellement ou lors de la réinstallation totale de votre jeedom) :
+Pourquoi ? Pour les curieux, voilà le détail : les informations suivantes sont stockées dans le cache de jeedom, il est recommandé de les initialiser lors de la 1ère installation (le cache de Jeedom n'est perdu ni lors d'une sauvegarde, ni lors d'un redémarrage, ni lors d'une mise à jour du core ou du plugin. Il n'est perdu que lorsque vous décidez de le vider manuellement ou lors de la réinstallation totale de votre jeedom) :
    * jour => état jour par défaut si cette valeur n'est pas initialisée.
    * presence/absence => le déclenchement de n'importe quel capteur (avec une temporisation >0) initialisera la présence
    * l'état courant de chaque capteur d'activité (pour ne déclencher que sur un changement d'état et non une répétition) => il est donc recommandé d'activer au moins 1 fois chaque capteur dans le logement. Si ça n'est pas fait, le 1er état sera nouveau et donc ça devrait fonctionner quand même.
    * le timestamp auquel il faudra déclencher la prochaine alerte => le déclenchement de n'importe quel capteur (avec une temporisation >0) initialisera ce timestamp. S'il n'est pas initialisé dans la 1ere minute après la création de l'équipement, les actions d'alerte vont se lancer (il suffit alors de les annuler avec le déclenchement d'un capteur).
    * l'état actuel de l'alerte (déjà déclenchée ou non) => le déclenchement de n'importe quel capteur (avec une temporisation >0) initialisera cette valeur à "pas d'alerte en cours"
-   * l'état d'exécution de chacune des actions d'alertes ayant un label (celles sans label sont mémorisées aussi mais s'écrasent entre elles et elles ne sont jamais lues, donc sans impact fonctionnel), pour conditionner l'exécution des actions d'AR et d'annulation. => laisser toutes les actions d'alerte déclencher au moins 1 fois puis les annuler*
+   * l'état d'exécution de chacune des actions d'alertes ayant un label (celles sans label sont mémorisées aussi mais s'écrasent entre elles et elles ne sont jamais lues, donc sans impact fonctionnel), pour conditionner l'exécution des actions d'AR et d'annulation. => laisser toutes les actions d'alerte déclencher au moins 1 fois puis les annuler
 
 
 Comportement après redémarrage Jeedom
 ---
-* Après un redémarrage de Jeedom, aucune information ne sera (ne devrait être...) perdue, mais il peut y avoir un délai supplémentaire d'1 min avant le déclenchement des alertes
+* Après un redémarrage de Jeedom, aucune information ne sera (ne devrait être...) perdue, mais il peut y avoir un délai supplémentaire d'1 min avant le déclenchement des alertes.
 
 Infos capteurs
 ---
-* L'ensemble des capteurs définis dans le plugin doivent posséder un nom unique. Le changement de nom d'un capteur revient à le supprimer et à en créer un nouveau, l'historique associé à ce capteur sera donc perdu
+* L'ensemble des capteurs définis dans le plugin doivent posséder un nom unique. Le changement de nom d'un capteur revient à le supprimer et à en créer un nouveau, l'historique associé à ce capteur sera donc perdu.
 * Si vous associez un capteur dont les valeurs ne sont pas binaires (0 ou 1), il ne sera jamais pris en compte. Vous devez alors passer par un virtuel pour générer une information binaire selon vos besoins.
-
-Exemples d'usage et configuration associée
-========================
-
-Bonus : configuration pour recevoir les alertes par notification sur un smartphone android
-========================
-
-Bonus 2 : configuration pour mettre un jour un widget sur un smartphone android selon les infos de ce plugin
-========================
