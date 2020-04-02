@@ -454,22 +454,7 @@ class seniorcareinactivity extends eqLogic {
       //TODO : voir comment on pourrait avoir l'info de "qui" a accusé réception...
       $cmd->save();
 
-      // et les commandes pour absence/presence
-
-/*      $cmd = $this->getCmd(null, 'life_sign_presence');
-      if (!is_object($cmd)) {
-        $cmd = new seniorcareinactivityCmd();
-        $cmd->setName(__('Déclarer présence', __FILE__));
-      }
-      $cmd->setLogicalId('life_sign_presence');
-      $cmd->setEqLogic_id($this->getId());
-      $cmd->setType('action');
-      $cmd->setSubType('other');
-      $cmd->setIsVisible(1);
-      $cmd->setIsHistorized(1);
-      $cmd->setConfiguration('historizeMode', 'none');
-      $cmd->save();*/
-
+      // et la commande pour absence
       $cmd = $this->getCmd(null, 'life_sign_absence');
       if (!is_object($cmd)) {
         $cmd = new seniorcareinactivityCmd();
@@ -487,6 +472,39 @@ class seniorcareinactivity extends eqLogic {
       $this->setCache('presence', 1); //A la creation de l'équipement, on declare la personne présente. C'est juste histoire d'initialiser le truc
       log::add('seniorcareinactivity', 'debug', $this->getHumanName() . ' - cache *presence* : ' . $this->getCache('presence'));
       log::add('seniorcareinactivity', 'debug', $this->getHumanName() . ' - PRESENCE (à la création de l\'eqLogic)');
+
+      // et les commandes pour jour et nuit
+      $cmd = $this->getCmd(null, 'life_sign_jour');
+      if (!is_object($cmd)) {
+        $cmd = new seniorcareinactivityCmd();
+        $cmd->setName(__('Déclarer jour', __FILE__));
+      }
+      $cmd->setLogicalId('life_sign_jour');
+      $cmd->setEqLogic_id($this->getId());
+      $cmd->setType('action');
+      $cmd->setSubType('other');
+      $cmd->setIsVisible(1);
+      $cmd->setIsHistorized(1);
+      $cmd->setConfiguration('historizeMode', 'none');
+      $cmd->save();
+
+      $cmd = $this->getCmd(null, 'life_sign_nuit');
+      if (!is_object($cmd)) {
+        $cmd = new seniorcareinactivityCmd();
+        $cmd->setName(__('Déclarer nuit', __FILE__));
+      }
+      $cmd->setLogicalId('life_sign_nuit');
+      $cmd->setEqLogic_id($this->getId());
+      $cmd->setType('action');
+      $cmd->setSubType('other');
+      $cmd->setIsVisible(1);
+      $cmd->setIsHistorized(1);
+      $cmd->setConfiguration('historizeMode', 'none');
+      $cmd->save();
+
+      $this->setCache('jour', 1); //A la creation de l'équipement, on declare qu'on est en jour. Histoire d'initialiser le truc
+      log::add('seniorcareinactivity', 'debug', $this->getHumanName() . ' - cache *jour* : ' . $this->getCache('jour'));
+      log::add('seniorcareinactivity', 'debug', $this->getHumanName() . ' - JOUR (à la création de l\'eqLogic)');
 
     }
 
@@ -735,31 +753,37 @@ class seniorcareinactivityCmd extends cmd {
 
 
 
-    public function execute($_options = array()) {
 
+    public function execute($_options = array()) {
       //$this est une cmd ici
 
-      if ($this->getLogicalId() == 'life_sign_ar') { //appel (via API ou extérieur) de l'AR
+      $eqLogic = $this->getEqLogic(); // on recupere l'eqLogic (la personne) de cette commande
 
-        $eqLogic = $this->getEqLogic(); // on recupere l'eqLogic (la personne) de cette commande
+      if ($this->getLogicalId() == 'life_sign_ar') { //appel (via API ou extérieur) de l'AR
 
         log::add('seniorcareinactivity', 'info', $eqLogic->getHumanName() . ' - Actions Accusé de réception Inactivité à lancer.');
 
         $eqLogic->lifeSignAR();
 
-/*      } else if ($this->getLogicalId() == 'life_sign_presence') {
-        log::add('seniorcareinactivity', 'debug', 'Appel de l\'action déclarer presence');
-        $eqLogic = $this->getEqLogic();
-        $eqLogic->presence(1);*/
+      } else if ($this->getLogicalId() == 'life_sign_jour') { // appel de la commande action "declarer jour"
+
+        log::add('seniorcareinactivity', 'info', $this->getHumanName() . ' - JOUR (par appel extérieur)');
+
+        $this->setCache('jour', 1);
+        log::add('seniorcareinactivity', 'debug', $this->getHumanName() . ' - cache *jour* : ' . $this->getCache('jour'));
+
+      } else if ($this->getLogicalId() == 'life_sign_nuit') { // appel de la commande action "declarer nuit"
+
+        log::add('seniorcareinactivity', 'info', $this->getHumanName() . ' - NUIT (par appel extérieur)');
+
+        $this->setCache('jour', 0);
+        log::add('seniorcareinactivity', 'debug', $this->getHumanName() . ' - cache *jour* : ' . $this->getCache('jour'));
 
       } else if ($this->getLogicalId() == 'life_sign_absence') { //appel (via API ou extérieur) de l'absence
 
-        $eqLogic = $this->getEqLogic();
-
         log::add('seniorcareinactivity', 'info', $eqLogic->getHumanName() . ' - ABSENCE (par appel extérieur)');
-        $eqLogic->setCache('presence', 0); //on declare l'absence dans le cache. On reviendra present a n'importe quel detecteur de presence declenché
-        log::add('seniorcareinactivity', 'debug', $eqLogic->getHumanName() . ' - cache *presence* : ' . $eqLogic->getCache('presence'));
 
+        $eqLogic->setCache('presence', 0); //on declare l'absence dans le cache. On reviendra present a n'importe quel detecteur de presence declenché
         $eqLogic->execCancelActions();
 
       } else { // sinon c'est un sensor et on veut juste sa valeur

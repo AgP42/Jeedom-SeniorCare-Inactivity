@@ -48,19 +48,33 @@ try {
       }
       $return = array();
 
-/*      $seniorcareinactivity_cmd = $seniorcareinactivity->getCmd(null, 'life_sign_presence');
-      if (is_object($seniorcareinactivity_cmd)) {
-        foreach (calendar_event::searchByCmd($seniorcareinactivity_cmd->getId()) as $event) {
-          $return[$event->getId()] = $event;
-        }
-      }*/
+      if(init('type') == 'absence'){
 
-      $seniorcareinactivity_cmd = $seniorcareinactivity->getCmd(null, 'life_sign_absence');
-      if (is_object($seniorcareinactivity_cmd)) {
-        foreach (calendar_event::searchByCmd($seniorcareinactivity_cmd->getId()) as $event) {
-          $return[$event->getId()] = $event;
+        $seniorcareinactivity_cmd = $seniorcareinactivity->getCmd(null, 'life_sign_absence');
+        if (is_object($seniorcareinactivity_cmd)) {
+          foreach (calendar_event::searchByCmd($seniorcareinactivity_cmd->getId()) as $event) {
+            $return[$event->getId()] = $event;
+          }
         }
+
+      } else if (init('type') == 'daynight'){
+
+        $seniorcareinactivity_cmd = $seniorcareinactivity->getCmd(null, 'life_sign_jour');
+        if (is_object($seniorcareinactivity_cmd)) {
+          foreach (calendar_event::searchByCmd($seniorcareinactivity_cmd->getId()) as $event) {
+            $return[$event->getId()] = $event;
+          }
+        }
+
+        $seniorcareinactivity_cmd = $seniorcareinactivity->getCmd(null, 'life_sign_nuit');
+        if (is_object($seniorcareinactivity_cmd)) {
+          foreach (calendar_event::searchByCmd($seniorcareinactivity_cmd->getId()) as $event) {
+            $return[$event->getId()] = $event;
+          }
+        }
+
       }
+
 
       ajax::success(utils::o2a($return));
     }

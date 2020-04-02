@@ -51,6 +51,8 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
     <li role="presentation"><a href="#absencestab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-calendar-alt"></i> {{Gestion absences}}</a></li>
 
+    <li role="presentation"><a href="#daynighttab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-calendar-alt"></i> {{Périodes jour/nuit}}</a></li>
+
     <li role="presentation"><a href="#sensorlifesigntab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-heartbeat"></i> {{Capteurs d'activité}}</a></li>
 
     <li role="presentation"><a href="#actionalertlifesigntab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fas fa-users"></i> {{Actions d'alerte}}</a></li>
@@ -153,7 +155,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
     </div>
 
-    <!-- TAB Capteurs absences -->
+    <!-- TAB absences -->
     <div class="tab-pane" id="absencestab">
       <br/>
       <div class="alert alert-info">
@@ -169,7 +171,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
           <legend><i class="fas fa-clock"></i> {{Utiliser le plugin Agenda pour la gestion des absences}}<sup><i class="fas fa-question-circle tooltips" title="{{Le début des plages d'absences est à configurer dans le plugin Agenda. La programmation réalisée s'affichera ici. Tout capteur d'activité détecté relancera la surveillance.}}"></i></sup></legend>
           <form class="form-horizontal">
             <fieldset>
-              <div id="div_schedule"></div>
+              <div id="div_schedule_absence"></div>
             </fieldset>
           </form>
 
@@ -202,11 +204,68 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <legend><i class="fas fa-external-link-alt"></i> {{Via un scenario, un autre plugin ou un appel extérieur}}<sup><i class="fas fa-question-circle tooltips" title="{{Réglages/Système/Configuration/Réseaux doit être correctement renseigné !}}"></i></sup></legend>
 
-      <div class="col-sm-6">
+      <div class="col-sm-12">
         <?php
         if(init('id') != ''){
           $eqLogic = eqLogic::byId(init('id'));
           $cmd = $eqLogic->getCmd(null, 'life_sign_absence');
+          echo '<p>N\'importe où dans Jeedom, appelez cette commande : <i class="fas fa-code-branch"></i><b>  '. $cmd->getHumanName() . '</b><br>Où via l\'extérieur : <a href="' . $cmd->getDirectUrlAccess() . '" target="_blank"><i class="fas fa-external-link-alt"></i>  '. $cmd->getDirectUrlAccess() . '</a></p>';
+        } else {
+          echo 'Sauvegarder ou rafraichir la page pour afficher les infos';
+        }
+        ?>
+      </div>
+
+    </div>
+
+    <!-- TAB jour/nuit -->
+    <div class="tab-pane" id="daynighttab">
+      <br/>
+      <div class="alert alert-info">
+        {{Onglet de configuration des périodes jour et nuit. Les états jour/nuit servent à utiliser le délai correspondant pour les capteurs d'activités. Vous pouvez déclarer ces périodes via la plugin agenda ou via des scenarios notamment.}}
+      </div>
+
+      <?php
+      try {
+        $plugin = plugin::byId('calendar');
+        if (is_object($plugin)) {
+          ?>
+
+          <legend><i class="fas fa-clock"></i> {{Utiliser le plugin Agenda pour la gestion jour/nuit}}<sup><i class="fas fa-question-circle tooltips" title="{{Le début des plages jour et nuit est à configurer dans le plugin Agenda. La programmation réalisée s'affichera ici. Nous pouvez définir autant de période 'nuit' que souhaité. En l'absence de programmation, le délai utilisé sera celui de 'jour'.}}"></i></sup></legend>
+          <form class="form-horizontal">
+            <fieldset>
+              <div id="div_schedule_daynight"></div>
+            </fieldset>
+          </form>
+
+          <?php
+        }
+      } catch (Exception $e) {
+
+      }
+      ?>
+
+      <legend><i class="fas fa-external-link-alt"></i> {{Via un scenario, un autre plugin ou un appel extérieur}}<sup><i class="fas fa-question-circle tooltips" title="{{Réglages/Système/Configuration/Réseaux doit être correctement renseigné !}}"></i></sup></legend>
+
+      <div class="col-sm-12">
+        <label class="col-sm-1 control-label">{{Déclarer jour }}</label>
+        <?php
+        if(init('id') != ''){
+          $eqLogic = eqLogic::byId(init('id'));
+          $cmd = $eqLogic->getCmd(null, 'life_sign_jour');
+          echo '<p>N\'importe où dans Jeedom, appelez cette commande : <i class="fas fa-code-branch"></i><b>  '. $cmd->getHumanName() . '</b><br>Où via l\'extérieur : <a href="' . $cmd->getDirectUrlAccess() . '" target="_blank"><i class="fas fa-external-link-alt"></i>  '. $cmd->getDirectUrlAccess() . '</a></p>';
+        } else {
+          echo 'Sauvegarder ou rafraichir la page pour afficher les infos';
+        }
+        ?>
+      </div>
+
+      <div class="col-sm-12">
+        <label class="col-sm-1 control-label">{{Déclarer nuit }}</label>
+        <?php
+        if(init('id') != ''){
+          $eqLogic = eqLogic::byId(init('id'));
+          $cmd = $eqLogic->getCmd(null, 'life_sign_nuit');
           echo '<p>N\'importe où dans Jeedom, appelez cette commande : <i class="fas fa-code-branch"></i><b>  '. $cmd->getHumanName() . '</b><br>Où via l\'extérieur : <a href="' . $cmd->getDirectUrlAccess() . '" target="_blank"><i class="fas fa-external-link-alt"></i>  '. $cmd->getDirectUrlAccess() . '</a></p>';
         } else {
           echo 'Sauvegarder ou rafraichir la page pour afficher les infos';

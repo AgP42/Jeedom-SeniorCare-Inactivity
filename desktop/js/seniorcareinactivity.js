@@ -299,7 +299,8 @@ function printEqLogic(_eqLogic) {
   $('#div_action_ar_life_sign').empty();
   $('#div_action_cancel_life_sign').empty();
 
-  printScheduling(_eqLogic); // va chercher les infos du plugin agenda pour les afficher dans l'onglet presence/absence
+  printScheduling(_eqLogic, 'absence'); // va chercher les infos du plugin agenda pour les afficher dans l'onglet presence/absence
+  printScheduling(_eqLogic, 'daynight'); // idem onglet jour/nuit
 
   if (isset(_eqLogic.configuration)) {
     if (isset(_eqLogic.configuration.absence)) {
@@ -330,13 +331,14 @@ function printEqLogic(_eqLogic) {
   }
 }
 
-function printScheduling(_eqLogic){
+function printScheduling(_eqLogic, _type){
   $.ajax({
     type: 'POST',
     url: 'plugins/seniorcareinactivity/core/ajax/seniorcareinactivity.ajax.php',
     data: {
       action: 'getLinkCalendar',
       id: _eqLogic.id,
+      type: _type,
     },
     dataType: 'json',
     error: function (request, status, error) {
@@ -347,9 +349,9 @@ function printScheduling(_eqLogic){
         $('#div_alert').showAlert({message: data.result, level: 'danger'});
         return;
       }
-      $('#div_schedule').empty();
+      $('#div_schedule_'+_type).empty();
       if(data.result.length == 0){
-        $('#div_schedule').append("<center><span style='color:#767676;font-size:1.2em;font-weight: bold;'>{{Vous n'avez encore aucune programmation. Veuillez cliquer <a href='index.php?v=d&m=calendar&p=calendar'>ici</a> pour programmer vos absences à l'aide du plugin agenda}}</span></center>");
+        $('#div_schedule_'+_type).append("<center><span style='color:#767676;font-size:1.2em;font-weight: bold;'>{{Vous n'avez encore aucune programmation. Veuillez cliquer <a href='index.php?v=d&m=calendar&p=calendar'>ici</a> pour programmer vos absences à l'aide du plugin agenda}}</span></center>");
       }else{
         var html = '<p>{{Liste des programmations liées}}</p>';
         for (var i in data.result) {
@@ -367,7 +369,7 @@ function printScheduling(_eqLogic){
           }
           html += '</a></span><br\><br\>';
         }
-        $('#div_schedule').empty().append(html);
+        $('#div_schedule_'+_type).empty().append(html);
       }
     }
   });
