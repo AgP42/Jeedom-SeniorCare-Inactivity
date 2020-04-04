@@ -26,7 +26,7 @@
 ---
 
 * Prise en compte des reformulations de mich0111 pour la configuration et la doc
-* Mise à jour des logs infos pour ajouter le declenchement des actions
+* Mise à jour des logs infos pour ajouter le déclenchement des actions
 * La réception de l'état "absence" appelle maintenant les actions d'annulation d'alerte, au cas où une alerte était en cours
 * Tests et debugs
 * Mise à jour documentation
@@ -39,3 +39,8 @@
 * (debug) La réception de l'état "absence" appelle les actions d'annulation d'alerte => uniquement si l'alerte était active
 * Tests, relecture et debugs
 * Mise à jour documentation
+
+0.0.6 - 3 avril
+---
+
+* Modif mineur pour cohérance avec les autres plugin SeniorCare

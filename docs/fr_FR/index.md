@@ -267,4 +267,10 @@ Comportement après redémarrage Jeedom
 Infos capteurs
 ---
 * L'ensemble des capteurs définis dans le plugin doivent posséder un nom unique. Le changement de nom d'un capteur revient à le supprimer et à en créer un nouveau, l'historique associé à ce capteur sera donc perdu.
-* Si vous associez un capteur dont les valeurs ne sont pas binaires (0 ou 1), il ne sera jamais pris en compte. Vous devez alors passer par un virtuel pour générer une information binaire selon vos besoins.
+* Si vous associez un capteur dont les valeurs ne sont pas binaires (0 ou 1), chaque nouvelle valeur sera prise en compte comme un front montant (0->1). Vous pouvez passer par un virtuel pour générer une information binaire selon vos besoins.
+
+Support
+===
+
+* Pour toute demande de support ou d'information : [Forum Jeedom](https://community.jeedom.com/c/plugins/security/86)
+* Pour un bug ou une demande d'évolution, merci de passer de préférence par [Github](https://github.com/AgP42/seniorcareinactivity/issues)

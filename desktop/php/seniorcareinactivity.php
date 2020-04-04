@@ -23,7 +23,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
       <span>{{Configuration}}</span>
     </div>
     </div>
-    <legend><i class="fas fa-table"></i> {{Personne dépendante}}</legend>
+    <legend><i class="fas fa-user-plus"></i> {{Personne dépendante}}</legend>
   	   <input class="form-control" placeholder="{{Rechercher}}" id="in_searchEqlogic" />
   <div class="eqLogicThumbnailContainer">
       <?php
