@@ -40,7 +40,8 @@
 * Tests, relecture et debugs
 * Mise à jour documentation
 
-0.0.6 - 3 avril
+0.0.6 - 4 avril
 ---
 
 * Modif mineur pour cohérance avec les autres plugin SeniorCare
+* Update doc
