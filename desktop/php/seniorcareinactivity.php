@@ -184,7 +184,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-toggle-off"></i> {{Utiliser un capteur pour déclarer l'absence}}<sup><i class="fas fa-question-circle tooltips" title="{{Après déclenchement de ce capteur, le plugin déclarera le début de l'absence à l'issu du délai configuré. Une fois l'absence déclarée, tout capteur d'activité détecté relancera la surveillance.}}"></i></sup>
+          <legend><i class="fas fa-toggle-off"></i> {{Utiliser un capteur pour déclarer l'absence}}<sup><i class="fas fa-question-circle tooltips" title="{{Après déclenchement de ce capteur, le plugin déclarera le début de l'absence à l'issue du délai configuré. Une fois l'absence déclarée, tout capteur d'activité détecté relancera la surveillance.}}"></i></sup>
             <a class="btn btn-success btn-sm addSensorAbsence" style="margin:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter un capteur}}</a>
           </legend>
 
