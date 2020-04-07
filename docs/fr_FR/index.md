@@ -32,9 +32,9 @@ Ce plugin est gratuit et open source, il est fourni sans garanti de bon fonction
 Changelog
 ==========
 
-Ce plugin est en cours de développement, il est encore en versions beta pour tests.
-
 Voir le [Changelog](https://agp42.github.io/seniorcareinactivity/fr_FR/changelog)
+
+Seules les modifications ayant un impact fonctionnel sur le plugin sont listées dans le changelog.
 
 Principe de fonctionnement
 ========================
