@@ -45,3 +45,8 @@
 
 * Modif mineur pour cohérance avec les autres plugin SeniorCare
 * Update doc
+
+0.0.7 - 16 avril
+---
+
+* Filtrage de la repetition des valeurs pour les capteurs d'absences

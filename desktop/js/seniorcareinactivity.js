@@ -79,7 +79,7 @@ $("body").undelegate(".listAction", 'click').delegate(".listAction", 'click', fu
 });
 
 // TODO ce morceau de code est un copier/coller du plugin thermostat : je vois pas à quoi il sert (tout semble ok sans...) TODO
-$('body').off('focusout','.cmdAction.expressionAttr[data-l1key=cmd]').on('focusout','.cmdAction.expressionAttr[data-l1key=cmd]',function (event) {
+/*$('body').off('focusout','.cmdAction.expressionAttr[data-l1key=cmd]').on('focusout','.cmdAction.expressionAttr[data-l1key=cmd]',function (event) {
   var type = $(this).attr('data-type');
   var expression = $(this).closest('.' + type).getValues('.expressionAttr');
   var el = $(this);
@@ -88,7 +88,7 @@ $('body').off('focusout','.cmdAction.expressionAttr[data-l1key=cmd]').on('focuso
   });
 
 });
-
+*/
 //////////////// Les fonctions CAPTEURS /////////////////////////////////
 
 // ajoute chaque ligne de CAPTEUR de détection d'absence, à la demande

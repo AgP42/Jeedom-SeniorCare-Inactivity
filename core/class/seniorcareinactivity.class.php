@@ -77,50 +77,71 @@ class seniorcareinactivity extends eqLogic {
 
       $seniorcareinactivity = seniorcareinactivity::byId($_option['seniorcareinactivity_id']); // on prend l'eqLogic du trigger qui nous a appelé
 
-      $lifeSignAbsenceDelay = $seniorcareinactivity->getConfiguration('absence_timer'); // on récupere le timer d'absence configuré, direct en min
+      // on va chercher quel capteur nous a declenché pour aller chercher son timer et sa valeur
+      foreach ($seniorcareinactivity->getConfiguration('absence') as $sensor) { // on boucle direct dans la conf
+        if ('#' . $_option['event_id'] . '#' == $sensor['cmd']) { // si on est sur le capteur qui vient de nous declencher
 
-      log::add('seniorcareinactivity', 'info', $seniorcareinactivity->getHumanName() . ' - Détection d\'un capteur d\'ABSENCE, l\'absence sera effective d\'ici ' . $lifeSignAbsenceDelay . ' minutes');
+          if ($seniorcareinactivity->getCache('sensor_absence_' . $_option['event_id']) != $_option['value']){ // si notre valeur a changé, donc a prendre en compte
 
-      if(is_numeric($lifeSignAbsenceDelay) && $lifeSignAbsenceDelay > 0){
+            $lifeSignAbsenceDelay = $seniorcareinactivity->getConfiguration('absence_timer'); // on récupere le timer d'absence configuré, direct en min
 
-        $seniorcareinactivity->setCache('presence', 0); //on declare dés maintenant l'absence dans le cache. Elle sera repetée par le cron qu'on met en place ci-dessous. Permet d'éviter de lancer une alerte entre le moment où on a lancé le bouton d'absence et l'absence effective (ne devrait pas arriver vu qu'on bouge de toute facon, mais bon...)
+            log::add('seniorcareinactivity', 'info', $seniorcareinactivity->getHumanName() . ' - Détection d\'un capteur d\'ABSENCE, l\'absence sera effective d\'ici ' . $lifeSignAbsenceDelay . ' minutes');
 
-        $cron = cron::byClassAndFunction('seniorcareinactivity', 'lifeSignAbsenceDelayed', array('eqLogic_id' => intval($seniorcareinactivity->getId()))); // cherche le cron qui correspond exactement à "ce plugin, cette fonction et cette personne (on ne veut)
-        // lors de la suppression de l'eqLogic, si un cron est existant, il sera supprimé
+            if(is_numeric($lifeSignAbsenceDelay) && $lifeSignAbsenceDelay > 0){
 
-        if (is_object($cron)) { // s'il existe, on le supprime et on le reset à la nouvelle heure. C'est pour gerer les appui multiples ou si on a plusieurs capteurs : on décale le CRON à chaque fois pour que seul le dernier soit pris en compte
-          $cron->remove();
+              $seniorcareinactivity->setCache('presence', 0); //on declare dés maintenant l'absence dans le cache. Elle sera repetée par le cron qu'on met en place ci-dessous. Permet d'éviter de lancer une alerte entre le moment où on a lancé le bouton d'absence et l'absence effective (ne devrait pas arriver vu qu'on bouge de toute facon, mais bon...)
+
+              $cron = cron::byClassAndFunction('seniorcareinactivity', 'lifeSignAbsenceDelayed', array('eqLogic_id' => intval($seniorcareinactivity->getId()))); // cherche le cron qui correspond exactement à "ce plugin, cette fonction et cette personne (on ne veut)
+              // lors de la suppression de l'eqLogic, si un cron est existant, il sera supprimé
+
+              if (is_object($cron)) { // s'il existe, on le décale le CRON à chaque fois pour que seul le dernier soit pris en compte. C'est pour gerer les appui multiples ou si on a plusieurs capteurs
+
+                $delai = strtotime(date('Y-m-d H:i:s', strtotime('+'.$lifeSignAbsenceDelay.' min ' . date('Y-m-d H:i:s')))); // on lui dit de se déclencher dans 'lifeSignAbsenceDelay' min
+                $cron->setSchedule(cron::convertDateToCron($delai));
+
+                $cron->save();
+
+                log::add('seniorcareinactivity', 'debug', 'Décalage CRON absence différée');
+
+              } else { // sinon on le cree
+
+                $cron = new cron();
+                $cron->setClass('seniorcareinactivity');
+                $cron->setFunction('lifeSignAbsenceDelayed');
+
+                $options['eqLogic_id'] = intval($seniorcareinactivity->getId());
+                $cron->setOption($options);
+
+                $cron->setEnable(1);
+                $cron->setTimeout(5); //minutes
+
+                $delai = strtotime(date('Y-m-d H:i:s', strtotime('+'.$lifeSignAbsenceDelay.' min ' . date('Y-m-d H:i:s')))); // on lui dit de se déclencher dans 'lifeSignAbsenceDelay' min
+                $cron->setSchedule(cron::convertDateToCron($delai));
+
+                $cron->setOnce(1); //permet qu'il s'auto supprime une fois executé
+                $cron->save();
+
+                log::add('seniorcareinactivity', 'debug', 'Set CRON absence différée pour eqLogic: ' . $options['eqLogic_id']);
+
+              }
+
+
+            } else { // immédiat
+
+              log::add('seniorcareinactivity', 'info', $seniorcareinactivity->getHumanName() . ' - ABSENCE (par activation d\' un capteur SANS timer)');
+              $seniorcareinactivity->setCache('presence', 0); //on declare l'absence dans le cache. C'est le cron1 de jeedom qui gere le reste
+              log::add('seniorcareinactivity', 'debug', $seniorcareinactivity->getHumanName() . ' - cache *presence* : ' . $seniorcareinactivity->getCache('presence'));
+
+              if ($seniorcareinactivity->getCache('alertLifeSignState')){ // si on était en phase d'alerte, on lance les actions d'annulation
+                $seniorcareinactivity->execCancelActions();
+              }
+
+            }
+          }
         }
-
-        $cron = new cron();
-        $cron->setClass('seniorcareinactivity');
-        $cron->setFunction('lifeSignAbsenceDelayed');
-
-        $options['eqLogic_id'] = intval($seniorcareinactivity->getId());
-        $cron->setOption($options);
-
-        $cron->setEnable(1);
-        $cron->setTimeout(5); //minutes
-
-        $delai = strtotime(date('Y-m-d H:i:s', strtotime('+'.$lifeSignAbsenceDelay.' min ' . date('Y-m-d H:i:s')))); // on lui dit de se déclencher dans 'lifeSignAbsenceDelay' min
-        $cron->setSchedule(cron::convertDateToCron($delai));
-
-        $cron->setOnce(1); //permet qu'il s'auto supprime une fois executé
-        $cron->save();
-
-        log::add('seniorcareinactivity', 'debug', 'Set CRON absence différée pour eqLogic: ' . $options['eqLogic_id']);
-
-      } else { // immédiat
-
-        log::add('seniorcareinactivity', 'info', $seniorcareinactivity->getHumanName() . ' - ABSENCE (par activation d\' un capteur SANS timer)');
-        $seniorcareinactivity->setCache('presence', 0); //on declare l'absence dans le cache. C'est le cron1 de jeedom qui gere le reste
-        log::add('seniorcareinactivity', 'debug', $seniorcareinactivity->getHumanName() . ' - cache *presence* : ' . $seniorcareinactivity->getCache('presence'));
-
-        if ($seniorcareinactivity->getCache('alertLifeSignState')){ // si on était en phase d'alerte, on lance les actions d'annulation
-          $seniorcareinactivity->execCancelActions();
-        }
-
       }
+
+      $seniorcareinactivity->setCache('sensor_absence_' . $_option['event_id'], $_option['value']); // memorise l'état, pour filtrer repetition valeur
 
     }
 
