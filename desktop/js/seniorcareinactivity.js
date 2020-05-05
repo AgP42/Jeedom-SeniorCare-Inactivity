@@ -22,6 +22,17 @@ $("#div_action_alert_life_sign").sortable({axis: "y", cursor: "move", items: ".a
 $("#div_action_ar_life_sign").sortable({axis: "y", cursor: "move", items: ".action_ar_life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_action_cancel_life_sign").sortable({axis: "y", cursor: "move", items: ".action_cancel_life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 
+// gestion des champs additionnels selon le menu déroulant condition entre triggers et triggers_cancel
+$('.eqLogicAttr[data-l1key=configuration][data-l2key=comportement_actions_alerte_reception_AR]').change(function () {
+  if($('.eqLogicAttr[data-l1key=configuration][data-l2key=comportement_actions_alerte_reception_AR]').value() == "remove" || $('.eqLogicAttr[data-l1key=configuration][data-l2key=comportement_actions_alerte_reception_AR]').value() == "keep"){
+    $('.delay').hide();
+  } else if($('.eqLogicAttr[data-l1key=configuration][data-l2key=comportement_actions_alerte_reception_AR]').value() == "delay"){
+    $('.delay').show();
+  } else {
+    $('.delay').hide();
+  }
+});
+
 // le bouton "ajouter un capteur" de l'onglet gestion absence
 $('.addSensorAbsence').off('click').on('click', function () {
   addSensorAbsence({});
@@ -32,11 +43,11 @@ $('.addSensorLifeSign').off('click').on('click', function () {
   addSensorLifeSign({});
 });
 
+var _labels; // variable pour memoriser les labels "action", la variable est remplie à la sauvegarde dans printEqLogic
 // tous les boutons d'action regroupés !
 $('.addAction').off('click').on('click', function () {
-  addAction({}, $(this).attr('data-type'));
+  addAction({}, $(this).attr('data-type'), _labels);
 });
-
 
 // tous les - qui permettent de supprimer la ligne
 $("body").off('click','.bt_removeAction').on('click','.bt_removeAction',function () {
@@ -228,7 +239,7 @@ function addSensorLifeSign(_info) {
 
 // fonction générique pour ajouter chaque ligne d'action.
 // _type peut etre 'action_alert_life_sign', 'action_ar_life_sign', 'action_cancel_life_sign'
-function addAction(_action, _type) {
+function addAction(_action, _type, _labels) {
   var div = '<div class="' + _type + '">';
     div += '<div class="form-group ">';
 
@@ -244,8 +255,18 @@ function addAction(_action, _type) {
         div += '</div>';
       } else { // pour les actions à la reception d'1 AR ou d'annulation d'alerte, on ajoute le label de l'action d'alerte à lier
         div += '<label class="col-sm-2 control-label">{{Label action de référence}} <sup><i class="fas fa-question-circle tooltips" title="{{Renseigner le label de l\'action de référence. Cette action ne sera exécutée que si l\'action de référence a été précédemment exécutée. }}"></i></sup></label>';
-        div += '<div class="col-sm-1">';
+/*        div += '<div class="col-sm-1">';
           div += '<input type="text" class="expressionAttr form-control cmdInfo" data-l1key="action_label_liee"/>';
+        div += '</div>';*/
+        div += '<div class="col-sm-6 col-md-2">';
+          div += '<div class="input-group">';
+            div += '<span class="input-group-btn">';
+              div += '<a class="btn btn-default bt_removeAction roundedLeft" data-type="' + _type + '"><i class="fas fa-minus-circle"></i></a>';
+            div += '</span>';
+            div += '<select class="expressionAttr eqLogicAttr form-control" data-l1key="action_label_liee">';
+              div += _labels;
+            div += '</select>';
+          div += '</div>';
         div += '</div>';
       }
 
@@ -300,6 +321,8 @@ function printEqLogic(_eqLogic) {
   printScheduling(_eqLogic, 'absence'); // va chercher les infos du plugin agenda pour les afficher dans l'onglet presence/absence
   printScheduling(_eqLogic, 'daynight'); // idem onglet jour/nuit
 
+  _labels = '<option value="" select></option>'; // initialise notre liste deroulante de labels avec le choix "vide"
+
   if (isset(_eqLogic.configuration)) {
     if (isset(_eqLogic.configuration.absence)) {
       for (var i in _eqLogic.configuration.absence) {
@@ -313,17 +336,20 @@ function printEqLogic(_eqLogic) {
     }
     if (isset(_eqLogic.configuration.action_alert_life_sign)) {
       for (var i in _eqLogic.configuration.action_alert_life_sign) {
-        addAction(_eqLogic.configuration.action_alert_life_sign[i], 'action_alert_life_sign');
+        if(_eqLogic.configuration.action_alert_life_sign[i].action_label != ''){ // a chaque action, si le label est non vide, on le prend pour le mettre dans la liste déroulante
+          _labels += '<option value="'+_eqLogic.configuration.action_alert_life_sign[i].action_label+'">'+_eqLogic.configuration.action_alert_life_sign[i].action_label+'</option>';
+        }
+        addAction(_eqLogic.configuration.action_alert_life_sign[i], 'action_alert_life_sign', '');
       }
     }
     if (isset(_eqLogic.configuration.action_ar_life_sign)) {
       for (var i in _eqLogic.configuration.action_ar_life_sign) {
-        addAction(_eqLogic.configuration.action_ar_life_sign[i], 'action_ar_life_sign');
+        addAction(_eqLogic.configuration.action_ar_life_sign[i], 'action_ar_life_sign', _labels);
       }
     }
     if (isset(_eqLogic.configuration.action_cancel_life_sign)) {
       for (var i in _eqLogic.configuration.action_cancel_life_sign) {
-        addAction(_eqLogic.configuration.action_cancel_life_sign[i], 'action_cancel_life_sign');
+        addAction(_eqLogic.configuration.action_cancel_life_sign[i], 'action_cancel_life_sign', _labels);
       }
     }
   }

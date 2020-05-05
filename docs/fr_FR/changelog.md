@@ -50,3 +50,10 @@
 ---
 
 * Filtrage de la repetition des valeurs pour les capteurs d'absences
+
+0.0.8 - 5 mai
+---
+
+* Ajout choix actions d'alertes restantes en cas de reception d'un AR : les annuler, les décaler, les laisser en l'état
+* Ajout menu déroulant pour choisir les actions de références pour les actions d'AR et les actions d'annulation
+* Robustification du code (ajout d'exceptions) et amélioration des logs

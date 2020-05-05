@@ -44,7 +44,7 @@ Le principe est le suivant :
 
 * Vous pouvez alors définir des actions à réaliser dans le logement (changement de couleur d'une lampe, alerte sonore, ...) ainsi que des actions vers un ou plusieurs aidants extérieurs. Ces actions peuvent être des notifications sur leur téléphone, un sms, un email, ... Ces différentes actions peuvent être à exécution immédiate ou différée. Celà permet de définir plusieurs personnes à prévenir successivement tant que l'alerte n'a pas été prise en compte par l'une d'entre elles. Il est aussi possible de définir la 1ère alerte dans le logement de la personne afin de lui laisser le temps de réagir (en activant n'importe lequel des capteurs du logement) avant que l'alerte ne soit lancée vers les aidants. Il est fortement conseillé de faire en sorte que cette alerte ne soit pas anxiogène pour la personne dépendante.
 
-* Les aidants peuvent accuser réception de l'alerte. Cela aura pour effet de déclencher des actions spécifiques (changer la couleur de la lampe dans le logement de la personne pour l'informer de la prise en compte par exemple). A la réception d'un AR, les actions d'alerte programmées n'ayant pas encore été exécutées sont annulées. Ceci permet de couper la chaîne d'alerte. Il est possible de définir des actions à ne réaliser que si une action d'alerte précédente a été exécutée, Ceci afin de prévenir les autres personnes ayant reçu l'alerte que quelqu'un en a déjà accusé réception par exemple.
+* Les aidants peuvent accuser réception de l'alerte. Cela aura pour effet de déclencher des actions spécifiques (changer la couleur de la lampe dans le logement de la personne pour l'informer de la prise en compte par exemple). A la réception d'un AR, les actions d'alerte programmées n'ayant pas encore été exécutées peuvent être annulées, reportées ou laissées en l'état. Ceci permet de couper ou reporter la chaîne d'alerte. Il est possible de définir des actions à ne réaliser que si une action d'alerte précédente a été exécutée, Ceci afin de prévenir les autres personnes ayant reçu l'alerte que quelqu'un en a déjà accusé réception par exemple.
 
 * Une fois l’aidant sur place ou si la personne a réagit entre-temps, des actions d'annulation sont définies et la chaîne d'alerte est coupée. L'activation de n'importe quel capteur permet d'interrompre l'alerte.
 
@@ -197,17 +197,19 @@ Cet onglet fourni l'URL à appeler pour déclencher l'Accusé de Réception et i
    * Vous pouvez cliquer sur le lien pour tester son bon fonctionnement
    * Cet URL peut être appelé par n'importe quel équipement extérieur, notamment un smartphone
 
+* **Comportement des actions d'alerte restantes, à la réception d'un accusé de réception**
+   * Choisir le comportement voulu :
+      * Annuler les actions d'alerte à venir
+      * Les reporter (choisir le délai supplémentaire en minutes)
+      * Ne rien faire : les actions d'alerte à venir seront exécutées comme s'il n'y avait pas eu d'Accusé de Réception
+
 * **Actions à la réception d'un accusé de réception**
    * **Label action de référence** :
-      * Vous pouvez ici saisir le label de l'action de référence de l'onglet "Actions d'alerte"
-      * Le label saisi doit être strictement identique, attention aux espaces
-      * Lorsque le label est renseigné et correspond à une action d'alerte, il faut que l'action d'alerte de référence ait été précédemment lancée pour que la présente action s'exécute
-      * Attention, si vous renseignez un label qui n'existe pas (et donc ne sera jamais exécuté), l'action liée ne s'exécutera jamais
+      * Vous pouvez ici choisir le label de l'action de référence de l'onglet "Actions d'alerte"
+      * Lorsque le label est renseigné, il faut que l'action d'alerte de référence ait été précédemment lancée pour que la présente action s'exécute
       * Exemple 1 : l'action d'alerte est d'envoyer un message à Mr x, 30 min après la détection d'inactivité (une alerte immédiate vers un autre aidant étant définie par ailleurs). L'action lors de l'AR est d'envoyer un message à Mr x pour le prévenir que quelqu'un a accusé réception de l'alerte. L'action d'AR ne sera exécutée que si l'action d'alerte initiale avait été exécutée à la fin de son délai de 30min. Ceci permet de ne pas envoyer des messages lors d'un AR alors que la personne n'avait pas reçu le message d'alerte initial
       * Exemple 2 : l'action d'alerte est d'allumer immédiatement une lampe en orange (signaler à la personne que le système a détecté une inactivité), puis en rouge (signaler à la personne que l'alerte a été transmise aux aidants. L'action d'AR est de passer cette lampe en vert lorsqu'un aidant a accusé réception de l'alerte. Il n'est ici pas nécessaire de définir un label pour les lier, car il n'y a pas de risque d'annuler une action n'ayant jamais eu lieu.
    * **Action** : la commande jeedom correspondant à l'action voulue. L'action peut être de n'importe quel type : une lampe du logement, un message vers les aidants, l'appel d'un scenario Jeedom, ... Si l'une de vos action est de type "message", vous pouvez utiliser les tags définis dans l'onglet **Général**
-
-Lors de la réception d'un accusé de réception, toutes les actions d'alertes "futures" sont annulées.
 
 Onglet **Annulation d'alerte**
 ---
@@ -234,12 +236,6 @@ Vous pouvez configurer ici les commandes utilisées par ce plugin. Vous pouvez n
 Les autres commandes correspondent aux différents capteurs.
 Les capteurs sont historisés par défaut, vous pouvez choisir de ne pas les historiser sans impact sur le comportement du plugin (permet de limiter l'usage de la base de donnée).
 
-Panneau desktop
-================
-
-To Do - Il permettra de suivre les différents capteurs et visualiser les alertes.
-
-=> Il a finalement été décidé de ne pas développer de panel, les fonctions Jeedom de visualisation d'historique, timeline et vues étant *a priori* suffisantes.
 
 Remarques sur le comportement du plugin
 ======
@@ -266,7 +262,7 @@ Comportement après redémarrage Jeedom
 
 Infos capteurs
 ---
-* L'ensemble des capteurs définis dans le plugin doivent posséder un nom unique. Le changement de nom d'un capteur revient à le supprimer et à en créer un nouveau, l'historique associé à ce capteur sera donc perdu.
+* L'ensemble des capteurs définis dans le plugin doivent avoir un nom unique. Le changement de nom d'un capteur revient à le supprimer et à en créer un nouveau, l'historique associé à ce capteur sera donc perdu.
 * Si vous associez un capteur dont les valeurs ne sont pas binaires (0 ou 1), chaque nouvelle valeur sera prise en compte comme un front montant (0->1). Vous pouvez passer par un virtuel pour générer une information binaire selon vos besoins.
 
 Support
