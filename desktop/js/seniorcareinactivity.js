@@ -22,7 +22,7 @@ $("#div_action_alert_life_sign").sortable({axis: "y", cursor: "move", items: ".a
 $("#div_action_ar_life_sign").sortable({axis: "y", cursor: "move", items: ".action_ar_life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_action_cancel_life_sign").sortable({axis: "y", cursor: "move", items: ".action_cancel_life_sign", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 
-// gestion des champs additionnels selon le menu déroulant condition entre triggers et triggers_cancel
+// gestion des champs additionnels selon le menu déroulant
 $('.eqLogicAttr[data-l1key=configuration][data-l2key=comportement_actions_alerte_reception_AR]').change(function () {
   if($('.eqLogicAttr[data-l1key=configuration][data-l2key=comportement_actions_alerte_reception_AR]').value() == "remove" || $('.eqLogicAttr[data-l1key=configuration][data-l2key=comportement_actions_alerte_reception_AR]').value() == "keep"){
     $('.delay').hide();

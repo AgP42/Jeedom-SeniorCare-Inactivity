@@ -456,7 +456,7 @@ class seniorcareinactivity extends eqLogic {
 
               $cron->save();
 
-              log::add('seniorcareinactivity', 'debug', $this->getHumanName() . ' - Cron trouvé à décaler - cmd : ' . $cron->getOption()['action']['cmd'] . ' - action_label : ' . $cron->getOption()['action']['action_label'] . ' - prévu initialement à : ' . $cron->getNextRunDate() . ' - delai ajouté : ' . $delai_ar . ' min');
+              log::add('seniorcareinactivity', 'debug', $this->getHumanName() . ' - Cron trouvé à décaler - cmd : ' . $cron->getOption()['action']['cmd'] . ' - action_label : ' . $cron->getOption()['action']['action_label'] . ' - maintenant prévu à : ' . $cron->getNextRunDate() . ' (delai ajouté : ' . $delai_ar . ' min)');
 
             } else if ($comportement == 'remove'){
 
@@ -603,6 +603,11 @@ class seniorcareinactivity extends eqLogic {
     }
 
     public function preSave() {
+
+      //supprime les CRON des actions d'alertes non encore appelés, affiche une alerte s'il y en avait
+      //sert à ne pas laisser trainer des CRONs en cours si on change le message ou le label puis en enregistre. Cas exceptionnel, mais au cas où...
+
+      $this->cleanAllCron(true);
 
     }
 
