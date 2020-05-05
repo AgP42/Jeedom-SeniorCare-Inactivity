@@ -255,10 +255,16 @@ Pourquoi ? Pour les curieux, voilà le détail : les informations suivantes sont
    * l'état actuel de l'alerte (déjà déclenchée ou non) => le déclenchement de n'importe quel capteur (avec une temporisation >0) initialisera cette valeur à "pas d'alerte en cours"
    * l'état d'exécution de chacune des actions d'alertes ayant un label (celles sans label sont mémorisées aussi mais s'écrasent entre elles et elles ne sont jamais lues, donc sans impact fonctionnel), pour conditionner l'exécution des actions d'AR et d'annulation. => laisser toutes les actions d'alerte se déclencher au moins 1 fois puis les annuler
 
-
 Comportement après redémarrage Jeedom
 ---
 * Après un redémarrage de Jeedom, aucune information ne sera (ne devrait être...) perdue, mais il peut y avoir un délai supplémentaire d'1 min avant le déclenchement des alertes.
+
+En cas de multiples Accusé de réceptions reçus
+---
+* Toutes les actions de la liste des actions AR seront relancées à chaque réception de la commande d'AR. Si elles dépendent d'une action d'alerte de référence (via un label), elles seront réalisées si l'action initiale a été réalisée uniquement.
+* Pour les actions différées, si le choix était de les reportées à la réception d'un AR, elles sont reportées d'autant à chaque réception d'AR. Par exemple si vous avez configuré 30min de décalage, si 3 AR sont reçus, les actions d'alerte différées seront reportées d'1h30.
+
+Il est à noter que la personne à l’origine de l’AR recevra elle aussi la notification que qu’AR à été reçu.
 
 Infos capteurs
 ---
