@@ -58,3 +58,8 @@
 * Ajout menu déroulant pour choisir les actions de références pour les actions d'AR et les actions d'annulation
 * Robustification du code (ajout d'exceptions) et amélioration des logs
 * Mise à jour de la documentation
+
+0.0.9 - 14 juin 2020
+---
+
+* Update doc pour passage stable

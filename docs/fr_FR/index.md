@@ -271,6 +271,34 @@ Infos capteurs
 * L'ensemble des capteurs définis dans le plugin doivent avoir un nom unique. Le changement de nom d'un capteur revient à le supprimer et à en créer un nouveau, l'historique associé à ce capteur sera donc perdu.
 * Si vous associez un capteur dont les valeurs ne sont pas binaires (0 ou 1), chaque nouvelle valeur sera prise en compte comme un front montant (0->1). Vous pouvez passer par un virtuel pour générer une information binaire selon vos besoins.
 
+Exemple de mise pratique du plugin
+===
+
+Notre mise en pratique est une petite maison de retraite familiale de 6 appartements.
+Nous avons choisi d'utiliser la technologie EnOcean. Pourquoi ?
+EnOcean est la  1ère techno à être sans fil et sans pile, pour l’environnement ce n’est pas rien, mais également pour la maintenance.
+Technologie très fiable, et qui permet d’éviter de créer des réseaux comme le z-wave ou zigbee. Flexibilité, évolutivité, EnOcean permet de changer par exemple de gateway sans devoir tout casser et recréer.
+
+Les équipements utilisés
+---
+
+Pour l’utilisation du plugin, il est important de bien positionner les capteurs dans chaque pièce afin de permettre une couverture totale et n’envoyer que des alertes avérées.
+
+Plan d'un logement :
+![](https://raw.githubusercontent.com/AgP42/seniorcareinactivity/master/docs/assets/images/plan.png)
+
+* Détecteur d’activité :
+   * Chambre :  détecteur de mouvement  EnOcean UBIEOSC + capteur de pression de matelas associé à un détecteur EnOcean Trio2sys entrée filaire contact sec
+   * Sdb : détecteur de mouvement EnOcean Nodon (avec pile durée de vie > 5 ans car souvent dans le noir) + détecteur de niveau de la chasse d’eau
+   * Couloir : détecteur de mouvement  EnOcean UBIEOSC
+   * Cuisine : détecteur de mouvement  EnOcean UBIEOSC
+   * Baie vitrée : détecteur d’ouverture EnOcean Trio2sys
+* Détecteur d’absence :
+   * Terrasse : détecteur de mouvement  EnOcean UBIEOSC
+   * Porte d’entrée : détecteur d’ouverture EnOcean Trio2sys
+   * Bouton EnOcean Nodon
+
+
 Support
 ===
 
