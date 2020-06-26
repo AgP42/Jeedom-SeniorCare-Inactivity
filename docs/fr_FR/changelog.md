@@ -3,6 +3,9 @@
 1.0.0 - juin 2020 => voir beta 0.0.9
 ---
 
+1.0.1 - 26 juin 2020 => idem beta 1.0.1
+---
+
 # Beta
 
 0.0.1 - 24 mars 2020
