@@ -1,3 +1,8 @@
+# Stables
+
+1.0.0 - juin 2020 => voir beta 0.0.9
+---
+
 # Beta
 
 0.0.1 - 24 mars 2020
@@ -63,3 +68,8 @@
 ---
 
 * Update doc pour passage stable
+
+1.0.1 - 26 juin 2020
+---
+
+* debug cas où plusieurs actions d'annulation sont liées à un même label d'action de reference

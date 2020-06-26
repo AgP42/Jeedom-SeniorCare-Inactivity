@@ -344,19 +344,32 @@ class seniorcareinactivity extends eqLogic {
 
           $this->execAction($action);
 
-        }else if(isset($action['action_label_liee']) && $action['action_label_liee'] != '' && $execActionLiee == 1){ // si on a une action liée définie et qu'elle a été executée => on execute notre action et on remet le cache de l'action liée à 0 (fait uniquement pour annulation et non à la réception de l'AR, donc l'aidant ayant recu une alerte pourra recevoir l'info qu'il y a eu une AR (mais on sait pas par qui... TODO...) puis que l'alerte est résolue)
+        }else if(isset($action['action_label_liee']) && $action['action_label_liee'] != '' && $execActionLiee == 1){ // si on a une action liée définie et qu'elle a été executée => on execute notre action sans reset du cache ( au cas où plusieurs actions associées)
 
         //  log::add('seniorcareinactivity', 'debug', 'Action liée ('.$action['action_label_liee'].') executée précédemment, donc on execute ' . $action['cmd'] . ' et remise à 0 du cache d\'exec de l\'action origine');
           log::add('seniorcareinactivity', 'info', $this->getHumanName() . ' - Exécution de l\'action d\'annulation : ' . $action['cmd'] . ' - Label de référence (précédemment exécuté) : ' . $action['action_label_liee']);
 
           $this->execAction($action);
-          $this->setCache('execAction_'.$action['action_label_liee'], 0);
-          log::add('seniorcareinactivity', 'debug', $this->getHumanName() . ' - cache *execAction_' . $action['action_label_liee'] . '* : ' . $this->getCache('execAction_'.$action['action_label_liee']));
+        //  $this->setCache('execAction_'.$action['action_label_liee'], 0);
+        //  log::add('seniorcareinactivity', 'debug', $this->getHumanName() . ' - cache *execAction_' . $action['action_label_liee'] . '* : ' . $this->getCache('execAction_'.$action['action_label_liee']));
 
         }else{ // sinon, on log qu'on n'execute pas l'action et la raison
           log::add('seniorcareinactivity', 'debug', $this->getHumanName() . ' Action liée ('.$action['action_label_liee'].') non executée précédemment, donc on execute pas ' . $action['cmd']);
         }
 
+      } // fin foreach toutes les actions
+
+      // boucle pour reset du cache
+      foreach ($this->getConfiguration('action_cancel_life_sign') as $action) { // pour toutes les actions définies
+
+        $execActionLiee = $this->getCache('execAction_'.$action['action_label_liee']); // on va lire le cache d'execution de l'action liée, savoir si deja lancé ou non...
+
+        if(isset($action['action_label_liee']) && $action['action_label_liee'] != '' && $execActionLiee == 1){ // si on a une action liée définie et qu'elle a été executée => on remet le cache de l'action liée à 0 (fait uniquement pour annulation et non à la réception de l'AR, donc l'aidant ayant recu une alerte pourra recevoir l'info qu'il y a eu une AR (mais on sait pas par qui... TODO...) puis que l'alerte est résolue)
+
+          $this->setCache('execAction_'.$action['action_label_liee'], 0);
+          log::add('seniorcareinactivity', 'debug', $this->getHumanName() . ' - cache *execAction_' . $action['action_label_liee'] . '* : ' . $this->getCache('execAction_'.$action['action_label_liee']));
+
+        }
       } // fin foreach toutes les actions
 
       //coupe les CRON des actions d'alertes non encore appelés
