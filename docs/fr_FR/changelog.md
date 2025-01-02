@@ -6,6 +6,12 @@
 1.0.1 - 26 juin 2020 => idem beta 1.0.1
 ---
 
+1.0.2 - 02 janvier 2024
+---
+
+* Correction erreurs cron
+* compatibilité debian 12
+
 # Beta
 
 0.0.1 - 24 mars 2020
