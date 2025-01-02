@@ -281,7 +281,7 @@ class seniorcareinactivity extends eqLogic {
 
     /*     * *********************Méthodes d'instance************************* */
 
-    public function execAlerteActions($action) { // appelée par le cron (celui de jeedom toutes les min), si besoin
+    public function execAlerteActions() { // appelée par le cron (celui de jeedom toutes les min), si besoin
 
       foreach ($this->getConfiguration('action_alert_life_sign') as $action) { // pour toutes les actions définies
 
@@ -671,7 +671,9 @@ class seniorcareinactivity extends eqLogic {
               $cmd->save();
 
               // va chopper la valeur de la commande puis la suivre a chaque changement
-              if (is_nan($cmd->execCmd()) || $cmd->execCmd() == '') {
+   			  $value = $cmd->execCmd();
+		      if (!is_numeric($value) || is_nan((float)$value) || $value == '') {
+              //if (is_nan($cmd->execCmd()) || $cmd->execCmd() == '') {
                 $cmd->setCollectDate('');
                 $cmd->event($cmd->execute());
               }
@@ -713,7 +715,9 @@ class seniorcareinactivity extends eqLogic {
           $cmd->save();
 
           // va chopper la valeur de la commande puis la suivre a chaque changement
-          if (is_nan($cmd->execCmd()) || $cmd->execCmd() == '') {
+		  $value = $cmd->execCmd();
+		  if (!is_numeric($value) || is_nan((float)$value) || $value == '') {
+          //if (is_nan($cmd->execCmd()) || $cmd->execCmd() == '') {
             $cmd->setCollectDate('');
             $cmd->event($cmd->execute());
           }
@@ -929,5 +933,3 @@ class seniorcareinactivityCmd extends cmd {
 
     /*     * **********************Getteur Setteur*************************** */
 }
-
-
