@@ -10,5 +10,7 @@
 	"hasOwnDeamon" : false,
 	"maxDependancyInstallTime" : 0,
 	"changelog" : "https://superbricolo.github.io/superbricoloDocs/seniorcareinactivity/#language#/changelog",
-	"documentation" : "https://superbricolo.github.io/superbricoloDocs/seniorcareinactivity/#language#/"
+	"documentation" : "https://superbricolo.github.io/superbricoloDocs/seniorcareinactivity/#language#/",
+	"language" : ["fr_FR"],
+	"compatibility" : ["miniplus","smart","rpi","docker","diy","v4"]
 }

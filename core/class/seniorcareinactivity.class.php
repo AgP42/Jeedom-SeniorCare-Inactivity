@@ -237,25 +237,24 @@ class seniorcareinactivity extends eqLogic {
         if (is_object($seniorcareinactivity) && $seniorcareinactivity->getIsEnable() == 1 && $seniorcareinactivity->getCache('presence')) { // si notre eq existe et est actif et que la personne est présente !
 
           $now = time(); // timestamp courant, en s
-          $nextLifeSignAlertTimestamp = $seniorcareinactivity->getCache('nextLifeSignAlertTimestamp'); // le timestamp enregistré auquel il faut déclencher l'alerte
+		  $nextLifeSignAlertTimestamp = intval($seniorcareinactivity->getCache('nextLifeSignAlertTimestamp')); // Force la conversion en entier
+		  $timeUntilAlert = $nextLifeSignAlertTimestamp - $now;
 
-          // on recupere l'état de l'alerte
-          $alertLifeSignState = $seniorcareinactivity->getCache('alertLifeSignState');
+		  // on recupere l'état de l'alerte
+		  $alertLifeSignState = $seniorcareinactivity->getCache('alertLifeSignState');
 
-          log::add('seniorcareinactivity', 'debug', $seniorcareinactivity->getHumanName() . ' Etat alerte : ' . $alertLifeSignState . ' - Alerte à lancer dans : ' . intval($nextLifeSignAlertTimestamp-$now) . 's');
+		  log::add('seniorcareinactivity', 'debug', $seniorcareinactivity->getHumanName() . ' Etat alerte : ' . $alertLifeSignState . ' - Alerte à lancer dans : ' . $timeUntilAlert . 's');
 
-          if ($now >= $nextLifeSignAlertTimestamp && !$alertLifeSignState){
-          //= on est au dela du delai et alerte pas encore en cours --> on va lancer les actions alerte
-            log::add('seniorcareinactivity', 'info', $seniorcareinactivity->getHumanName() . ' - Actions Alerte Inactivité à lancer.');
+		  if ($now >= $nextLifeSignAlertTimestamp && !$alertLifeSignState) {
+		      //= on est au dela du delai et alerte pas encore en cours --> on va lancer les actions alerte
+		      log::add('seniorcareinactivity', 'info', $seniorcareinactivity->getHumanName() . ' - Actions Alerte Inactivité à lancer.');
 
-            // boucler dans les actions, les lancer ou set cron si timer défini
-            $seniorcareinactivity->execAlerteActions();
+			  // boucler dans les actions, les lancer ou set cron si timer défini
+		      $seniorcareinactivity->execAlerteActions();
 
-            $seniorcareinactivity->setCache('alertLifeSignState', 1); // on memorise qu'on a lancé les actions pour ne pas repeter toutes les min
-            log::add('seniorcareinactivity', 'debug', $seniorcareinactivity->getHumanName() . ' - cache *alertLifeSignState* : ' . $seniorcareinactivity->getCache('alertLifeSignState'));
-
-
-          } // sinon : on fait juste rien...
+		      $seniorcareinactivity->setCache('alertLifeSignState', 1); // on memorise qu'on a lancé les actions pour ne pas repeter toutes les min
+		      log::add('seniorcareinactivity', 'debug', $seniorcareinactivity->getHumanName() . ' - cache *alertLifeSignState* : ' . $seniorcareinactivity->getCache('alertLifeSignState'));
+		  }	// sinon : on fait juste rien...
 
         } // fin if eq actif
 
