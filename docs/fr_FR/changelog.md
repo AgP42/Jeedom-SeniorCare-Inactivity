@@ -12,6 +12,11 @@
 * Correction erreurs cron
 * compatibilité debian 12
 
+1.0.3 - 07 janvier 2024
+---
+
+* compatibilité debian 12
+
 # Beta
 
 0.0.1 - 24 mars 2020
